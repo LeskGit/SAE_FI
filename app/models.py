@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, Enum
 from .app import db, login_manager
 from flask_login import UserMixin
 
@@ -16,3 +16,46 @@ class User(db.Model, UserMixin):
 @login_manager.user_loader
 def load_user(num_tel):
     return User.query.get(num_tel)
+
+contenir = db.Table('contenir',
+    db.Column('nom', db.String(64), db.ForeignKey('Plats.nom_plat'), primary_key=True),
+    db.Column('id_formule', db.Integer, db.ForeignKey('Formule.id_formule'), primary_key=True)
+)
+
+class Commandes(db.Model):
+    num_commande = db.Column(db.Integer, primary_key = True)
+    date = db.Column(db.DateTime)
+    sur_place = db.Column(db.Boolean)
+    num_table = db.Column(db.Integer, CheckConstraint('0 < num_table AND num_table <= 12'))
+    etat = dn.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"))
+    les_plats = relationship("Plats", back_populates = "les_commandes")
+    num_tel = relationship("User", ForeignKey("USER.num_tel"))
+
+    def __repr__(self):
+        return f"{self.num_commande} : {self.date}"
+
+class Plats(db.Model):
+    nom_plat = db.Column(db.String(64), primary_key = True)
+    type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
+    quantite_stock = db.Column(db.Integer)
+    prix = db.Column(db.Float)
+    quantite_promo = db.Column(db.Integer)
+    prix_reduc = db.Column(db.Float)
+    les_commandes = db.Column("Commandes", back_populates = "les_plats")
+
+    def __repr__(self):
+        return f"{self.nom} ( {self.type_plat} ) : {self.prix}"
+
+class Formule(db.Model):
+    id_formule = db.Column(db.Integer, primary_key = True)
+    libelle_formule = db.Column(db.String(64))
+
+    def __repr__(self):
+        return f"{self.id_formule} : {self.libelle_formule}"
+
+
+
+
+
+
+
