@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
 
     @validates("email")
     def validate_email(self, key, address):
-        if not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$", address):
+        if not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}$", address):
             raise ValueError("Invalid email address")
         return address
 
@@ -34,6 +34,11 @@ contenir = db.Table("contenir",
     db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
 )
 
+constituer = db.Table("constituer",
+    db.Column("nom_plat", db.String(64), db.ForeignKey("plats.nom_plat"), primary_key=True),
+    db.Column("num_commande", db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
+)
+
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key = True)
     num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
@@ -41,8 +46,8 @@ class Commandes(db.Model):
     sur_place = db.Column(db.Boolean)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"))
-    les_plats = db.relationship("Plats", back_populates = "les_commandes")
-    plats = db.relationship("Plats", secondary="contenir", back_populates="formules")
+    les_plats = db.relationship("Plats", secondary = constituer, back_populates = "les_commandes")
+    les_clients = db.relationship("User", back_populates = "les_commandes")
 
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
@@ -54,8 +59,8 @@ class Plats(db.Model):
     prix = db.Column(db.Float)
     quantite_promo = db.Column(db.Integer)
     prix_reduc = db.Column(db.Float)
-    les_commandes = db.relationship("Commandes", back_populates = "les_plats")
-    formules = db.relationship("Formule", secondary="contenir", back_populates="plats")
+    les_commandes = db.relationship("Commandes", secondary = constituer, back_populates = "les_plats")
+    les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
