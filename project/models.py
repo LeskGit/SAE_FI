@@ -75,6 +75,7 @@ class TriggerManager:
 
     def __init__(self):
         self.trigger_test()
+        self.trigger_formule()
 
     def trigger_test(self):
         db.session.execute(text("""
@@ -84,6 +85,24 @@ class TriggerManager:
             IF NEW.num_tel = "0000000000" THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Erreur : numéro de téléphone invalide";
+            END IF;
+        END;
+        """))
+        db.session.commit()
+
+    def trigger_formule(self):
+        db.engine.execute(text("""
+        CREATE OR REPLACE TRIGGER nb_plat BEFORE INSERT ON contenir FOR EACH ROW
+        BEGIN
+            DECLARE nb int;
+
+            Select count(*) into nb 
+            FROM contenir 
+            WHERE id_formule = new.id_formule; 
+
+            IF nb > 4 then
+                SIGNAL SQLstate '45000'
+                SET MESSAGE_TEXT = 'Une formule ne peut pas contenir plus de 4 plats'
             END IF;
         END;
         """))
