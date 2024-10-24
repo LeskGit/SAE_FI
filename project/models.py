@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, text
 from sqlalchemy.orm import validates
 from .app import db, login_manager
 from flask_login import UserMixin
@@ -21,7 +21,8 @@ class User(db.Model, UserMixin):
 
     @validates("email")
     def validate_email(self, key, address):
-        assert re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$", address)
+        if not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$", address):
+            raise ValueError("Invalid email address")
         return address
 
 @login_manager.user_loader
@@ -68,4 +69,22 @@ class Formule(db.Model):
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
 
+#--------
 
+class TriggerManager:
+
+    def __init__(self):
+        self.trigger_test()
+
+    def trigger_test(self):
+        db.session.execute(text("""
+        CREATE or replace TRIGGER test BEFORE INSERT ON user
+        FOR EACH ROW
+        BEGIN
+            IF NEW.num_tel = "0000000000" THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Erreur : numéro de téléphone invalide";
+            END IF;
+        END;
+        """))
+        db.session.commit()
