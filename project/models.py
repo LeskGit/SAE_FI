@@ -35,7 +35,8 @@ class Commandes(db.Model):
     num_table = db.Column(db.Integer, CheckConstraint('0 < num_table AND num_table <= 12'))
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"))
     les_plats = db.relationship("Plats", back_populates = "les_commandes")
-    les_clients = db.relationship("User", back_populates = "les_commandes")
+    num_tel = db.Column(db.ForeignKey(db.String(10), "USER.num_tel"))
+    plats = db.relationship("Plats", secondary="contenir", back_populates="formules")
 
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
@@ -48,10 +49,10 @@ class Plats(db.Model):
     quantite_promo = db.Column(db.Integer)
     prix_reduc = db.Column(db.Float)
     les_commandes = db.relationship("Commandes", back_populates = "les_plats")
-    les_formules = db.relationship("Formule", secondary = contenir, back_populates = "les_plats")
+    formules = db.relationship("Formule", secondary="contenir", back_populates="plats")
 
     def __repr__(self):
-        return f"{self.nom} ( {self.type_plat} ) : {self.prix}"
+        return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)
@@ -62,9 +63,16 @@ class Formule(db.Model):
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
 
+# TRIGGERS #
 
+def insert_contenir(mapper, connection, target):
+    id_formule = target.id_formule
 
+    res = connection.execute(text("SELECT COUNT(*) FROM contenir WHERE id_formule = :id_formule"), {"if_formule" : id_formule})
 
+    nombre_plats = res.scalar()
 
+    if nombre_plats > 4:
+        raise ValueError(f"La formule {id_formule} ne peut pas contenir plus de 3 plats.")
 
-
+event.listen(contenir, "before_insert", insert_contenir)
