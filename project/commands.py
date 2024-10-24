@@ -6,6 +6,10 @@ def syncdb():
     '''Creates the tables and populates them with data.'''
     db.create_all()
 
+    from .models import TriggerManager
+    TriggerManager()
+
+
     #TODO : Not implemented yet
 
 @app.cli.command()
