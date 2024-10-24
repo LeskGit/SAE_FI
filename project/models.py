@@ -5,7 +5,7 @@ from flask_login import UserMixin
 import re
 
 class User(db.Model, UserMixin):
-    num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10"), primary_key=True)
+    num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), primary_key = True)
     nom = db.Column(db.String(32))
     prenom = db.Column(db.String(32))
     password = db.Column(db.String(64))
@@ -77,38 +77,49 @@ class Formule(db.Model):
 #--------
 
 class TriggerManager:
-
     def __init__(self):
-        self.trigger_test()
-        self.trigger_formule()
+        self.execute_triggers()
 
-    def trigger_test(self):
-        db.session.execute(text("""
-        CREATE or replace TRIGGER test BEFORE INSERT ON user
-        FOR EACH ROW
+    def execute_triggers(self) -> None:
+        """
+        Execute all trigger methods in the class.
+
+        Trigger methods are methods that start with "trigger_".
+        """
+        for attr_name in dir(self):
+            if attr_name.startswith("trigger_"):
+                method = getattr(self, attr_name)
+                if callable(method):
+                    trigger_str = method()
+                    db.session.execute(text(trigger_str))
+                    db.session.commit()
+    
+    #TODO : Ne pas oublier le BEFORE UPDATE
+
+    def trigger_test(self) -> str:
+        return """
+        CREATE OR REPLACE TRIGGER test BEFORE INSERT ON user FOR EACH ROW
         BEGIN
             IF NEW.num_tel = "0000000000" THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Erreur : numéro de téléphone invalide";
             END IF;
         END;
-        """))
-        db.session.commit()
+        """
 
-    def trigger_formule(self):
-        db.engine.execute(text("""
+    def trigger_formule(self) -> str:
+        return """
         CREATE OR REPLACE TRIGGER nb_plat BEFORE INSERT ON contenir FOR EACH ROW
         BEGIN
-            DECLARE nb int;
+            DECLARE nb INT;
 
-            Select count(*) into nb 
+            SELECT count(*) INTO nb 
             FROM contenir 
             WHERE id_formule = new.id_formule; 
 
-            IF nb > 4 then
-                SIGNAL SQLstate '45000'
-                SET MESSAGE_TEXT = 'Une formule ne peut pas contenir plus de 4 plats'
+            IF nb >= 4 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Une formule ne peut pas contenir plus de 4 plats';
             END IF;
         END;
-        """))
-        db.session.commit()
+        """
