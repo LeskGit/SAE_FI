@@ -123,3 +123,67 @@ class TriggerManager:
             END IF;
         END;
         """
+    
+
+def execute_tests():
+
+    usr = User(num_tel = '01234567a9',
+                nom = 'Doe',
+                prenom = 'John',
+                password = 'password',
+                adresse = '1 rue de la Paix',
+                email = 'a@b.com',
+                blacklisted = False,
+                points_fidelite = 0,
+                prix_panier = 0)
+    
+    db.session.add(usr)
+    db.session.commit()
+
+
+    #5 Plats
+    plat1 = Plats(nom_plat = 'plat1',
+                type_plat = 'Plat chaud',
+                quantite_stock = 10,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0)
+    plat2 = Plats(nom_plat = 'plat2',
+                type_plat = 'Plat froid',
+                quantite_stock = 10,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0)
+    plat3 = Plats(nom_plat = 'plat3',
+                type_plat = 'Sushi',
+                quantite_stock = 10,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0)
+    plat4 = Plats(nom_plat = 'plat4',
+                type_plat = 'Dessert',
+                quantite_stock = 10,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0)
+    plat5 = Plats(nom_plat = 'plat5',
+                type_plat = 'Plat chaud',
+                quantite_stock = 10,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0)
+    
+    db.session.add_all([plat1, plat2, plat3, plat4, plat5])
+
+    #Formule
+    formule1 = Formule(id_formule = 1,
+                        libelle_formule = 'formule1',
+                        prix = 20)
+    
+    db.session.add(formule1)
+    
+    formule1.les_plats.append(plat1)
+    formule1.les_plats.append(plat2)
+    formule1.les_plats.append(plat3)
+
+    db.session.commit()
