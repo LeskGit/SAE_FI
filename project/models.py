@@ -1,12 +1,11 @@
 from sqlalchemy import CheckConstraint
+from sqlalchemy.orm import validates
 from .app import db, login_manager
 from flask_login import UserMixin
-from sqlalchemy import event
 import re
-from sqlalchemy.orm import validates
 
 class User(db.Model, UserMixin):
-    num_tel = db.Column(db.String(10), CheckConstraint('LENGTH(num_tel) = 10'), primary_key=True)
+    num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10"), primary_key=True)
     nom = db.Column(db.String(32))
     prenom = db.Column(db.String(32))
     password = db.Column(db.String(64))
@@ -20,26 +19,26 @@ class User(db.Model, UserMixin):
     prix_panier = db.Column(db.Float, default=0)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
 
-    @validates('email')
+    @validates("email")
     def validate_email(self, key, address):
-        assert re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$', address)
+        assert re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$", address)
         return address
 
 @login_manager.user_loader
 def load_user(num_tel):
     return User.query.get(num_tel)
 
-contenir = db.Table('contenir',
-    db.Column('nom', db.String(64), db.ForeignKey('plats.nom_plat'), primary_key=True),
-    db.Column('id_formule', db.Integer, db.ForeignKey('formule.id_formule'), primary_key=True)
+contenir = db.Table("contenir",
+    db.Column("nom", db.String(64), db.ForeignKey("plats.nom_plat"), primary_key=True),
+    db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
 )
 
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key = True)
-    num_tel = db.Column(db.String(10), db.ForeignKey('user.num_tel'))
+    num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
     date = db.Column(db.DateTime)
     sur_place = db.Column(db.Boolean)
-    num_table = db.Column(db.Integer, CheckConstraint('0 < num_table AND num_table <= 12'))
+    num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"))
     les_plats = db.relationship("Plats", back_populates = "les_commandes")
     plats = db.relationship("Plats", secondary="contenir", back_populates="formules")
@@ -68,3 +67,5 @@ class Formule(db.Model):
 
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
+
+
