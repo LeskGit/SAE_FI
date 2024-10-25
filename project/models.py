@@ -29,9 +29,14 @@ class User(db.Model, UserMixin):
 def load_user(num_tel):
     return User.query.get(num_tel)
 
+CONTENIR_NOM_PLAT = "plats.nom_plat"
+
 contenir = db.Table("contenir",
-    db.Column("nom", db.String(64), db.ForeignKey("plats.nom_plat"), primary_key=True),
-    db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
+    db.Column("nom", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
+    db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True),
+    db.Column("plat_entree", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
+    db.Column("plat_principal", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
+    db.Column("plat_dessert", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True)
 )
 
 constituer = db.Table("constituer",
@@ -109,26 +114,6 @@ class TriggerManager:
         END;
         """
 
-    def trigger_formule(self) -> str:
-        """
-        Trigger qui empêche de créer une formule avec plus de 4 plats
-        """
-        return """
-        CREATE OR REPLACE TRIGGER nb_plat BEFORE INSERT ON contenir FOR EACH ROW
-        BEGIN
-            DECLARE nb INT;
-
-            SELECT count(*) INTO nb 
-            FROM contenir 
-            WHERE id_formule = new.id_formule; 
-
-            IF nb >= 4 THEN
-                SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Une formule ne peut pas contenir plus de 4 plats';
-            END IF;
-        END;
-        """
-    
     def trigger_limiter_commandes_surplace(self) -> str:
         return """
         CREATE OR REPLACE TRIGGER limiter_commandes_surplace BEFORE INSERT ON commandes FOR EACH ROW
@@ -145,7 +130,7 @@ class TriggerManager:
             END IF;
         END;
         """
-    
+
     def trigger_commandes_surplace_midi(self) -> str:
         return """
         CREATE OR REPLACE TRIGGER commandes_surplace_midi BEFORE INSERT ON commandes FOR EACH ROW
@@ -158,7 +143,7 @@ class TriggerManager:
             END IF;
         END;
         """
-    
+
     def trigger_update_commande(self) -> str:
         """
         Trigger qui empêche de modifier une commande après 15 minutes après la date de la commande
@@ -175,7 +160,7 @@ class TriggerManager:
             END IF;
         END;
         """
-    
+
     def trigger_delete_commande(self) -> str:
         """
         Trigger qui empêche de supprimer une commande après 15 minutes après la date de la commande
@@ -192,7 +177,7 @@ class TriggerManager:
             END IF;
         END;
         """
-    
+
     def trigger_reserver_delais(self) -> str:
         """
         Trigger qui empêche de réserver 2 heures avant la date de la commande
@@ -209,7 +194,7 @@ class TriggerManager:
             END IF;
         END;
         """
-    
+
     def trigger_commande_non_payee(self) -> str:
         """
         Trigger qui empêche de commander si l'utilisateur a une commande non payée
@@ -229,7 +214,7 @@ class TriggerManager:
             END IF;
         END;
         """
-    
+
     def trigger_commande_blacklisted(self) -> str:
         """
         Trigger qui empêche de commander si l'utilisateur est blacklisted
@@ -243,8 +228,6 @@ class TriggerManager:
             END IF;
         END;
         """
-    
-    
 
 def execute_tests():
 
