@@ -36,7 +36,8 @@ contenir = db.Table("contenir",
 
 constituer = db.Table("constituer",
     db.Column("nom_plat", db.String(64), db.ForeignKey("plats.nom_plat"), primary_key=True),
-    db.Column("num_commande", db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
+    db.Column("num_commande", db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True),
+    db.Column("quantite_plat", db.Integer, default=1)
 )
 
 class Commandes(db.Model):
@@ -61,6 +62,7 @@ class Plats(db.Model):
     prix_reduc = db.Column(db.Float)
     les_commandes = db.relationship("Commandes", secondary = constituer, back_populates = "les_plats")
     les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
+    est_bento = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
