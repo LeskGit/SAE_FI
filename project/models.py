@@ -44,7 +44,7 @@ class Commandes(db.Model):
     num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
     date = db.Column(db.DateTime)
     sur_place = db.Column(db.Boolean)
-    num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
+    num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"), unique = True)
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"))
     les_plats = db.relationship("Plats", secondary = constituer, back_populates = "les_commandes")
     les_clients = db.relationship("User", back_populates = "les_commandes")
@@ -108,6 +108,9 @@ class TriggerManager:
         """
 
     def trigger_formule(self) -> str:
+        """
+        Trigger qui empêche de créer une formule avec plus de 4 plats
+        """
         return """
         CREATE OR REPLACE TRIGGER nb_plat BEFORE INSERT ON contenir FOR EACH ROW
         BEGIN
@@ -124,10 +127,126 @@ class TriggerManager:
         END;
         """
     
+    def trigger_limiter_commandes_surplace(self) -> str:
+        return """
+        CREATE OR REPLACE TRIGGER limiter_commandes_surplace BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE nb INT;
+
+            SELECT count(*) INTO nb 
+            FROM commandes 
+            WHERE sur_place = 1; 
+
+            IF nb >= 12 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Il y a déjà 12 commandes sur place';
+            END IF;
+        END;
+        """
+    
+    def trigger_commandes_surplace_midi(self) -> str:
+        return """
+        CREATE OR REPLACE TRIGGER commandes_surplace_midi BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            IF HOUR(NEW.date) BETWEEN 12 AND 14 THEN
+                IF NEW.sur_place = 1 THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Impossible de commander sur place entre 12h et 14h';
+                END IF;
+            END IF;
+        END;
+        """
+    
+    def trigger_update_commande(self) -> str:
+        """
+        Trigger qui empêche de modifier une commande après 15 minutes après la date de la commande
+        """
+        return """
+        CREATE OR REPLACE TRIGGER update_commande BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE current_time DATETIME;
+            SET current_time = NOW();
+
+            IF TIMESTAMPDIFF(MINUTE, NEW.date, current_time) > 15 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Impossible de modifier une commande après 15 minutes';
+            END IF;
+        END;
+        """
+    
+    def trigger_delete_commande(self) -> str:
+        """
+        Trigger qui empêche de supprimer une commande après 15 minutes après la date de la commande
+        """
+        return """
+        CREATE OR REPLACE TRIGGER delete_commande BEFORE DELETE ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE current_time DATETIME;
+            SET current_time = NOW();
+
+            IF TIMESTAMPDIFF(MINUTE, OLD.date, current_time) > 15 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Impossible de supprimer une commande après 15 minutes';
+            END IF;
+        END;
+        """
+    
+    def trigger_reserver_delais(self) -> str:
+        """
+        Trigger qui empêche de réserver 2 heures avant la date de la commande
+        """
+        return """
+        CREATE OR REPLACE TRIGGER reserver_delais BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE current_time DATETIME;
+            SET current_time = NOW();
+
+            IF TIMESTAMPDIFF(HOUR, NEW.date, current_time) < 2 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Impossible de réserver moins de 2 heures avant la date de la commande';
+            END IF;
+        END;
+        """
+    
+    def trigger_commande_non_payee(self) -> str:
+        """
+        Trigger qui empêche de commander si l'utilisateur a une commande non payée
+        """
+        return """
+        CREATE OR REPLACE TRIGGER commande_non_payee BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE nb INT;
+
+            SELECT count(*) INTO nb 
+            FROM commandes 
+            WHERE num_tel = NEW.num_tel AND etat = 'Non payée'; 
+
+            IF nb > 0 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Vous avez une commande non payée';
+            END IF;
+        END;
+        """
+    
+    def trigger_commande_blacklisted(self) -> str:
+        """
+        Trigger qui empêche de commander si l'utilisateur est blacklisted
+        """
+        return """
+        CREATE OR REPLACE TRIGGER commande_blacklisted BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            IF (SELECT blacklisted FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Vous êtes blacklisted';
+            END IF;
+        END;
+        """
+    
+    
 
 def execute_tests():
 
-    usr = User(num_tel = '01234567a9',
+    usr = User(num_tel = '0123456759',
                 nom = 'Doe',
                 prenom = 'John',
                 password = 'password',
