@@ -8,13 +8,13 @@ from wtforms import StringField, PasswordField, EmailField
 
 class LoginForm (FlaskForm) :
     num_tel = StringField("Numero_telephone")
-    mot_de_passe = PasswordField("Mot_de_passe")
+    password = PasswordField("Mot_de_passe")
 
 class RegisterForm ( FlaskForm ) :
     num_tel = StringField("Numero_telephone")
     nom = StringField("Nom")
     prenom = StringField("Prenom")
-    mot_de_passe = PasswordField("Mot_de_passe")
+    password = PasswordField("Mot_de_passe")
     adresse = StringField("Adresse")
     email = EmailField("Email")
     repcatcha = RecaptchaField()
@@ -51,4 +51,18 @@ def logout ():
 
 @app.route("/inscription")
 def inscription() :
-    return render_template("inscription.html")
+    f = RegisterForm()
+    if f.validate_on_submit():
+        numero_tel = f.num_tel.data
+        password = f.password.data
+        nom_c = f.nom.data
+        prenom_c = f.prenom.data
+        adresse_c = f.adresse.data
+        email_c = f.email.data
+        m = sha256()
+        m.update(password.encode())
+        u = User(num_tel=numero_tel, password=m.hexdigest(), nom = nom_c, prenom = prenom_c, adresse = adresse_c, email = email_c)
+        db.session.add(u)
+        db.session.commit()
+        return redirect(url_for("connexion"))
+    return render_template("inscription.html", form = f)
