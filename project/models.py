@@ -49,6 +49,7 @@ class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key = True)
     num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
     date = db.Column(db.DateTime)
+    date_creation = db.Column(db.DateTime, default = db.func.current_timestamp())
     sur_place = db.Column(db.Boolean)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"), unique = True)
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"))
@@ -151,10 +152,9 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER update_commande BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            DECLARE current_time DATETIME;
-            SET current_time = NOW();
+            DECLARE current DATETIME DEFAULT NOW();
 
-            IF TIMESTAMPDIFF(MINUTE, NEW.date, current_time) > 15 THEN
+            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de modifier une commande après 15 minutes';
             END IF;
@@ -168,10 +168,10 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER delete_commande BEFORE DELETE ON commandes FOR EACH ROW
         BEGIN
-            DECLARE current_time DATETIME;
-            SET current_time = NOW();
+            DECLARE current DATETIME DEFAULT NOW();
 
-            IF TIMESTAMPDIFF(MINUTE, OLD.date, current_time) > 15 THEN
+
+            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de supprimer une commande après 15 minutes';
             END IF;
@@ -185,10 +185,9 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER reserver_delais BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            DECLARE current_time DATETIME;
-            SET current_time = NOW();
+            DECLARE current DATETIME DEFAULT NOW();
 
-            IF TIMESTAMPDIFF(HOUR, NEW.date, current_time) < 2 THEN
+            IF TIMESTAMPDIFF(HOUR, NEW.date, current) < 2 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de réserver moins de 2 heures avant la date de la commande';
             END IF;
@@ -243,7 +242,6 @@ def execute_tests():
     
     db.session.add(usr)
     db.session.commit()
-
 
     #5 Plats
     plat1 = Plats(nom_plat = 'plat1',
