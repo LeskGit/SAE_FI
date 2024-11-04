@@ -39,6 +39,39 @@
     </div>
 </nav>
 
+
+
+<footer class="footer-bg d-flex justify-content-around">
+    <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_footer" alt="Logo Oumami">
+    <!-- Section 1 : Contact -->
+    <div class="container text_footer">
+        <h5>Contact</h5>
+        <p>Adresse : 123 Rue Exemple, Ville</p>
+        <p>Téléphone : 01 23 45 67 89</p>
+        <br>
+        <br>
+        <p>Ouverture du magasin :Du mardi au samedi 11h30 - 14h / 17h - 20h</p>
+    </div>
+    
+    <!-- Section 2 : Partenaires -->
+    <div class="container">
+        <h5>Nos Partenaires</h5>
+        <a href="{{ url_for('home') }}">SANGA : miso, koji et produits BIO </a>
+    </div>
+
+    <!-- Section 3 : Réseaux sociaux -->
+    <div class="container">
+        <h5>Suivez-nous</h5>
+        <a href="#">Facebook</a>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <p>© 2014-2024 Oumami - Tous droits réservés.</p>
+    </div>
+</footer>
+
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>

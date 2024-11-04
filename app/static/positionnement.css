@@ -11,6 +11,28 @@
     width: 3em;
 }
 
+.logo_footer {
+    height: 9em;
+    width: 9em;
+    margin-left: 6em;
+    margin-top: 3em;
+}
+
+.text_footer {
+    margin-left: 7em;
+}
+
 .text_nav {
     font-weight: bold;
+}
+
+.footer-bg {
+    background-image: url("../static/img/background_footer.webp");
+    background-size: cover;
+    background-position: center;
+    color: black;
+    padding: 20px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
