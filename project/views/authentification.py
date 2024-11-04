@@ -40,6 +40,11 @@ def connexion() :
             return render_template("profil_client_connecte.html", client = user) 
     return render_template("connexion.html", form = f)
 
+@app.route("/deconnexion")
+def logout ():
+    logout_user ()
+    return redirect ( url_for ("accueil"))
+
 @app.route("/inscription")
 def inscription() :
     return render_template("inscription.html")

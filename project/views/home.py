@@ -6,7 +6,7 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 
 @app.route("/")
-def home() :
+def accueil() :
     return render_template("home.html")
 
 @app.route("/a_propos")
