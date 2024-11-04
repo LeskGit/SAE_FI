@@ -6,7 +6,11 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
 
-class LoginForm ( FlaskForm ) :
+class LoginForm (FlaskForm) :
+    num_tel = StringField("Numero_telephone")
+    mot_de_passe = PasswordField("Mot_de_passe")
+
+class RegisterForm ( FlaskForm ) :
     num_tel = StringField("Numero_telephone")
     nom = StringField("Nom")
     prenom = StringField("Prenom")
