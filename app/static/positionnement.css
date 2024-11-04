@@ -1,0 +1,16 @@
+
+
+.img_nav {
+    height: 2em;
+    width: 2em;
+    margin-left: 1em;
+}
+
+.logo_nav {
+    height: 3em;
+    width: 3em;
+}
+
+.text_nav {
+    font-weight: bold;
+}
