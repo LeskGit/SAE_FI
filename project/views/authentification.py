@@ -16,6 +16,12 @@ class LoginForm ( FlaskForm ) :
     repcatcha = RecaptchaField()
 
     def get_user_authentifie(self):
+        """permet de savoir si le mot de passe de 
+        l'utilisateur est bon
+
+        Returns:
+            User: L'utilisateur si le mot de passe est correct, None sinon
+        """
         user = User.query.get(self.num_tel.data)
         if user is None:
             return None
