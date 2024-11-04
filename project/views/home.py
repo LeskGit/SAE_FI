@@ -1,4 +1,4 @@
-from .app import app, db
+from ..app import app, db
 from flask import render_template, url_for, redirect, request
 #from .models import 
 from flask_wtf import FlaskForm
