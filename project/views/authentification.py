@@ -53,15 +53,14 @@ def logout():
 def register():
     f = RegisterForm()
     if f.validate_on_submit():
-        phone = f.phone_number.data
         passwd = f.password.data
-        name = f.name.data
-        first_name = f.first_name.data
-        addresse = f.addresse.data
-        mail = f.email.data
         m = sha256()
         m.update(passwd.encode())
-        u = User(num_tel=phone, password=m.hexdigest(), nom = name, prenom = first_name, adresse = addresse, email = mail)
+        u = User(num_tel=f.phone_number.data, password=m.hexdigest(), 
+                 nom = f.name.data, 
+                 prenom = f.first_name.data, 
+                 adresse = f.addresse.data, 
+                 email = f.email.data)
         db.session.add(u)
         db.session.commit()
         return redirect(url_for("login"))
