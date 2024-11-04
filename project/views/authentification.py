@@ -15,6 +15,15 @@ class LoginForm ( FlaskForm ) :
     email = EmailField("Email")
     repcatcha = RecaptchaField()
 
+    def get_user_authentifie(self):
+        user = User.query.get(self.num_tel.data)
+        if user is None:
+            return None
+        m = sha256 ()
+        m.update(self.password.data.encode())
+        passwd = m.hexdigest ()
+        return user if passwd == user.password else None
+
 @app.route("/connexion")
 def connexion() :
     return render_template("connexion.html")
