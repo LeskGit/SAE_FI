@@ -30,9 +30,15 @@ class LoginForm ( FlaskForm ) :
         passwd = m.hexdigest ()
         return user if passwd == user.password else None
 
-@app.route("/connexion")
+@app.route("/connexion", methods = ("GET", "POST", ))
 def connexion() :
-    return render_template("connexion.html")
+    f = LoginForm()
+    if f.validate_on_submit ():
+        user = f.get_authenticated_user ()
+        if user :
+            login_user(user)
+            return render_template("profil_client_connecte.html", client = user) 
+    return render_template("connexion.html", form = f)
 
 @app.route("/inscription")
 def inscription() :
