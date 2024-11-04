@@ -1,2 +1,2 @@
-FLASK_APP=app
+FLASK_APP=project
 FLASK_ENV=development

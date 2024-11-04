@@ -8,6 +8,9 @@
 
 {% block content %}
 <section class="carousel" >
+    <p id="oumami" class="carousel-text">OUMAMI</p>
+    <hr class="carousel-line">
+    <p id="info"class="carousel-text">Traiteur asiatique</p>
 
     <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
         <!-- Indicateurs dynamiques -->
@@ -21,9 +24,6 @@
         {% for image in images %}
         <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
             <img src="{{ url_for('static', filename=image) }}" alt="Slide {{ loop.index }}">
-            <div class="carousel-caption">
-                <h3>OUMAMI</h3>
-            </div>
         </div>
         {% endfor %}
     </div>

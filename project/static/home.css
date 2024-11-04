@@ -4,6 +4,32 @@
     margin: 0;
     overflow: hidden;
 }
+#oumami .carousel-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  -webkit-text-stroke: 2px black;
+  font-size: 5rem;
+  font-weight: bold;
+  text-align: center;
+  z-index: 10; /* Assure que le texte reste au-dessus du carousel */
+}
+
+/* Style de la ligne horizontale */
+.carousel-line {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px; /* Ajuste la largeur de la ligne ici */
+  border: 1px solid white;
+  opacity: 0.8;
+  z-index: 10;
+}
+
+.carousel-text
 
 /* Carousel en fond d’écran */
 .carousel {
@@ -19,15 +45,6 @@
     width: 100%;
     height: 100vh;
     object-fit: cover;
-}
-
-/* Texte centré et en avant-plan */
-.carousel-caption {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
 }
 
 /* Personnalisation des boutons de contrôle */

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        {% block head %}
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        {% block styles %}
+            <!-- Bootstrap CSS -->
+            {{ bootstrap.load_css() }}
+        {% endblock %}
+
+        <title>Ma bibliothèque SF</title>
+        {% endblock %}
+    </head>
+    <body>
+        <header>
+            <!-- Fixed navbar -->
+            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+              <div class="container-fluid">
+                <a class="navbar-brand" href="#">Mes Livres</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                  <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                      <a class="nav-link active" aria-current="page" href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Ajouter
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/add/author">Auteur</a>
+                        <a class="dropdown-item" href="/add/book">Livres</a>
+                      </div>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link disabled">Désactiver</a>
+                    </li>
+                  </ul>
+                  <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Rechercher</button>
+                  </form>
+                  <ul class="nav navbar -nav navbar -right" id = "navbarLogin">
+                    <form class="form-inline">
+                      <a href="/login" class="btn btn-outline-success" role="button" aria-pressed="true">Login</a>
+                    </form>
+                    
+                    
+                    </ul>
+                  
+                </div>
+              </div>
+            </nav>
+          </header>
+        <!-- Your page content -->
+        <main class="flex-shrink-0">
+            <div class="container">
+     
+            {% block content %}
+        
+            {% endblock %}
+            </div>
+        </main>
+        <footer class="footer mt-auto py-3 bg-light">
+            <div class="container">
+              <span class="text-muted">Place sticky footer content here.</span>
+            </div>
+          </footer>
+        {% block scripts %}
+            <!-- Optional JavaScript -->
+            {{ bootstrap.load_js() }}
+        {% endblock %}
+    </body>
+</html>
