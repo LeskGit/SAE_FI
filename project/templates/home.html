@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+<section class="carousel" >
+
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <!-- Indicateurs dynamiques -->
+        <ol class="carousel-indicators">
+            {% for image in images %}
+            <li data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" class="{% if loop.index == 1 %}active{% endif %}"></li>
+            {% endfor %}
+        </ol>
+
+    <div class="carousel-inner">
+        {% for image in images %}
+        <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+            <img src="{{ url_for('static', filename=image) }}" alt="Slide {{ loop.index }}">
+            <div class="carousel-caption">
+                <h3>OUMAMI</h3>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Contrôles du carousel -->
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only"></span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only"></span>
+    </a>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+{% endblock %}
