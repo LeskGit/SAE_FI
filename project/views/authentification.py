@@ -15,6 +15,7 @@ class RegisterForm (FlaskForm):
     name = StringField("Nom")
     first_name = StringField("Prénom")
     password = PasswordField("Mot de passe")
+    password_check = PasswordField("Mot de passe")
     address = StringField("Adresse")
     email = EmailField("Email")
     repcatcha = RecaptchaField()
