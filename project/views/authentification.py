@@ -7,14 +7,14 @@ from wtforms import StringField, PasswordField, EmailField
 from project.models import User
 
 class LoginForm (FlaskForm):
-    phone_number = StringField("Numero_telephone")
-    password = PasswordField("Mot_de_passe")
+    phone_number = StringField("Numéro de téléphone")
+    password = PasswordField("Mot de passe")
 
 class RegisterForm (FlaskForm):
-    phone_number = StringField("Numero_telephone")
+    phone_number = StringField("Numéro téléphone")
     name = StringField("Nom")
-    first_name = StringField("Prenom")
-    password = PasswordField("Mot_de_passe")
+    first_name = StringField("Prénom")
+    password = PasswordField("Mot de passe")
     addresse = StringField("Adresse")
     email = EmailField("Email")
     repcatcha = RecaptchaField()
