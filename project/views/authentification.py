@@ -38,10 +38,10 @@ class RegisterForm (FlaskForm):
 def login():
     f = LoginForm()
     if f.validate_on_submit():
-        user = f.get_authenticated_user()
-        if user:
-            login_user(user)
-            return render_template("profil_client_connecte.html", client = user) 
+        the_user = f.get_authenticated_user()
+        if the_user:
+            login_user(the_user)
+            return render_template("profil_client_connecte.html", user = the_user) 
     return render_template("connexion.html", form = f)
 
 @app.route("/deconnexion")
