@@ -5,7 +5,10 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='authentification.css')}}">
 {% endblock %}
 {% block content %}
-<form class="form-horizontal" role="form" method ="POST"
+<div class = "background">
+    <img src="{{ url_for('static', filename='img/notre_magasin.jpg')}}" class="background_image" alt="Background">
+    <div class="form_container">
+    <form class="form-horizontal" role="form" method ="POST"
     action ="{{ url_for ("login") }}">
     <div class="form-group">
         <label for="phone number" class="col-sm-2 control-label">
@@ -31,4 +34,6 @@
             </div >
         </div >
     </form >
+</div>
+</div>
 {% endblock %}
