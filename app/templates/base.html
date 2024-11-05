@@ -41,36 +41,56 @@
 
 
 
-<footer class="footer-bg d-flex justify-content-around">
-    <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_footer" alt="Logo Oumami">
-    <!-- Section 1 : Contact -->
-    <div class="container text_footer">
-        <h5>Contact</h5>
-        <p>Adresse : 123 Rue Exemple, Ville</p>
-        <p>Téléphone : 01 23 45 67 89</p>
-        <br>
-        <br>
-        <p>Ouverture du magasin :Du mardi au samedi 11h30 - 14h / 17h - 20h</p>
-    </div>
-    
-    <!-- Section 2 : Partenaires -->
-    <div class="container">
-        <h5>Nos Partenaires</h5>
-        <a href="{{ url_for('home') }}">SANGA : miso, koji et produits BIO </a>
-    </div>
+<footer class="footer-bg py-4">
+    <div class="container d-flex align-items-center justify-content-between">
+      <!-- Logo -->
+      <div class="text_footer logo-footer">
+        <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_footer" alt="Logo Oumami">
+      </div>
+  
+      <!-- Sections du footer en grille -->
+      <div class="container">
 
-    <!-- Section 3 : Réseaux sociaux -->
-    <div class="container">
-        <h5>Suivez-nous</h5>
-        <a href="#">Facebook</a>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <p>© 2014-2024 Oumami - Tous droits réservés.</p>
+        <div class="container d-flex justify-content-between">
+            <!-- Section 1 : Contact -->
+            <div class="text_footer contact-footer">
+            <h5>Contact</h5>
+            <p>Adresse : 123 Rue Exemple, Ville</p>
+            <p>Téléphone : 01 23 45 67 89</p>
+            </div>
+    
+            <!-- Section 2 : Partenaires -->
+            <div class="text_footer partenaire-footer">
+            <h5>Nos Partenaires</h5>
+            <a href="{{ url_for('home') }}">SANGA : miso, koji et produits BIO</a>
+            </div>
+    
+            <!-- Section 3 : Réseaux sociaux -->
+            <div class="text_footer reseau-footer">
+            <h5>Suivez-nous</h5>
+            <a href="#">Facebook</a>
+            </div>
+        </div>
+        <div class="container d-flex align-items-center justify-content-between">
+  
+            <!-- Section 4 : Horaires -->
+            <div class="text_footer horaire-footer">
+            <p>Ouverture du magasin : Du mardi au samedi 11h30 - 14h / 17h - 20h</p>
+            </div>
+    
+            <!-- Section 5 : Droits -->
+            <div class="text_footer droit-footer">
+            <p>© 2014-2024 Oumami - Tous droits réservés.</p>
+            </div>
+        </div>
+      </div>
     </div>
+  </footer>
+  
+    
 </footer>
+
+
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

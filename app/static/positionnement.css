@@ -14,13 +14,8 @@
 .logo_footer {
     height: 9em;
     width: 9em;
-    margin-left: 6em;
-    margin-top: 3em;
 }
 
-.text_footer {
-    margin-left: 7em;
-}
 
 .text_nav {
     font-weight: bold;
@@ -36,3 +31,4 @@
     bottom: 0;
     width: 100%;
 }
+
