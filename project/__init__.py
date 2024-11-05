@@ -3,6 +3,6 @@ import project.views.administration
 import project.views.authentification
 import project.views.client_fidele
 import project.views.commander
-import project.views.home
+import project.views.home_views
 import project.commands
 import project.models
