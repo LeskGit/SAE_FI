@@ -46,7 +46,7 @@
 
 /* Carousel en fond d’écran */
 .carousel {
-    position: fixed;
+    position: relative;
     top: 0;
     left: 0;
     width: 100%;
@@ -75,4 +75,12 @@
 /* Indicateur actif */
 .carousel-indicators .active {
   background-color: #007bff;
+}
+
+.contact-section {
+  text-align: center;
+  padding: 20px;
+  color: orange;
+  font-size: 1.2rem;
+  border: 1px solid ;
 }
