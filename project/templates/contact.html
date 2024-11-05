@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="top-info">
+    <h1 class="text-center my-3">Contact</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="row mt-5">
+    <div class="col-7 contact-map mx-5 rounded-3">
+        <div class="px-5 py-4">
+            <!-- Embedded Google Map using an iframe - to select your location find it on Google maps and paste the link as the iframe src. If you want to use the Google Maps API instead then have at it! -->
+            <iframe width="100%" height="400" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2692.98631518759!2d1.5392065156284955!3d47.54859507918095!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e4b106780f8db7%3A0x60b08ff551cacb21!2s4%20Place%20de%20la%20Halle%2C%2041250%20Bracieux!5e0!3m2!1sfr!2sfr!4v1598866956896!5m2!1sfr!2sfr"></iframe>
+            <div class="container">
+                <div class="row mb-3">
+                    <div class="col-4">Addresse :</div>
+                    <div class="col-6 flex-grow-1">4 place de la Halle 41250 Bracieux FRANCE</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4">Téléphone :</div>
+                    <div class="col-6 flex-grow-1">02.54.79.05.48</div>
+                </div>
+                <div class="row">
+                    <div class="col-4">Horaire d'ouverture :</div>
+                    <div class="col-6 flex-grow-1">Du mardi au samedi 11h30 - 14h / 17h - 20h</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6 mx-auto">
+        <div class="top-info">
+            <h3 class="text-center my-3">Nous contacter</h3>
+            <hr class="w-75 mx-auto bg-dark bar"/>
+        </div>
+
+        <div class="d-flex flex-column align-items-center text-center">
+            <form class="form-horizontal" method="POST" action="{{ url_for('home') }}">
+                {{ form.hidden_tag() }}
+
+                {{ form.email(size=50, class_="form-control contact-form my-3", placeholder="Email") }}
+
+                {{ form.objet(size=50, class_="form-control contact-form my-3", placeholder="Objet") }}
+                
+                {{ form.message(class_="form-control contact-form my-3", style='height: 20em; resize:none;', placeholder="Votre message") }}
+
+                <button class="btn btn-lg btn-dark" type="submit">Envoyer</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

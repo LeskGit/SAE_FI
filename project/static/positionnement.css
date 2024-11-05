@@ -32,3 +32,10 @@
     width: 100%;
 }
 
+.bar {
+    padding-bottom: 0.1em;
+}
+
+.a_propos_texte {
+    font-family: Open;
+}
