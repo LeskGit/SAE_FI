@@ -7,7 +7,7 @@ from hashlib import sha256
 
 @app.route("/")
 def home() :
-    return render_template("home.html")
+    return render_template("base.html")
 
 @app.route("/a_propos")
 def a_propos() :

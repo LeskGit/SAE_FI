@@ -27,8 +27,11 @@
     background-position: center;
     color: black;
     padding: 20px 0;
-    position: fixed;
+    position: relative;
     bottom: 0;
     width: 100%;
 }
 
+.a_propos_texte {
+    font-family: Open;
+}

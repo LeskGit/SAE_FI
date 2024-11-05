@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_bootstrap import Bootstrap5
 from flask_login import LoginManager
-import auth
+import project.auth as auth
 
 def mkpath(p):
     return os.path.normpath(
