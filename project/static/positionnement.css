@@ -32,6 +32,10 @@
     width: 100%;
 }
 
-.a_propos_texte {
+
+
+.bar {
+    padding-bottom: 0.1em;
+}.a_propos_texte {
     font-family: Open;
 }
