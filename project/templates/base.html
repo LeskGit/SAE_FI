@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oumami</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="static/positionnement.css">
+    {% block head %}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>Oumami</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='positionnement.css') }}">
+        {% block styles %}
+            {{ bootstrap.load_css() }}
+        {% endblock %}
+    {% endblock %}
 </head>
 <body>
 
@@ -40,7 +44,7 @@
 </nav>
 
 <main class="flex-shrink-0">
-    <div class="container">
+    <div class="container-fluid">
         {% block content %}
 
         {% endblock %}
