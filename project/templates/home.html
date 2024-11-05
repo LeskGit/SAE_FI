@@ -99,6 +99,102 @@
     </div>
 </section>
 
+<section class="plats-section">
+    <h2 class="plats-title">Découvrez nos plats</h2>
+    <hr class="plats-divider">
+    
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-md-3">
+                <h3 class="text-orange">PLATS CHAUDS</h3>
+                <ul>
+                    <li>Nem nature (à la viande hachée et aux légumes) - 2,50 €</li>
+                    <li>Nem au curry (au poulet) - 2,50 €</li>
+                    <li>Samoussa - 1,50 €</li>
+                    <li>Fritette japonaise au calamar - 4,50 €</li>
+                    <li>Poulet frit, 5 pièces - 5,00 €</li>
+                    <li>Poulet frit, 10 pièces - 9,00 €</li>
+                    <li>Poulet frit, 15 pièces - 13,00 €</li>
+                    <li>Poulet sauté à la sauce sésame (caramélisée) - 42,00 € / kg</li>
+                    <li>Poulet sauté à la sauce coréenne (épicée) - 42,00 € / kg</li>
+                    <li>Porc à la sauce aigre-douce - 40,00 € / kg</li>
+                    <li>Bœuf caramélisé - 45,00 € / kg</li>
+                    <li>Poisson du jour - 50,00 € / kg</li>
+                    <li>Riz sauté - 20,00 € / kg</li>
+                    <li>Nouilles sautées - 22,00 € / kg</li>
+                    <li>Ramen - 15,00 € / bol</li>
+                    <li>Udon - 15,00 € / bol</li>
+                    <li>Soupe miso, petit bol - 3,80 €</li>
+                    <li>Soupe miso, grand bol - 4,50 €</li>
+                    <li>Soupe au lait de coco, petit bol - 5,50 €</li>
+                    <li>Soupe au lait de coco, grand bol - 6,50 €</li>
+                </ul>
+                
+            </div>
+            <div class="col-md-3">
+                <h3 class="text-orange">SUSHIS</h3>
+                <p class="sushis-disclaimer">La disponibilité de Sushi peut varier selon arrivée des poissons.<br>Merci de commander à l'avance.</p>
+                <ul>
+                    <li>Plateau SUSHI 12 pièces (3 Sushi, 6 Maki, 3 Maki géant) - 13,00 € / plateau</li>
+                    <li>Plateau SUSHI 24 pièces (6 Sushi, 12 Maki, 6 Maki géant) - 24,00 € / plateau</li>
+                    <li>Plateau SUSHI 35 pièces (8 Sushi, 18 Maki, 9 Maki géant) - 33,00 € / plateau</li>
+                    <li>Plateau 8 SUSHI, 8 saumon - 12,00 € / plateau</li>
+                    <li>Plateau 8 SUSHI, 4 saumon et 4 thon - 13,00 € / plateau</li>
+                    <li>Plateau MAKI 12 pièces - 6,50 € / plateau</li>
+                    <li>Plateau MAKI 18 pièces - 9,00 € / plateau</li>
+                    <li>Plateau California 8 pièces - 10,00 € / plateau</li>
+                    <li>Plateau Maki géant au thon cuit 8 pièces - 10,00 € / plateau</li>
+                    <li>Chirashi saumon (saumon mariné et salade sur le riz à Sushi) - 13,00 € / bol</li>
+                    <li>Chirashi saumon thon (saumon et thon marinés et salade sur le riz à Sushi) - 13,50 € / bol</li>
+                    <li>Mini Chirashi saumon avocat - 9,00 € / bol</li>
+                </ul>
+                
+            </div>
+            <div class="col-md-3">
+                <h3 class="text-orange">PLATS FROIDS</h3>
+                <ul>
+                    <li>Rouleau de printemps aux crevettes - 3,00 € / pièce</li>
+                    <li>Rouleau de printemps au poulet - 3,00 € / pièce</li>
+                    <li>Salade de saison - 4,00 € / paquet</li>
+                    <li>Salade de crevettes - 8,00 € / paquet</li>
+                    <li>Carpaccio de bœuf - 10,00 € / paquet</li>
+                </ul>
+
+                <h3 class="text-orange">DESSERTS</h3>
+                <ul>
+                    <li>Panna cotta à la chinoise - 4,50 € / pièce</li>
+                    <li>Tarte maison (au chocolat blanc et au thé vert Matcha) - 5,00 € / pièce</li>
+                    <li>Biscuits maison - 3,00 € / sachet</li>
+                </ul>
+
+                <h3 class="text-orange">PLATS À EMPORTER</h3>
+                <ul>
+                    <li>Rouleau de printemps aux crevettes - 3,00 € / pièce</li>
+                    <li>Rouleau de printemps au poulet - 3,00 € / pièce</li>
+                    <li>Salade de saison - 4,00 € / paquet</li>
+                    <li>Salade de crevettes - 8,00 € / paquet</li>
+                    <li>Carpaccio de bœuf - 10,00 € / paquet</li><br>
+                </ul>
+                <div class="row flex-nowrap dl">
+                    <a href="{{ url_for('static', filename='img/menu.pdf') }}" download class="d-flex align-items-center text-decoration-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                        </svg>
+                        <p class="mb-0 ms-2">Télécharger le menu</p>
+                    </a>                   
+                <div>
+                
+            </div>
+        </div>
+        
+    </div>
+
+</section>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 

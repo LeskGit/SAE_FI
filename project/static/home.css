@@ -160,3 +160,54 @@
   padding: 0; /* Supprime le padding de la colonne de séparation */
   max-width: 1px; /* Réduit la largeur de la colonne de séparation */
 }
+
+
+
+
+.plats-section {
+  padding: 40px 0;
+  background-color: #f8f9fa; 
+  
+}
+.plats-title{
+  text-align: center;
+}
+.plats-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.plats-divider {
+  width: 60px;
+  height: 2px;
+  background-color: black;
+  margin: 0 auto 20px;
+}
+
+.text-orange {
+  color: #e87c36; 
+  font-weight: bold;
+}
+
+.sushis-disclaimer {
+  color: red;
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul li {
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+
+
+
+
