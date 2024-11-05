@@ -207,7 +207,9 @@ ul li {
   margin-bottom: 5px;
 }
 
-
-
-
-
+.horaire-section{
+  padding: 40px 0;
+  text-align: center;
+  font-size: large;
+  background-color: #f8f9fa; 
+}
