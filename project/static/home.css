@@ -4,7 +4,7 @@
     margin: 0;
     overflow: hidden;
 }
-#oumami .carousel-text {
+#oumami {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -17,19 +17,32 @@
   z-index: 10; /* Assure que le texte reste au-dessus du carousel */
 }
 
+#info {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  -webkit-text-stroke: 1px black;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  z-index: 10; /* Assure que le texte reste au-dessus du carousel */
+}
+
+
 /* Style de la ligne horizontale */
 .carousel-line {
   position: absolute;
   top: 55%;
   left: 50%;
   transform: translateX(-50%);
-  width: 200px; /* Ajuste la largeur de la ligne ici */
-  border: 1px solid white;
+  width: 400px; /* Ajuste la largeur de la ligne ici */
+  border: 2px solid white;
   opacity: 0.8;
   z-index: 10;
 }
 
-.carousel-text
 
 /* Carousel en fond d’écran */
 .carousel {
