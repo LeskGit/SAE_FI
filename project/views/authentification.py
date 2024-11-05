@@ -1,4 +1,4 @@
-from ..app import app, db
+from project import app, db
 from flask import render_template, url_for, redirect, request
 from models import User
 from flask_wtf import FlaskForm, RecaptchaField
