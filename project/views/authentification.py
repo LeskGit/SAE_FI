@@ -15,7 +15,7 @@ class RegisterForm (FlaskForm):
     name = StringField("Nom")
     first_name = StringField("Prénom")
     password = PasswordField("Mot de passe")
-    addresse = StringField("Adresse")
+    address = StringField("Adresse")
     email = EmailField("Email")
     repcatcha = RecaptchaField()
 
@@ -59,7 +59,7 @@ def register():
         u = User(num_tel=f.phone_number.data, password=m.hexdigest(), 
                  nom = f.name.data, 
                  prenom = f.first_name.data, 
-                 adresse = f.addresse.data, 
+                 adresse = f.address.data, 
                  email = f.email.data)
         db.session.add(u)
         db.session.commit()
