@@ -19,3 +19,5 @@ app.config['SECRET_KEY'] = '599ad302-c28b-49ae-9144-83c6f2eb081a'   ## Utilisé 
 app.config['SQLALCHEMY_DATABASE_URI'] = ('sqlite:///' + mkpath('../oumami.db'))
 db = SQLAlchemy(app)
 
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
