@@ -27,8 +27,15 @@
     background-position: center;
     color: black;
     padding: 20px 0;
-    position: fixed;
+    position: relative;
     bottom: 0;
     width: 100%;
 }
 
+.bar {
+    padding-bottom: 0.1em;
+}
+
+.a_propos_texte {
+    font-family: Open;
+}
