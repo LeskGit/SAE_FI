@@ -39,8 +39,66 @@
     </a>
 </section>
 <section class="contact-section">
-    <p>4, place de la Halle | 41250 BRACIEUX | 02.54.79.05.48</p>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 text-start">
+                <p>4, place de la Halle</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <p>|41250 BRACIEUX|</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <p>02.54.79.05.48</p>
+            </div>
+        </div>
+    </div>
 </section>
+
+
+<section class="full-width-image">
+    <img src="{{ url_for('static', filename='img/quelques-plats-japonais.jpg') }}" alt="Background Image">
+    <div class="text-overlay">
+        <h2>Bienvenue à <br>OUMAMI</h2>
+        <p> Traiteur et Plats à emporter</p>
+    </div>
+</section>
+
+<section class="offres-section">
+    <h2 class="offres-title">Découvrez nos offres</h2>
+    <hr class="offres-divider">
+    <div class="container">
+        <div class="row text-center flex-nowrap">
+            <!-- Colonne Réception -->
+            <div class="col-md-4">
+                <h3 class="offres-subtitle text-orange">Réception</h3>
+                <p class="offres-subdetail">(à partir de 30 personnes)</p>
+                <p>Oumami se déplace chez vous pour vos cocktails, mariages, baptêmes, repas d'affaires, etc.</p>
+                <p><em>Uniquement sur réservation</em></p>
+            </div>
+            <!-- Ligne de séparation -->
+            <div class="col-md-1 d-none d-md-block">
+                <div class="separator"></div>
+            </div>
+            <!-- Colonne Bento -->
+            <div class="col-md-4">
+                <h3 class="offres-subtitle text-orange">Bentô</h3>
+                <p class="offres-subdetail">(plateau repas)</p>
+                <p>Oumami livre chez vous pour vos réunions, pique-niques, manifestations sportives et culturelles, etc.</p>
+                <p><em>Uniquement sur réservation</em></p>
+            </div>
+            <!-- Ligne de séparation -->
+            <div class="col-md-1 d-none d-md-block">
+                <div class="separator"></div>
+            </div>
+            <!-- Colonne Plats à emporter -->
+            <div class="col-md-4">
+                <h3 class="offres-subtitle text-orange">Plats à emporter</h3><br><br>
+                <p>Oumami vous propose des plats divers suggérés par notre chef.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 
