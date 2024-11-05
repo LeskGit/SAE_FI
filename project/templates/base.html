@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oumami</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/positionnement.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+    <div class="container-fluid">
+        <!-- Left buttons -->
+        <div class="navbar-nav w-100 d-flex">
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Accueil</a>
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">A propos</a>
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Contact</a>
+        </div>
+
+        <!-- Center logo -->
+        <a class="navbar-brand mx-auto" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_nav" alt="Logo Oumami">
+        </a>
+        
+        <!-- Right buttons -->
+        <div class="navbar-nav w-100 d-flex">
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Nouveauté</a>
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Commander</a>
+            <div class="nav-item nav-link text-center">
+                <a href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='img/logo_panier.png') }}" class="img_nav" alt="Logo panier">
+                </a>
+                <a href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='img/logo_login.png') }}" class="img_nav" alt="Logo login">
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
