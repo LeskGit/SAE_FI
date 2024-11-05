@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm, RecaptchaField
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
+from project.models import User
 
 class LoginForm (FlaskForm):
     phone_number = StringField("Numero_telephone")
