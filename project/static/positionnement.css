@@ -14,3 +14,7 @@
 .text_nav {
     font-weight: bold;
 }
+
+.bar {
+    padding-bottom: 0.1em;
+}
