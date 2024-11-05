@@ -14,11 +14,23 @@
     justify-content: center;
     align-items: center;
 }
-.form_container { position: relative; 
+.form_container { 
+    position: relative; 
     z-index: 2; 
     padding: 20px; 
     background-color: rgba(255, 255, 255);
     width: 25%; 
     border-radius: 12px; 
     box-shadow: 5px 5px 10px 1px rgba(0,0,0,0.4); 
+}
+.form-group label {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.form-group button {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    background-color: black;
+    color: white;
+
 }
