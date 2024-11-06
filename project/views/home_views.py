@@ -13,7 +13,9 @@ class ContactForm(FlaskForm):
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    images = ["img/slide-1.jpg", "img/slide-2.jpg", "img/slide-3.jpg"]
+    return render_template("home.html",
+                           images=images)
 
 @app.route("/a_propos")
 def a_propos():
