@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='panier.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="top-info">
+    <h1 class="text-center my-3">Panier</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container-fluid d-flex p-0 mb-4 align-items-center">
+    <div class="col-md-8 text-start" style="background-color: red;">
+        <div class="rounded mes_articles m-5">
+            <h3 class="text-center my-3">Mes Articles</h3>
+            <hr class="w-25 mx-auto bg-dark bar"/>
+            <div class="container-fluid">
+                <div class="container d-flex bg-light">
+                    <div class="container col-2">
+                        <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="img-fluid img_article m-2" style="width: 80px; height: 80px" alt="produit1">
+                    </div>
+                    <div class="container">
+                        <h4>Titre</h4>
+                        <p>Description</p>
+                    </div>
+                    <div class="container d-flex">
+                        <p class="col-4">1</p>
+                        <p class="col-4">33€</p>
+                        <p class="col-4">Pb</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 text-center" style="background-color: green;">
+        <div>
+            <h3 class="text-center my-3">Recap</h3>
+            <hr class="w-25 mx-auto bg-dark bar"/>
+        </div>
+    </div>
+</div>
+{% endblock %}
