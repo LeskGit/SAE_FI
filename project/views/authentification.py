@@ -18,7 +18,8 @@ class RegisterForm (FlaskForm):
     password_check = PasswordField("Confirmez votre mot de passe")
     address = StringField("Adresse")
     email = EmailField("Email")
-    repcatcha = RecaptchaField()
+    # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
+    #recaptcha = RecaptchaField() 
 
     def get_authentificated_user(self):
         """permet de savoir si le mot de passe de 
@@ -55,14 +56,35 @@ def register():
     f = RegisterForm()
     if f.validate_on_submit():
         passwd = f.password.data
+        passwd_2 = f.password_check.data
+        if passwd != passwd_2 :
+            f_erreur = RegisterForm(phone_number=f.phone_number.data,
+                            name = f.name.data, 
+                            first_name = f.first_name.data, 
+                            adress = f.address.data, 
+                            email = f.email.data)
+            return render_template("inscription.html", form = f_erreur)
         m = sha256()
         m.update(passwd.encode())
-        u = User(num_tel=f.phone_number.data, password=m.hexdigest(), 
+        u = User(num_tel=f.phone_number.data, 
+                 password=m.hexdigest(), 
                  nom = f.name.data, 
                  prenom = f.first_name.data, 
                  adresse = f.address.data, 
                  email = f.email.data)
-        db.session.add(u)
-        db.session.commit()
-        return redirect(url_for("login"))
+        db.session.add(u)                  #
+        db.session.commit()                # à enlever une fois le captcha mis en place
+        return redirect(url_for("login"))  #
+        # à ajouter une fois le captcha mis en place
+        """try :
+            db.session.add(u)
+            db.session.commit()
+            return redirect(url_for("login"))
+        except Exception :
+            f_erreur = RegisterForm(phone_number=f.phone_number.data,
+                            name = f.name.data, 
+                            first_name = f.first_name.data, 
+                            adress = f.address.data, 
+                            email = f.email.data)
+            return render_template("inscription.html", form = f_erreur)"""
     return render_template("inscription.html", form = f)
