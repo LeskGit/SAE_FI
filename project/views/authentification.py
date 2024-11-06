@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm, RecaptchaField
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
+from wtforms.validators import DataRequired, EqualTo, Email
 from project.models import User
 
 class LoginForm (FlaskForm):
@@ -11,13 +12,13 @@ class LoginForm (FlaskForm):
     password = PasswordField("Mot de passe")
 
 class RegisterForm (FlaskForm):
-    phone_number = StringField("Numéro téléphone")
-    name = StringField("Nom")
-    first_name = StringField("Prénom")
-    password = PasswordField("Mot de passe")
-    password_check = PasswordField("Confirmez votre mot de passe")
-    address = StringField("Adresse")
-    email = EmailField("Email")
+    phone_number = StringField("Numéro téléphone", validators=[DataRequired()])
+    name = StringField("Nom", validators=[DataRequired()])
+    first_name = StringField("Prénom", validators=[DataRequired()])
+    password = PasswordField("Mot de passe", validators=[DataRequired()])
+    password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), EqualTo('password_check', message='Les mots de passe doivent correspondre')])
+    address = StringField("Adresse", validators=[DataRequired()])
+    email = EmailField("Email", validators=[DataRequired(), Email()])
     # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
     #recaptcha = RecaptchaField() 
 
@@ -51,7 +52,7 @@ def logout():
     logout_user()
     return redirect(url_for("accueil"))
 
-@app.route("/inscription")
+@app.route("/inscription", methods = ["GET", "POST"])
 def register():
     f = RegisterForm()
     if f.validate_on_submit():
@@ -66,15 +67,16 @@ def register():
             return render_template("inscription.html", form = f_erreur)
         m = sha256()
         m.update(passwd.encode())
-        u = User(num_tel=f.phone_number.data, 
-                 password=m.hexdigest(), 
-                 nom = f.name.data, 
-                 prenom = f.first_name.data, 
-                 adresse = f.address.data, 
+        u = User(num_tel=f.phone_number.data,
+                 password=m.hexdigest(),
+                 nom = f.name.data,
+                 prenom = f.first_name.data,
+                 adresse = f.address.data,
                  email = f.email.data)
         db.session.add(u)                  #
         db.session.commit()                # à enlever une fois le captcha mis en place
-        return redirect(url_for("login"))  #
+        login_user(u)
+        return redirect(url_for("home"))  #
         # à ajouter une fois le captcha mis en place
         """try :
             db.session.add(u)
