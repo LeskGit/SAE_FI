@@ -11,6 +11,31 @@
     width: 3em;
 }
 
+.logo_footer {
+    height: 9em;
+    width: 9em;
+}
+
+
 .text_nav {
     font-weight: bold;
+}
+
+.footer-bg {
+    background-image: url("../static/img/background_footer.webp");
+    background-size: cover;
+    background-position: center;
+    color: black;
+    padding: 20px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.bar {
+    padding-bottom: 0.1em;
+}
+
+.a_propos_texte {
+    font-family: Open;
 }
