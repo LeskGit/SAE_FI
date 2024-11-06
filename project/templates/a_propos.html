@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block styles %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="top-info">
+    <h1 class="text-center my-3">A propos</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container-fluid d-flex p-4 mb-4 align-items-center">
+    <p class="w-50 me-4 shadow p-3 mb-5 bg-body-tertiary rounded" style="text-align: justify;">
+        L'«Oumami» est un mot japonais qui signifie un «goût savoureux». C'est la cinquième saveur fondamentale avec le sucré, l'acide, l'amer et le salé. Ce goût a été découvert en 1908 par un chercheur japonais, Professeur IKEDA Kikumae.
+        L'oumami est présent dans le DASHI (bouillon d'algue KOMBU, de copeaux de bonite séchée et de champignon SHIITAKE), ingrédient indispensable dans la cuisine japonaise.
+        C'est la raison pour laquelle j'ai choisi ce mot «oumami» pour nommer mon magasin, où je pourrai vous faire découvrir ce goût savoureux et l'art de cuisine asiatique au travers de mes plats.
+        Madoka
+    </p>
+    <img src="{{ url_for('static', filename='img/slide-1.jpg') }}" class="w-50 rounded shadow-lg" alt="ex2">
+</div>
+
+<div class="container-fluid d-flex p-4 mb-4 align-items-center">
+    <img src="{{ url_for('static', filename='img/slide-1.jpg') }}" class="w-50 rounded shadow-lg me-4" alt="ex1">
+    <p class="w-50 shadow p-3 mb-5 bg-body-tertiary rounded" style="text-align: justify;">
+        L'«Oumami» est un mot japonais qui signifie un «goût savoureux». C'est la cinquième saveur fondamentale avec le sucré, l'acide, l'amer et le salé. Ce goût a été découvert en 1908 par un chercheur japonais, Professeur IKEDA Kikumae.
+        L'oumami est présent dans le DASHI (bouillon d'algue KOMBU, de copeaux de bonite séchée et de champignon SHIITAKE), ingrédient indispensable dans la cuisine japonaise.
+        C'est la raison pour laquelle j'ai choisi ce mot «oumami» pour nommer mon magasin, où je pourrai vous faire découvrir ce goût savoureux et l'art de cuisine asiatique au travers de mes plats.
+        Madoka
+    </p>
+</div>
+
+
+{% endblock %}
