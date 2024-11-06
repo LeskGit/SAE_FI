@@ -15,10 +15,12 @@
         </div>
         <nav>
             <ul class="list-unstyled">
-                <li class="d-flex align-items-center mb-3">
-                    <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="me-2" style="width: 30px;">
+                <a href="profil" class="d-flex text-decoration-none text-dark">
+                <li class="d-flex align-items-center mb-3 active section_effect flex-grow-1">
+                        <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="me-2" style="width: 30px;">
                     <p class="mb-0">Profil</p>
                 </li>
+                </a>
                 <li class="d-flex align-items-center mb-3">
                     <img src="{{ url_for('static', filename='img/logo_fidelite.png') }}" alt="Logo fidelite" class="me-2" style="width: 30px;">
                     <p class="mb-0">Programme fidélité</p>
@@ -30,47 +32,52 @@
             </ul>
         </nav>
     </aside>
-
-    <!-- Main content area -->
     <div class="p-5 rounded shadow w-100 main_profil">
-        <h2 class="mb-4">Profil</h2>
-        <form>
-            <div class="mb-3">
-                <label for="prenom" class="form-label">Prénom</label>
-                <input type="text" class="form-control w-50" id="prenom" placeholder="Entrez votre prénom">
+        <!-- Main content area -->
+        <div class="w-50">
+            <h2 class="mb-4">Profil</h2>
+            <form>
+                <div class="mb-3">
+                    <label for="prenom" class="form-label">Prénom</label>
+                    <input type="text" class="form-control w-100" id="prenom" placeholder="Entrez votre prénom">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="nom" class="form-label">Nom</label>
+                    <input type="text" class="form-control w-100" id="nom" placeholder="Entrez votre nom">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control w-100" id="email" placeholder="Entrez votre email">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="telephone" class="form-label">Téléphone</label>
+                    <input type="tel" class="form-control w-100" id="telephone" placeholder="Entrez votre numéro de téléphone">
+                </div>
+            </form>
+            <div class="d-flex">
+                <div class="mb-3 ms-auto">
+                    <input class="btn btn_color" type="submit" value="Enregistrer">
+                </div>
             </div>
-            
-            <div class="mb-3">
-                <label for="nom" class="form-label">Nom</label>
-                <input type="text" class="form-control w-50" id="nom" placeholder="Entrez votre nom">
+            <h2 class="mb-4">Mot de passe</h2>
+            <form>    
+                <div class="mb-3">
+                    <label for="motDePasse" class="form-label">Mot de passe</label>
+                    <input type="password" class="form-control w-100" id="motDePasse" placeholder="Entrez votre mot de passe">
+                </div>
+                <div class="mb-3">
+                    <label for="ConfmotDePasse" class="form-label">Confirmer votre mot de passe</label>
+                    <input type="password" class="form-control w-100" id="ConfmotDePasse" placeholder="Confirmer votre mot de passe">
+                </div>
+            </form>
+            <div class="d-flex">
+                <div class="mb-3 ms-auto">
+                    <input class="btn btn_color" type="submit" value="Enregistrer">
+                </div>
             </div>
-            
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control w-50" id="email" placeholder="Entrez votre email">
-            </div>
-            
-            <div class="mb-3">
-                <label for="telephone" class="form-label">Téléphone</label>
-                <input type="tel" class="form-control w-50" id="telephone" placeholder="Entrez votre numéro de téléphone">
-            </div>
-        </form>
-        <div class="mb-3 ms-auto">
-            <input class="btn btn-warning" type="submit" value="Enregistrer">
-        </div>
-        <h2 class="mb-4">Mot de passe</h2>
-        <form>    
-            <div class="mb-3">
-                <label for="motDePasse" class="form-label">Mot de passe</label>
-                <input type="password" class="form-control w-50" id="motDePasse" placeholder="Entrez votre mot de passe">
-            </div>
-            <div class="mb-3">
-                <label for="ConfmotDePasse" class="form-label">Confirmer votre mot de passe</label>
-                <input type="password" class="form-control w-50" id="ConfmotDePasse" placeholder="Confirmer votre mot de passe">
-            </div>
-        </form>
-        <div class="mb-3 ms-auto">
-            <input class="btn btn-warning" type="submit" value="Enregistrer">
         </div>
     </div>
 </div>
