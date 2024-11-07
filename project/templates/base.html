@@ -13,7 +13,7 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-md navbar-light bg-light">
+<nav class="navbar sticky-top navbar-expand-md navbar-light bg-light">
     <div class="container-fluid">
         <!-- Left buttons -->
         <div class="navbar-nav w-100 d-flex">
@@ -31,13 +31,21 @@
         <div class="navbar-nav w-100 d-flex">
             <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('nouveaute') }}">Nouveauté</a>
             <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('commander') }}">Commander</a>
+
             <div class="nav-item nav-link text-center">
                 <a href="{{ url_for('home') }}">
                     <img src="{{ url_for('static', filename='img/logo_panier.png') }}" class="img_nav" alt="Logo panier">
                 </a>
-                <a href="{{ url_for('home') }}">
-                    <img src="{{ url_for('static', filename='img/logo_login.png') }}" class="img_nav" alt="Logo login">
+                <a data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                    <img src="{{ url_for('static', filename='img/logo_login.png') }}" class="img_nav rounded-circle" alt="Logo login">
                 </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2 rounded">
+                    <li><a class="dropdown-item py-2" href="#">Se connecter</a></li>
+                    <li><a class="dropdown-item py-2" href="#">S'inscrire</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2" href="#">Mon profil</a></li>
+                    <li><a class="dropdown-item py-2 text-logout" href="#">Se déconnecter</a></li>
+                </ul>
             </div>
         </div>
     </div>
