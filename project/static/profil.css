@@ -58,3 +58,10 @@ aside nav ul li.active::before {
     box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2); /* Ombre en relief pour effet de pression */
     transform: translateY(1px); /* Légère translation pour effet de clic */
 }
+
+.pseudo {
+    width: 150px;            /* Ajuste la largeur en fonction de la zone souhaitée */
+    white-space: nowrap;      /* Empêche le texte de se mettre sur plusieurs lignes */
+    overflow: hidden;         /* Masque le texte qui dépasse la largeur */
+    text-overflow: ellipsis;  /* Ajoute les "..." pour indiquer le texte tronqué */
+}
