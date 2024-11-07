@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    {% block head %}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>Oumami</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='positionnement.css') }}">
+        {% block styles %}
+            {{ bootstrap.load_css() }}
+        {% endblock %}
+    {% endblock %}
+</head>
+<body>
+
+<nav class="navbar sticky-top navbar-expand-md navbar-light bg-light">
+    <div class="container-fluid">
+        <!-- Left buttons -->
+        <div class="navbar-nav w-100 d-flex">
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Accueil</a>
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('a_propos') }}">A propos</a>
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('contact') }}">Contact</a>
+        </div>
+
+        <!-- Center logo -->
+        <a class="navbar-brand mx-auto" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_nav" alt="Logo Oumami">
+        </a>
+        
+        <!-- Right buttons -->
+        <div class="navbar-nav w-100 d-flex">
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('nouveaute') }}">Nouveauté</a>
+            <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('commander') }}">Commander</a>
+
+            <div class="nav-item nav-link text-center">
+                <a href="{{ url_for('panier') }}">
+                    <img src="{{ url_for('static', filename='img/logo_panier.png') }}" class="img_nav" alt="Logo panier">
+                </a>
+                <a data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                    <img src="{{ url_for('static', filename='img/logo_login.png') }}" class="img_nav rounded-circle" alt="Logo login">
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2 rounded">
+                    <li><a class="dropdown-item py-2" href="{{ url_for('login') }}">Se connecter</a></li>
+                    <li><a class="dropdown-item py-2" href="#">S'inscrire</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2" href="#">Mon profil</a></li>
+                    <li><a class="dropdown-item py-2 text-logout" href="#">Se déconnecter</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+<main class="flex-shrink-0">
+    <div class="container-fluid p-0">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+ </main>
+{% block scripts %}
+{{ bootstrap.load_js() }}
+{% endblock %}
+
+
+
+<footer class="footer-bg py-4">
+    <div class="container d-flex align-items-center justify-content-between">
+      <!-- Logo -->
+      <div class="text_footer logo-footer">
+        <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_footer" alt="Logo Oumami">
+      </div>
+  
+      <!-- Sections du footer en grille -->
+      <div class="container">
+
+        <div class="container d-flex justify-content-between">
+            <!-- Section 1 : Contact -->
+            <div class="text_footer contact-footer">
+            <h5>Contact</h5>
+            <p>Adresse : 123 Rue Exemple, Ville</p>
+            <p>Téléphone : 01 23 45 67 89</p>
+            </div>
+    
+            <!-- Section 2 : Partenaires -->
+            <div class="text_footer partenaire-footer">
+            <h5>Nos Partenaires</h5>
+            <a href="{{ url_for('home') }}">SANGA : miso, koji et produits BIO</a>
+            </div>
+    
+            <!-- Section 3 : Réseaux sociaux -->
+            <div class="text_footer reseau-footer">
+            <h5>Suivez-nous</h5>
+            <a href="#">Facebook</a>
+            </div>
+        </div>
+        <div class="container d-flex align-items-center justify-content-between">
+  
+            <!-- Section 4 : Horaires -->
+            <div class="text_footer horaire-footer">
+            <p>Ouverture du magasin : Du mardi au samedi 11h30 - 14h / 17h - 20h</p>
+            </div>
+    
+            <!-- Section 5 : Droits -->
+            <div class="text_footer droit-footer">
+            <p>© 2014-2024 Oumami - Tous droits réservés.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+    
+</footer>
+
+
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
