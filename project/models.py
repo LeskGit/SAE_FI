@@ -676,3 +676,9 @@ def execute_tests():
 
 def get_plats():
     return Plats.query.all()
+
+def get_formules():
+    return Formule.query.all()
+
+def get_desserts():
+    return  Plats.query.filter_by(type_plat = "Dessert").all()

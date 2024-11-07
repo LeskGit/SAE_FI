@@ -39,17 +39,19 @@
             <!-- Catégories -->
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">Plats</a>
+                    <a class="nav-link {% if type == 'p' %}active{% endif %}" href="?type=p">Plats</a>
+                </li>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Formule</a>
+                    <a class="nav-link {% if type == 'f' %}active{% endif %}" href="?type=f">Formules</a>
+                </li>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Dessert</a>
+                    <a class="nav-link {% if type == 'd' %}active{% endif %}" href="?type=d">Desserts</a>
                 </li>
             </ul>
-
-            <!-- Grille des produits -->
+            {% if type=="p" %}
+            <!-- Grille des plats -->
             <div class="row g-3 rounded">
                 {% for plat in plats %}
                 <div class="col-md-4">
@@ -66,6 +68,48 @@
                 </div>
                 {% endfor %}
             </div>
+            {% endif %}
+
+            {% if type=="f" %}
+            <!-- Grille des formules -->
+            <div class="row g-3 rounded">
+                {% for formule in formules %}
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="{{ url_for('static', filename='img/sushi.jpg') }}" class="card-img-top" alt="Sushi">
+                        <div class="card-body text-center">
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <button class="btn btn-outline-danger btn-sm">-</button>
+                                <span class="mx-2">1</span>
+                                <button class="btn btn-outline-danger btn-sm">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if type=="d" %}
+            <!-- Grille des desserts -->
+            <div class="row g-3 rounded">
+                {% for dessert in desserts %}
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="{{ url_for('static', filename=dessert.img) }}" class="card-img-top" alt="Sushi">
+                        <div class="card-body text-center">
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <button class="btn btn-outline-danger btn-sm">-</button>
+                                <span class="mx-2">1</span>
+                                <button class="btn btn-outline-danger btn-sm">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
         </div>
 
         <!-- Bouton Commander -->
