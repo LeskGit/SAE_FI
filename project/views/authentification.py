@@ -5,6 +5,7 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, EqualTo, Email
+from sqlalchemy.exc import IntegrityError
 from project.models import User
 
 class LoginForm (FlaskForm):
@@ -84,11 +85,14 @@ def register():
                  prenom = f.first_name.data,
                  adresse = f.address.data,
                  email = f.email.data)
-        db.session.add(u)                  #
-        db.session.commit()                # à enlever une fois le captcha mis en place
-        print(u)
-        login_user(u)
-        return redirect(url_for("home"))  #
+        if User.query.get(u.get_id()) :
+            return render_template("inscription.html", form = f, error="phone_number_already_exist")
+        else :
+            db.session.add(u)                  #
+            db.session.commit()                # à enlever une fois le captcha mis en place
+            login_user(u)                      #
+            return redirect(url_for("home"))   #
+            
         # à ajouter une fois le captcha mis en place
         """try :
             db.session.add(u)

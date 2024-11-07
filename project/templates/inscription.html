@@ -22,6 +22,13 @@
                 </div>
             </div>
 
+            <!--Erreur si numéro déja dans BD-->
+            {% if error == 'phone_number_already_exist' %}
+                    <div class="alert alert-warning" role="alert">
+                        Ce numéro de téléphone est déjà utilisé par quelqu'un.
+                    </div>
+            {% endif %}
+
             <!--Nom-->
             <div class="form-group row justify-content-center">
                 <label for="name" class="col-sm-10 mx-auto">
@@ -88,6 +95,7 @@
                 </div>
             </div>
 
+            <!--Erreur si mdp non identiques-->
             {% if error == 'password_not_same' %}
                     <div class="alert alert-warning" role="alert">
                         Les mots de passe ne correspondent pas.
