@@ -525,31 +525,36 @@ def execute_tests():
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     
     db.session.add_all([plat1, plat2, plat3, plat4, plat5])
 
@@ -692,3 +697,12 @@ def execute_tests():
     #print(Commandes.query.all())
 
     db.session.commit()
+
+def get_plats():
+    return Plats.query.all()
+
+def get_formules():
+    return Formule.query.all()
+
+def get_desserts():
+    return  Plats.query.filter_by(type_plat = "Dessert").all()

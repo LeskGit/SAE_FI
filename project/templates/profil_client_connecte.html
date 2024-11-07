@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='profil.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex mb-5">
+    <!-- Sidebar -->
+    <aside class="bg-light p-4 rounded shadow-sm me-4" style="width: 300px;">
+        <div class="d-flex align-items-center mb-4">
+            <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+            <p class="pseudo mb-0 fw-bold">Xiaopang</p>
+        </div>
+        <nav>
+            <ul class="list-unstyled">
+                <a href="profil" class="d-flex text-decoration-none text-dark">
+                <li class="d-flex align-items-center mb-3 active section_effect flex-grow-1">
+                        <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="me-2" style="width: 30px;">
+                    <p class="mb-0">Profil</p>
+                </li>
+                </a>
+                <a href="fidelite" class="d-flex text-decoration-none text-dark">
+                <li class="d-flex align-items-center mb-3 section_effect flex-grow-1">
+                    <img src="{{ url_for('static', filename='img/logo_fidelite.png') }}" alt="Logo fidelite" class="me-2" style="width: 30px;">
+                    <p class="mb-0">Programme fidélité</p>
+                </li>
+                </a>
+                <a href="historique" class="d-flex text-decoration-none text-dark">
+                <li class="d-flex align-items-center mb-3 section_effect flex-grow-1">
+                    <img src="{{ url_for('static', filename='img/logo_historique.png') }}" alt="Logo historique" class="me-2" style="width: 30px;">
+                    <p class="mb-0">Historique des commandes</p>
+                </li>
+                </a>
+            </ul>
+        </nav>
+    </aside>
+    <div class="p-5 rounded shadow w-100 main_profil">
+        <!-- Main content area -->
+        <div class="w-50">
+            <h2 class="mb-4">Profil</h2>
+            <form>
+                <div class="mb-5">
+                    <label for="prenom" class="form-label">Prénom</label>
+                    <input type="text" class="form-control w-100" id="prenom" placeholder="Entrez votre prénom">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="nom" class="form-label">Nom</label>
+                    <input type="text" class="form-control w-100" id="nom" placeholder="Entrez votre nom">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control w-100" id="email" placeholder="Entrez votre email">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="telephone" class="form-label">Téléphone <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control w-100" id="telephone" placeholder="Entrez votre numéro de téléphone">
+                </div>
+            </form>
+            <div class="d-flex">
+                <div class="mb-3 ms-auto">
+                    <input class="btn btn_color" type="submit" value="Enregistrer">
+                </div>
+            </div>
+            <h2 class="mb-4">Mot de passe</h2>
+            <form>    
+                <div class="mb-3">
+                    <label for="motDePasse" class="form-label">Mot de passe <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control w-100" id="motDePasse" placeholder="Entrez votre mot de passe">
+                </div>
+                <div class="mb-3">
+                    <label for="ConfmotDePasse" class="form-label">Confirmer votre mot de passe <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control w-100" id="ConfmotDePasse" placeholder="Confirmer votre mot de passe">
+                </div>
+            </form>
+            <div class="d-flex">
+                <div class="mb-3 ms-auto">
+                    <input class="btn btn_color" type="submit" value="Enregistrer">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
