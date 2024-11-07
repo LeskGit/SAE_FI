@@ -40,3 +40,39 @@
     font-family: Open;
 }
 
+
+
+/* Ajustement de l'image dans le bouton */
+.img_nav {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+    background-color: #f8f9fa; /* Couleur de fond */
+    border: none;
+    border-radius: 8px; /* Arrondir les coins */
+}
+
+/* Item du dropdown avec effet survol */
+.dropdown-item {
+    color: #343a40;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Divider */
+.dropdown-divider {
+    border-color: #e9ecef;
+}
+
+/* Style de l'option déconnexion */
+.dropdown-item.text-logout {
+    color: #dc3545;
+}
+
+.dropdown-item.text-logout:hover {
+    background-color: #dc3545;
+    color: #ffffff;
+}
