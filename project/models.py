@@ -3,18 +3,19 @@ from sqlalchemy.orm import validates
 from .app import db, login_manager
 from flask_login import UserMixin
 import re
+from datetime import datetime
 
 class User(db.Model, UserMixin):
     num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), primary_key = True)
     nom = db.Column(db.String(32))
     prenom = db.Column(db.String(32))
-    password = db.Column(db.String(64))
+    mdp = db.Column(db.String(64))
     adresse = db.Column(db.String(64))
     email = db.Column(
         db.String(64),
         unique=True
     )
-    blacklisted = db.Column(db.Boolean, default=False)
+    blackliste = db.Column(db.Boolean, default=False)
     points_fidelite = db.Column(db.Integer, default=0)
     prix_panier = db.Column(db.Float, default=0)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
@@ -33,10 +34,7 @@ CONTENIR_NOM_PLAT = "plats.nom_plat"
 
 contenir = db.Table("contenir",
     db.Column("nom", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
-    db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True),
-    db.Column("plat_entree", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
-    db.Column("plat_principal", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
-    db.Column("plat_dessert", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True)
+    db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
 )
 
 constituer = db.Table("constituer",
@@ -46,13 +44,13 @@ constituer = db.Table("constituer",
 )
 
 class Commandes(db.Model):
-    num_commande = db.Column(db.Integer, primary_key = True)
+    num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
     num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
     date = db.Column(db.DateTime)
     date_creation = db.Column(db.DateTime, default = db.func.current_timestamp())
     sur_place = db.Column(db.Boolean)
-    num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"), unique = True)
-    etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"))
+    num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
+    etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"), default = "Panier")
     les_plats = db.relationship("Plats", secondary = constituer, back_populates = "les_commandes")
     les_clients = db.relationship("User", back_populates = "les_commandes")
 
@@ -69,6 +67,7 @@ class Plats(db.Model):
     les_commandes = db.relationship("Commandes", secondary = constituer, back_populates = "les_plats")
     les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
     est_bento = db.Column(db.Boolean, default=False)
+    img = db.Column(db.String(200))
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
@@ -101,28 +100,18 @@ class TriggerManager:
                     trigger_str = method()
                     db.session.execute(text(trigger_str))
                     db.session.commit()
-    
-    #TODO : Ne pas oublier le BEFORE UPDATE
 
-    def trigger_test(self) -> str:
-        return """
-        CREATE OR REPLACE TRIGGER test BEFORE INSERT ON user FOR EACH ROW
-        BEGIN
-            IF NEW.num_tel = "0000000000" THEN
-                SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = "Erreur : numéro de téléphone invalide";
-            END IF;
-        END;
+    def trigger_limiter_commandes_sur_place_insert(self) -> str:
         """
-
-    def trigger_limiter_commandes_surplace(self) -> str:
+        On ne peut avoir que 12 commandes sur place en même temps
+        """
         return """
-        CREATE OR REPLACE TRIGGER limiter_commandes_surplace BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE OR REPLACE TRIGGER limiter_commandes_sur_place_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             DECLARE nb INT;
 
             SELECT count(*) INTO nb 
-            FROM commandes 
+            FROM commandes
             WHERE sur_place = 1; 
 
             IF nb >= 12 THEN
@@ -132,14 +121,55 @@ class TriggerManager:
         END;
         """
 
-    def trigger_commandes_surplace_midi(self) -> str:
+    def trigger_limiter_commandes_sur_place_update(self) -> str:
+        """
+        On ne peut avoir que 12 commandes sur place en même temps
+        """
         return """
-        CREATE OR REPLACE TRIGGER commandes_surplace_midi BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE OR REPLACE TRIGGER limiter_commandes_sur_place_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            IF HOUR(NEW.date) BETWEEN 12 AND 14 THEN
+            DECLARE nb INT;
+
+            SELECT count(*) INTO nb 
+            FROM commandes
+            WHERE sur_place = 1 and num_commande != NEW.num_commande; 
+
+            IF NEW.sur_place = 1 THEN
+                IF nb >= 12 THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Il y a déjà 12 commandes sur place';
+                END IF;
+            END IF;
+        END;
+        """
+
+    def trigger_commandes_sur_place_midi_insert(self) -> str:
+        """
+        Permet de réserver une table uniquement le midi
+        """
+        return """
+        CREATE OR REPLACE TRIGGER commandes_sur_place_midi_insert BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
                 IF NEW.sur_place = 1 THEN
                     SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'Impossible de commander sur place entre 12h et 14h';
+                    SET MESSAGE_TEXT = 'Impossible de commander sur place avant 12h et après 14h';
+                END IF;
+            END IF;
+        END;
+        """
+
+    def trigger_commandes_sur_place_midi_update(self) -> str:
+        """
+        Permet de réserver une table uniquement le midi
+        """
+        return """
+        CREATE OR REPLACE TRIGGER commandes_sur_place_midi_update BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+            IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
+                IF NEW.sur_place = 1 THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Impossible de commander sur place avant 12h et après 14h';
                 END IF;
             END IF;
         END;
@@ -154,7 +184,7 @@ class TriggerManager:
         BEGIN
             DECLARE current DATETIME DEFAULT NOW();
 
-            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 THEN
+            IF TIMESTAMPDIFF(MINUTE, current, OLD.date_creation) > 15 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de modifier une commande après 15 minutes';
             END IF;
@@ -171,59 +201,310 @@ class TriggerManager:
             DECLARE current DATETIME DEFAULT NOW();
 
 
-            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 THEN
+            IF TIMESTAMPDIFF(MINUTE, current, OLD.date_creation) > 15 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de supprimer une commande après 15 minutes';
             END IF;
         END;
         """
 
-    def trigger_reserver_delais(self) -> str:
+    def reserver_delais_insert(self) -> str:
         """
         Trigger qui empêche de réserver 2 heures avant la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER reserver_delais BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE OR REPLACE TRIGGER reserver_delais_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            DECLARE current DATETIME DEFAULT NOW();
+            DECLARE t VARCHAR(256);
 
-            IF TIMESTAMPDIFF(HOUR, NEW.date, current) < 2 THEN
+            IF TIMESTAMPDIFF(HOUR, NEW.date, NEW.date_creation) * -1 < 2 THEN
+                set t = CONCAT(NEW.num_commande, '    et   ', TIMESTAMPDIFF(HOUR, NEW.date, NEW.date_creation), "     ", NEW.date_creation);
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = t;
+            END IF;
+        END;
+        """
+    
+    def trigger_reserver_delais_update(self) -> str:
+        """
+        Trigger qui empêche de réserver 2 heures avant la date de la commande
+        """
+        return """
+        CREATE OR REPLACE TRIGGER reserver_delais_update BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+
+            IF TIMESTAMPDIFF(HOUR, NEW.date, NEW.date_creation) < 2 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de réserver moins de 2 heures avant la date de la commande';
             END IF;
         END;
         """
 
-    def trigger_commande_non_payee(self) -> str:
+    #def trigger_commande_non_payee(self) -> str:
+    #    """
+    #    Trigger qui empêche de commander si l'utilisateur a une commande non payée
+    #    """
+    #    return """
+    #    CREATE OR REPLACE TRIGGER commande_non_payee BEFORE INSERT ON commandes FOR EACH ROW
+    #    BEGIN
+    #        DECLARE nb INT;##
+
+    #        SELECT count(*) INTO nb 
+    #        FROM commandes 
+    #        WHERE num_tel = NEW.num_tel AND etat = 'Non payée'; 
+
+    #        IF nb > 0 THEN
+    #            SIGNAL SQLSTATE '45000'
+    #            SET MESSAGE_TEXT = 'Vous avez une commande non payée';
+    #        END IF;
+    #    END;
+    #    """
+
+    def trigger_commande_blacklisted_insert(self) -> str:
         """
-        Trigger qui empêche de commander si l'utilisateur a une commande non payée
+        Trigger qui empêche de commander si l'utilisateur est blackliste
         """
         return """
-        CREATE OR REPLACE TRIGGER commande_non_payee BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE OR REPLACE TRIGGER commande_blacklisted_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            DECLARE nb INT;
-
-            SELECT count(*) INTO nb 
-            FROM commandes 
-            WHERE num_tel = NEW.num_tel AND etat = 'Non payée'; 
-
-            IF nb > 0 THEN
+            IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
                 SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Vous avez une commande non payée';
+                SET MESSAGE_TEXT = 'Vous êtes blackliste';
             END IF;
         END;
         """
 
-    def trigger_commande_blacklisted(self) -> str:
+    def trigger_commande_blacklisted_update(self) -> str:
         """
-        Trigger qui empêche de commander si l'utilisateur est blacklisted
+        Trigger qui empêche de commander si l'utilisateur est blackliste
         """
         return """
-        CREATE OR REPLACE TRIGGER commande_blacklisted BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE OR REPLACE TRIGGER commande_blacklisted_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            IF (SELECT blacklisted FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
+            IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
                 SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Vous êtes blacklisted';
+                SET MESSAGE_TEXT = 'Vous êtes blackliste';
+            END IF;
+        END;
+        """
+
+    def trigger_black_list_insert(self) -> str:
+        """
+        Trigger qui ajoute un utilisateur à la blacklist s'il n'est pas 
+            venu chercher sa commande
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_black_list_insert BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE temps INT;
+            DECLARE current DATETIME DEFAULT NOW();
+
+            SELECT max((TIMESTAMPDIFF(HOUR, current, date))) INTO temps 
+            FROM commandes NATURAL JOIN user
+            WHERE num_tel = NEW.num_tel AND etat = 'Non payée';
+
+            IF temps >= 24 THEN
+                UPDATE user
+                SET blackliste = True
+                WHERE num_tel = NEW.num_tel;
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Vous êtes blacklisté et ne pouvez plus commander';
+            END IF;
+        END;
+        """
+
+    def trigger_black_list_insert_update(self) -> str:
+        """
+        Trigger qui ajoute un utilisateur à la blacklist s'il n'est pas 
+            venu chercher sa commande
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_black_list_update BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE temps INT;
+            DECLARE current DATETIME DEFAULT NOW();
+
+            SELECT max((TIMESTAMPDIFF(HOUR, current, date))) INTO temps 
+            FROM commandes NATURAL JOIN user
+            WHERE num_tel = NEW.num_tel AND etat = 'Non payée';
+
+            IF temps >= 24 THEN
+                UPDATE user
+                SET blackliste = True
+                WHERE num_tel = NEW.num_tel;
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Vous êtes blacklisté et ne pouvez plus commander';
+            END IF;
+        END;
+        """
+
+    def trigger_stocks_insert(self) -> str:
+        """
+        Trigger qui vérifie si il reste assez de plats
+            en stock
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
+        BEGIN
+            DECLARE stocks INT;
+            DECLARE nb_plat INT;
+
+            SELECT SUM(quantite_plat) into nb_plat
+            FROM constituer NATURAL JOIN commandes
+            WHERE nom_plat = NEW.nom_plat and DATE(date) = DATE(NOW());
+
+            SELECT quantite_stock into stocks
+            FROM plats
+            WHERE nom_plat = NEW.nom_plat;
+
+            IF nb_plat + NEW.quantite_plat > stocks * 0.8 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
+            END IF;
+        END;
+        """
+
+    def trigger_stocks_update(self) -> str:
+        """
+        Trigger qui vérifie si il reste assez de plats
+            en stock
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
+        BEGIN
+            DECLARE stocks INT;
+            DECLARE nb_plat INT;
+
+            SELECT SUM(quantite_plat) into nb_plat
+            FROM constituer NATURAL JOIN commandes
+            WHERE nom_plat = NEW.nom_plat and DATE(date) = DATE(NOW());
+
+            SELECT quantite_stock into stocks
+            FROM plats
+            WHERE nom_plat = NEW.nom_plat;
+
+            IF nb_plat + NEW.quantite_plat > stocks * 0.8 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
+            END IF;
+        END;
+        """
+
+    def trigger_table_insert(self) -> str:
+        """
+        On ne peut réserver une table que si elle est disponible
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_table_insert BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE num INT;
+
+            IF (NEW.sur_place = 0 AND NEW.num_table IS NOT NULL) OR (NEW.sur_place = 1 AND NEW.num_table IS NULL) THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Il faut remplir 2 champs pour pouvoir réserver une table";
+            END IF;
+
+            SELECT num_commande into num
+            FROM commandes
+            WHERE num_table = NEW.num_table and date = NEW.date;
+
+            IF num IS NOT NULL THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "La table est déjà occupée";
+            END IF;
+        END;
+        """
+
+    def trigger_table_update(self) -> str:
+        """
+        On ne peut réserver une table que si elle est disponible
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_table_update BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE num INT;
+
+            IF (NEW.sur_place = 0 AND NEW.num_table IS NOT NULL) OR (NEW.sur_place = 1 AND NEW.num_table IS NULL) THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Il faut remplir 2 champs pour pouvoir réserver une table";
+            END IF;
+
+            SELECT num_commande into num
+            FROM commandes
+            WHERE num_table = NEW.num_table and date = NEW.date and num_commande != NEW.num_commande;
+
+            IF num IS NOT NULL THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "La table est déjà occupée";
+            END IF;
+        END;
+        """
+
+    def _formule_insert(self) -> str:
+        """
+        Une formule doit être constituée d'au maximum 4 produits de 
+            catégories différentes
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_formule_insert BEFORE INSERT ON contenir FOR EACH ROW
+        BEGIN
+            DECLARE nombre int;
+            DECLARE type VARCHAR(62);
+            DECLARE n VARCHAR(62);
+
+            SELECT count(nom) into nombre
+            FROM contenir
+            WHERE id_formule = NEW.id_formule;
+
+            IF nombre > 3 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "La formule est déjà complète";
+            END IF;
+
+            SELECT type_plat into type
+            FROM plats
+            WHERE nom_plat = NEW.nom;
+
+            SELECT nom into n
+            FROM contenir
+            WHERE nom in (
+            SELECT nom
+            FROM plats
+            WHERE type_plat = type) and id_formule = NEW.id_formule;
+
+            IF n IS NOT NULL THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "La formule contient déjà ce type de plat";
+            END IF;
+        END;
+        """
+
+    def _formule_update(self) -> str:
+        """
+        Une formule doit être constituée d'au maximum 4 produits de 
+            catégories différentes
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_formule_update BEFORE UPDATE ON contenir FOR EACH ROW
+        BEGIN
+            DECLARE nombre int;
+            DECLARE type VARCHAR(62);
+            DECLARE id_f int;
+
+            SELECT type_plat into type
+            FROM plats
+            WHERE nom_plat = NEW.nom;
+
+            SELECT id_formule into id_f
+            FROM contenir
+            WHERE nom in (
+            SELECT nom
+            FROM plats
+            WHERE type_plat = type and nom != OLD.nom);
+
+            IF id_f IS NOT NULL THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "La formule contient déjà ce type de plat";
             END IF;
         END;
         """
@@ -233,10 +514,10 @@ def execute_tests():
     usr = User(num_tel = '0123456759',
                 nom = 'Doe',
                 prenom = 'John',
-                password = 'password',
+                mdp = 'password',
                 adresse = '1 rue de la Paix',
                 email = 'a@b.com',
-                blacklisted = False,
+                blackliste = False,
                 points_fidelite = 0,
                 prix_panier = 0)
     
@@ -249,33 +530,39 @@ def execute_tests():
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
                 prix = 10,
                 quantite_promo = 0,
-                prix_reduc = 0)
+                prix_reduc = 0,
+                img = 'img/sushi.jpg')
     
     db.session.add_all([plat1, plat2, plat3, plat4, plat5])
+
 
     #Formule
     formule1 = Formule(id_formule = 1,
@@ -286,6 +573,112 @@ def execute_tests():
     
     formule1.les_plats.append(plat1)
     formule1.les_plats.append(plat2)
-    formule1.les_plats.append(plat3)
+
+    com1 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 6, 12),
+                        date_creation = datetime(2024, 11, 6, 1),
+                        sur_place = True,
+                        num_table = 1,
+                        etat = "Payée")
+
+    com2 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 3, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 2,
+                        etat = "Payée")
+
+    com3 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 6, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 3,
+                        etat = "Payée")
+
+    com4 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 3, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 4,
+                        etat = "Payée")
+
+    com5 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 6, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 5,
+                        etat = "Payée")
+
+    com6 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 3, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 6,
+                        etat = "Payée")
+
+    com7 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 6, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 7,
+                        etat = "Payée")
+
+    com8 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 3, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 8,
+                        etat = "Payée")
+
+    com9 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 6, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 9,
+                        etat = "Payée")
+
+    com10 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 3, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 10,
+                        etat = "Payée")
+
+    com11 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 6, 12),
+                        date_creation = datetime(2024, 11, 1),
+                        sur_place = True,
+                        num_table = 11,
+                        etat = "Payée")
+
+    com12 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 11, 4, 12),
+                        date_creation = datetime(2024, 12, 1),
+                        sur_place = True,
+                        num_table = 12,
+                        etat = "Payée")
+
+    db.session.add_all([com1, com2, com3, com4, com5, com6, com7, com8, com9, com10, com11, com12])
+    print(Commandes.query.all())
+    #com1.les_plats.append(plat5)
+    #Commandes.query.get(1).num_table = 5
 
     db.session.commit()
+
+    commande = Commandes.query.get(1)
+    if commande is not None:
+        commande.les_plats.append(plat5)
+    else:
+        print("La commande avec l'ID 0 n'existe pas.")
+        print(Commandes.query.all())
+
+    db.session.commit()
+
+def get_plats():
+    return Plats.query.all()
+
+def get_formules():
+    return Formule.query.all()
+
+def get_desserts():
+    return  Plats.query.filter_by(type_plat = "Dessert").all()
