@@ -4,13 +4,12 @@ from flask_wtf import FlaskForm, RecaptchaField
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
-from wtforms.validators import DataRequired, EqualTo, Email
-from sqlalchemy.exc import IntegrityError
+from wtforms.validators import DataRequired, EqualTo, Email, Length
 from project.models import User
 
 class LoginForm (FlaskForm):
-    phone_number = StringField("Numéro de téléphone")
-    password = PasswordField("Mot de passe")
+    phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), Length(min=10, max=10, message = 'Longueur incorrect')])
+    password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
 
     def get_authentificated_user(self):
         """permet de savoir si le mot de passe de 
@@ -28,13 +27,13 @@ class LoginForm (FlaskForm):
         return user if passwd == user.mdp else None
 
 class RegisterForm (FlaskForm):
-    phone_number = StringField("Numéro téléphone", validators=[DataRequired()])
-    name = StringField("Nom", validators=[DataRequired()])
-    first_name = StringField("Prénom", validators=[DataRequired()])
-    password = PasswordField("Mot de passe", validators=[DataRequired()])
+    phone_number = StringField("Numéro téléphone", validators=[DataRequired(), Length(min=10, max=10, message = 'Longueur incorrect')])
+    name = StringField("Nom", validators=[DataRequired(), Length(max=32)])
+    first_name = StringField("Prénom", validators=[DataRequired(), Length(max=32)])
+    password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
     password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), EqualTo('password_check', message='Les mots de passe doivent correspondre')])
-    address = StringField("Adresse", validators=[DataRequired()])
-    email = EmailField("Email", validators=[DataRequired(), Email()])
+    address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
+    email = EmailField("Email", validators=[DataRequired(), Email(), Length(max=64)])
     # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
     #recaptcha = RecaptchaField() 
 
@@ -71,7 +70,8 @@ def login():
         the_user = f.get_authentificated_user()
         if the_user:
             login_user(the_user)
-            return render_template("home.html", user = the_user) 
+            return redirect(url_for("home"))
+        return render_template("connexion.html", form = f, error = 'incorrect_password')
     return render_template("connexion.html", form = f)
 
 @app.route("/deconnexion")
@@ -103,10 +103,5 @@ def register():
             db.session.commit()
             return redirect(url_for("login"))
         except Exception :
-            f_erreur = RegisterForm(phone_number=f.phone_number.data,
-                            name = f.name.data, 
-                            first_name = f.first_name.data, 
-                            adress = f.address.data, 
-                            email = f.email.data)
             return render_template("inscription.html", form = f_erreur)"""
     return render_template("inscription.html", form = f)

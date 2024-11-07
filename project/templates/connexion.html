@@ -33,9 +33,16 @@
                 </div>
             </div>
 
+            <!--Erreur si mdp ne correspond pas-->
+            {% if error == 'incorrect_password' %}
+                    <div class="alert alert-warning" role="alert">
+                        Mot de passe incorrect.
+                    </div>
+            {% endif %}
+
             <!--Les boutons-->
             <div class="form-group">
-                
+
                 <!--Bouton Se connecter-->
                 <div class="col-sm-offset-2 col-sm-10 mx-auto">
                     <button type="submit" class="btn btn-dark btn-lg btn-block w-100">Se connecter</button>
