@@ -680,6 +680,7 @@ def execute_tests():
         formule1.les_plats.append(plat3)
         formule1.les_plats.append(plat4)
         formule1.les_plats.append(plat5)
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         print("Erreur:", e)
