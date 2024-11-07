@@ -4,10 +4,11 @@ from flask import render_template, url_for, redirect, request
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
+from project.models import get_plats
 
 @app.route("/commander")
 def commander() :
-    return render_template("commander.html")
+    return render_template("commander.html",plats=get_plats())
 
 @app.route("/commander_plat", methods = ("POST",))
 def ajout_plat() :
