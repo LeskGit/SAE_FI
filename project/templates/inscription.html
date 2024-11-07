@@ -22,11 +22,13 @@
                 </div>
             </div>
 
-            <!--Erreur si numéro déja dans BD-->
-            {% if error == 'phone_number_already_exist' %}
-                    <div class="alert alert-warning" role="alert">
-                        Ce numéro de téléphone est déjà utilisé par quelqu'un.
-                    </div>
+            <!--Erreur si numéro déja dans BD ou si ce n'est pas que des chiffres-->
+            {% if form.phone_number.errors %}
+                <ul class="list-group">
+                    {% for e in form.phone_number.errors %}
+                        <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                    {% endfor %}
+                </ul>
             {% endif %}
 
             <!--Nom-->
@@ -70,7 +72,6 @@
                     {% endfor %}
                 </ul>
             {% endif %}
-
 
             <!--Addresse-->
             <div class="form-group row justify-content-center">

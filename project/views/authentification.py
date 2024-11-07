@@ -4,12 +4,14 @@ from flask_wtf import FlaskForm, RecaptchaField
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
-from wtforms.validators import DataRequired, EqualTo, Email, Length
+from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from email_validator import EmailNotValidError
 from project.models import User
 
 class LoginForm (FlaskForm):
-    phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), Length(min=10, max=10, message = 'Longueur incorrect')])
+    phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
+                                                                  Length(min=10, max=10, message = 'Longueur incorrect'), 
+                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone doit contenir uniquement des chiffres.")])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
 
     def get_authentificated_user(self):
@@ -28,11 +30,14 @@ class LoginForm (FlaskForm):
         return user if passwd == user.mdp else None
 
 class RegisterForm (FlaskForm):
-    phone_number = StringField("Numéro téléphone", validators=[DataRequired(), Length(min=10, max=10, message = 'Longueur incorrect')])
+    phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
+                                                               Length(min=10, max=10, message = 'Longueur incorrect'),
+                                                               Regexp(r'^\d{10}$', message="Le numéro de téléphone doit contenir uniquement des chiffres.")])
     name = StringField("Nom", validators=[DataRequired(), Length(max=32)])
     first_name = StringField("Prénom", validators=[DataRequired(), Length(max=32)])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
-    password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), EqualTo('password_check', message='Les mots de passe doivent correspondre')])
+    password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), 
+                                                                               EqualTo('password_check', message='Les mots de passe doivent correspondre'),])
     address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
     email = EmailField("Email", validators=[DataRequired(), Email(message='addresse mail invalide'), Length(max=64)])
     # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
