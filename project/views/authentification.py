@@ -11,7 +11,7 @@ from project.models import User
 class LoginForm (FlaskForm):
     phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
                                                                   Length(min=10, max=10, message = 'Longueur incorrect'), 
-                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone doit contenir uniquement des chiffres.")])
+                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone invalide.")])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
 
     def get_authentificated_user(self):
@@ -32,14 +32,18 @@ class LoginForm (FlaskForm):
 class RegisterForm (FlaskForm):
     phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
                                                                Length(min=10, max=10, message = 'Longueur incorrect'),
-                                                               Regexp(r'^\d{10}$', message="Le numéro de téléphone doit contenir uniquement des chiffres.")])
-    name = StringField("Nom", validators=[DataRequired(), Length(max=32)])
-    first_name = StringField("Prénom", validators=[DataRequired(), Length(max=32)])
-    password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
+                                                               Regexp(r'^\d{10}$', message="Le numéro de téléphone invalide.")])
+    name = StringField("Nom", validators=[DataRequired(), 
+                                          Length(max=32)])
+    first_name = StringField("Prénom", validators=[DataRequired(), 
+                                                   Length(max=32)])
+    password = PasswordField("Mot de passe", validators=[DataRequired(), 
+                                                         Length(max=64)])
     password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), 
-                                                                               EqualTo('password_check', message='Les mots de passe doivent correspondre'),])
+                                                                               EqualTo('password', message='Les mots de passe doivent correspondre'),])
     address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
-    email = EmailField("Email", validators=[DataRequired(), Email(message='addresse mail invalide'), Length(max=64)])
+    email = EmailField("Email", validators=[DataRequired(), Email(message='addresse mail invalide'), 
+                                            Length(max=64)])
     # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
     #recaptcha = RecaptchaField() 
 
@@ -93,10 +97,10 @@ def register():
         passwd_2 = f.password_check.data
         if passwd != passwd_2 :
             print("mot de passe pas bon")
-            return render_template("inscription.html", form = f, error="password_not_same")
+            return render_template("inscription.html", form = f)
         u = f.create_user()
         if User.query.get(u.get_id()) :
-            return render_template("inscription.html", form = f, error="phone_number_already_exist")
+            return render_template("inscription.html", form = f)
         else :
             db.session.add(u)                  #
             db.session.commit()                # à enlever une fois le captcha mis en place
@@ -105,10 +109,14 @@ def register():
 
         # à ajouter une fois le captcha mis en place
         """try :
-            db.session.add(u)
-            db.session.commit()
-            return redirect(url_for("login"))
+            if User.query.get(u.get_id()) :
+                return render_template("inscription.html", form = f)
+            else :
+                db.session.add(u)
+                db.session.commit()
+                login_user(u)
+                return redirect(url_for("home"))
         except Exception :
-            return render_template("inscription.html", form = f_erreur)"""
-    print("test")
+            return render_template("inscription.html", form = f)
+            db.session.rollback()"""
     return render_template("inscription.html", form = f)

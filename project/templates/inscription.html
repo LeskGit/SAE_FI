@@ -107,10 +107,12 @@
             </div>
 
             <!--Erreur si mdp non identiques-->
-            {% if error == 'password_not_same' %}
-                    <div class="alert alert-warning" role="alert">
-                        Les mots de passe ne correspondent pas.
-                    </div>
+            {% if form.password_check.errors %}
+                <ul class="list-group">
+                    {% for e in form.password_check.errors %}
+                        <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                    {% endfor %}
+                </ul>
             {% endif %}
 
             <!--repcatcha à mettre ici-->
