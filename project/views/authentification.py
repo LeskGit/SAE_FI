@@ -11,6 +11,21 @@ class LoginForm (FlaskForm):
     phone_number = StringField("Numéro de téléphone")
     password = PasswordField("Mot de passe")
 
+    def get_authentificated_user(self):
+        """permet de savoir si le mot de passe de 
+        l'utilisateur est bon
+
+        Returns:
+            User: L'utilisateur si le mot de passe est correct, None sinon
+        """
+        user = User.query.get(self.phone_number.data)
+        if user is None:
+            return None
+        m = sha256()
+        m.update(self.password.data.encode())
+        passwd = m.hexdigest()
+        return user if passwd == user.mdp else None
+
 class RegisterForm (FlaskForm):
     phone_number = StringField("Numéro téléphone", validators=[DataRequired()])
     name = StringField("Nom", validators=[DataRequired()])
@@ -29,22 +44,22 @@ class RegisterForm (FlaskForm):
         Returns:
             User: L'utilisateur si le mot de passe est correct, None sinon
         """
-        user = User.query.get(self.num_tel.data)
+        user = User.query.get(self.phone_number.data)
         if user is None:
             return None
         m = sha256()
         m.update(self.password.data.encode())
         passwd = m.hexdigest()
-        return user if passwd == user.password else None
+        return user if passwd == user.mdp else None
 
 @app.route("/connexion", methods = ("GET", "POST", ))
 def login():
     f = LoginForm()
     if f.validate_on_submit():
-        the_user = f.get_authenticated_user()
+        the_user = f.get_authentificated_user()
         if the_user:
             login_user(the_user)
-            return render_template("profil_client_connecte.html", user = the_user) 
+            return render_template("home.html", user = the_user) 
     return render_template("connexion.html", form = f)
 
 @app.route("/deconnexion")
@@ -68,13 +83,14 @@ def register():
         m = sha256()
         m.update(passwd.encode())
         u = User(num_tel=f.phone_number.data,
-                 password=m.hexdigest(),
+                 mdp=m.hexdigest(),
                  nom = f.name.data,
                  prenom = f.first_name.data,
                  adresse = f.address.data,
                  email = f.email.data)
         db.session.add(u)                  #
         db.session.commit()                # à enlever une fois le captcha mis en place
+        print(u)
         login_user(u)
         return redirect(url_for("home"))  #
         # à ajouter une fois le captcha mis en place

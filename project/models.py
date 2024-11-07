@@ -25,6 +25,9 @@ class User(db.Model, UserMixin):
         if not re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Z|a-z]{2,}$", address):
             raise ValueError("Invalid email address")
         return address
+    
+    def get_id(self):
+        return self.num_tel
 
 @login_manager.user_loader
 def load_user(num_tel):
