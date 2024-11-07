@@ -88,6 +88,12 @@
                 </div>
             </div>
 
+            {% if error == 'password_not_same' %}
+                    <div class="alert alert-warning" role="alert">
+                        Les mots de passe ne correspondent pas.
+                    </div>
+            {% endif %}
+
             <!--repcatcha à mettre ici-->
 
             <!--Bouton Inscription-->

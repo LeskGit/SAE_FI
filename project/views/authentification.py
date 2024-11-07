@@ -74,12 +74,8 @@ def register():
         passwd = f.password.data
         passwd_2 = f.password_check.data
         if passwd != passwd_2 :
-            f_erreur = RegisterForm(phone_number=f.phone_number.data,
-                            name = f.name.data, 
-                            first_name = f.first_name.data, 
-                            adress = f.address.data, 
-                            email = f.email.data)
-            return render_template("inscription.html", form = f_erreur)
+            print("mot de passe pas bon")
+            return render_template("inscription.html", form = f, error="password_not_same")
         m = sha256()
         m.update(passwd.encode())
         u = User(num_tel=f.phone_number.data,
