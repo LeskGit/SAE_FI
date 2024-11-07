@@ -1,0 +1,9 @@
+hr {
+    background-color: #dc3545;
+}
+
+.edition {
+    margin: 3em;
+    background-color: rgb(150, 162, 174);
+    border-radius: 20px;
+}
