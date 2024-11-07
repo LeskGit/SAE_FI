@@ -8,10 +8,10 @@
 {% block content %}
 <div class="container-fluid d-flex mb-5">
     <!-- Sidebar -->
-    <aside class="bg-light p-4 rounded shadow-sm me-4" style="width: 250px;">
+    <aside class="bg-light p-4 rounded shadow-sm me-4" style="width: 300px;">
         <div class="d-flex align-items-center mb-4">
             <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="rounded-circle me-3" style="width: 50px; height: 50px;">
-            <p class="pseudo mb-0 fw-bold">Xiaopang Binchiling</p>
+            <p class="pseudo mb-0 fw-bold">Xiaopang</p>
         </div>
         <nav>
             <ul class="list-unstyled">
@@ -41,7 +41,7 @@
         <div class="w-50">
             <h2 class="mb-4">Profil</h2>
             <form>
-                <div class="mb-3">
+                <div class="mb-5">
                     <label for="prenom" class="form-label">Prénom</label>
                     <input type="text" class="form-control w-100" id="prenom" placeholder="Entrez votre prénom">
                 </div>
@@ -57,7 +57,7 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="telephone" class="form-label">Téléphone</label>
+                    <label for="telephone" class="form-label">Téléphone <span class="text-danger">*</span></label>
                     <input type="tel" class="form-control w-100" id="telephone" placeholder="Entrez votre numéro de téléphone">
                 </div>
             </form>
@@ -69,11 +69,11 @@
             <h2 class="mb-4">Mot de passe</h2>
             <form>    
                 <div class="mb-3">
-                    <label for="motDePasse" class="form-label">Mot de passe</label>
+                    <label for="motDePasse" class="form-label">Mot de passe <span class="text-danger">*</span></label>
                     <input type="password" class="form-control w-100" id="motDePasse" placeholder="Entrez votre mot de passe">
                 </div>
                 <div class="mb-3">
-                    <label for="ConfmotDePasse" class="form-label">Confirmer votre mot de passe</label>
+                    <label for="ConfmotDePasse" class="form-label">Confirmer votre mot de passe <span class="text-danger">*</span></label>
                     <input type="password" class="form-control w-100" id="ConfmotDePasse" placeholder="Confirmer votre mot de passe">
                 </div>
             </form>
