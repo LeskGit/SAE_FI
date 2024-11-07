@@ -52,6 +52,17 @@ class RegisterForm (FlaskForm):
         m.update(self.password.data.encode())
         passwd = m.hexdigest()
         return user if passwd == user.mdp else None
+    
+    def create_user(self) :
+        passwd = self.password.data
+        m = sha256()
+        m.update(passwd.encode())
+        return User(num_tel=self.phone_number.data,
+                 mdp=m.hexdigest(),
+                 nom = self.name.data,
+                 prenom = self.first_name.data,
+                 adresse = self.address.data,
+                 email = self.email.data)
 
 @app.route("/connexion", methods = ("GET", "POST", ))
 def login():
@@ -77,14 +88,7 @@ def register():
         if passwd != passwd_2 :
             print("mot de passe pas bon")
             return render_template("inscription.html", form = f, error="password_not_same")
-        m = sha256()
-        m.update(passwd.encode())
-        u = User(num_tel=f.phone_number.data,
-                 mdp=m.hexdigest(),
-                 nom = f.name.data,
-                 prenom = f.first_name.data,
-                 adresse = f.address.data,
-                 email = f.email.data)
+        u = f.create_user()
         if User.query.get(u.get_id()) :
             return render_template("inscription.html", form = f, error="phone_number_already_exist")
         else :
