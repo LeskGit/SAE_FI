@@ -5,6 +5,7 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, EqualTo, Email, Length
+from email_validator import EmailNotValidError
 from project.models import User
 
 class LoginForm (FlaskForm):
@@ -33,7 +34,7 @@ class RegisterForm (FlaskForm):
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
     password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), EqualTo('password_check', message='Les mots de passe doivent correspondre')])
     address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
-    email = EmailField("Email", validators=[DataRequired(), Email(), Length(max=64)])
+    email = EmailField("Email", validators=[DataRequired(), Email(message='addresse mail invalide'), Length(max=64)])
     # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
     #recaptcha = RecaptchaField() 
 
@@ -96,7 +97,7 @@ def register():
             db.session.commit()                # à enlever une fois le captcha mis en place
             login_user(u)                      #
             return redirect(url_for("home"))   #
-            
+
         # à ajouter une fois le captcha mis en place
         """try :
             db.session.add(u)
@@ -104,4 +105,5 @@ def register():
             return redirect(url_for("login"))
         except Exception :
             return render_template("inscription.html", form = f_erreur)"""
+    print("test")
     return render_template("inscription.html", form = f)

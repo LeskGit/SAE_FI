@@ -62,6 +62,16 @@
                 </div>
             </div>
 
+            <!--Erreur Email invalide-->
+            {% if form.email.errors %}
+                <ul class="list-group">
+                    {% for e in form.email.errors %}
+                        <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+
             <!--Addresse-->
             <div class="form-group row justify-content-center">
                 <label for="address" class="col-sm-10 mx-auto">
