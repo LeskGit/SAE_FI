@@ -5,6 +5,7 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, ValidationError
 from project.models import User
 
 class LoginForm (FlaskForm):
@@ -29,11 +30,12 @@ class LoginForm (FlaskForm):
         return user if passwd == user.mdp else None
 
 class RegisterForm (FlaskForm):
-    phone_number = StringField("Téléphone", validators=[DataRequired(), 
+    phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
                                                                Length(min=10, max=10, message = 'Longueur incorrecte.'),
                                                                Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
     name = StringField("Nom", validators=[DataRequired(), 
                                           Length(max=32)])
+                                          
                                           
     first_name = StringField("Prénom", validators=[DataRequired(), 
                                                    Length(max=32)])
