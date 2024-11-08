@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-#from .models import
+from project.models import Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -35,6 +35,9 @@ def suivi_commande() :
     return render_template(
         "suivi_commandes.html",
         )
+    return render_template(
+        "suivi_commandes.html",
+        )
 
 @app.route("/suivi/stock")
 @admin_required
@@ -54,6 +57,11 @@ def creation_offre():
 @app.route("/edition/plat")
 @admin_required
 def edition_plat():
+    return render_template(
+        "edition_plat.html",
+        plats=Plats.get_all_plats(Plats)
+        )
+
     return render_template(
         "edition_plat.html",
         plats=Plats.get_all_plats(Plats)
