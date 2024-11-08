@@ -100,7 +100,7 @@ def login():
 @app.route("/deconnexion")
 def logout():
     logout_user()
-    return redirect(url_for("accueil"))
+    return redirect(url_for("home"))
 
 @app.route("/inscription", methods = ["GET", "POST"])
 def register():
