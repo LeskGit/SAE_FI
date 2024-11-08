@@ -14,7 +14,6 @@ def syncdb():
 
     #execute_tests()
 
-
     #TODO : Not implemented yet
 
 @app.cli.command()
