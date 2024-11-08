@@ -29,7 +29,7 @@ class LoginForm (FlaskForm):
         return user if passwd == user.mdp else None
 
 class RegisterForm (FlaskForm):
-    phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
+    phone_number = StringField("Téléphone", validators=[DataRequired(), 
                                                                Length(min=10, max=10, message = 'Longueur incorrect'),
                                                                Regexp(r'^\d{10}$', message="Le numéro de téléphone invalide.")])
     name = StringField("Nom", validators=[DataRequired(), 
@@ -86,7 +86,7 @@ def login():
 @app.route("/deconnexion")
 def logout():
     logout_user()
-    return redirect(url_for("accueil"))
+    return redirect(url_for("home"))
 
 @app.route("/inscription", methods = ["GET", "POST"])
 def register():

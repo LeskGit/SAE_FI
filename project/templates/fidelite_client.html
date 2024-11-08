@@ -8,34 +8,9 @@
 {% block content %}
 <div class="container-fluid d-flex mb-5">
     <!-- Sidebar -->
-    <aside class="bg-light p-4 rounded shadow-sm me-4" style="width: 300px;">
-        <div class="d-flex align-items-center mb-4">
-            <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="rounded-circle me-3" style="width: 50px; height: 50px;">
-            <p class="pseudo mb-0 fw-bold">Xiaopang</p>
-        </div>
-        <nav>
-            <ul class="list-unstyled">
-                <a href="profil" class="d-flex text-decoration-none text-dark">
-                <li class="d-flex align-items-center mb-3 section_effect flex-grow-1">
-                        <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="me-2" style="width: 30px;">
-                    <p class="mb-0">Profil</p>
-                </li>
-                </a>
-                <a href="fidelite" class="d-flex text-decoration-none text-dark">
-                <li class="d-flex align-items-center mb-3 active section_effect flex-grow-1">
-                    <img src="{{ url_for('static', filename='img/logo_fidelite.png') }}" alt="Logo fidelite" class="me-2" style="width: 30px;">
-                    <p class="mb-0">Programme fidélité</p>
-                </li>
-                </a>
-                <a href="historique" class="d-flex text-decoration-none text-dark">
-                <li class="d-flex align-items-center mb-3 section_effect flex-grow-1">
-                    <img src="{{ url_for('static', filename='img/logo_historique.png') }}" alt="Logo historique" class="me-2" style="width: 30px;">
-                    <p class="mb-0">Historique des commandes</p>
-                </li>
-                </a>
-            </ul>
-        </nav>
-    </aside>
+    {% from "macro_client_aside.html" import sidebar_client with context %}
+    {{ sidebar_client() }}
+
     <div class="p-5 rounded shadow w-100 main_profil">
         <!-- Main content area -->
         
