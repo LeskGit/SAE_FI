@@ -37,9 +37,6 @@ def suivi_commande() :
     return render_template(
         "suivi_commandes.html",
         )
-    return render_template(
-        "suivi_commandes.html",
-        )
 
 @app.route("/suivi/stock")
 @admin_required

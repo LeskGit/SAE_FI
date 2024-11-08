@@ -53,6 +53,9 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2 rounded">
                     {% if current_user.is_authenticated %}
                         <li><a class="dropdown-item py-2" href="{{ url_for('client_profil') }}">Mon profil</a></li>
+                        {% if current_user.is_admin %}
+                            <li><a class="dropdown-item py-2" href="{{ url_for('admin') }}">Page Admin</a></li>
+                        {% endif %}
                         <li><a class="dropdown-item py-2 text-logout" href="{{ url_for('logout') }}">Se déconnecter</a></li>
                     {% else %}
                         <li><a class="dropdown-item py-2" href="{{ url_for('login') }}">Se connecter</a></li>
