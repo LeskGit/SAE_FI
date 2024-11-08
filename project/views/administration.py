@@ -4,10 +4,15 @@ from flask import render_template, url_for, redirect, request
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
+from project.models import Commandes, User, get_sur_place_today
 
 @app.route("/admin")
 def admin():
-    return render_template("admin_traiteur.html")
+    commandes_sur_place = get_sur_place_today()
+    dico_tables = {i: False for i in range(1, 13)}
+    for table in commandes_sur_place :
+        dico_tables[table.sur_place] = True
+    return render_template("admin_traiteur.html", tables = dico_tables)
 
 @app.route("/suivi/commande")
 def suivi_commande() :
