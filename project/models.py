@@ -703,3 +703,12 @@ def get_formules():
 
 def get_desserts():
     return  Plats.query.filter_by(type_plat = "Dessert").all()
+
+def get_plats_chauds():
+    return  Plats.query.filter_by(type_plat = "Plat chaud").all()
+
+def get_plats_froids():
+    return  Plats.query.filter_by(type_plat = "Plat froid").all()
+
+def get_sushis():
+    return  Plats.query.filter_by(type_plat = "Sushi").all()
