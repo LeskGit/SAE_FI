@@ -10,7 +10,7 @@ from project.models import User
 class LoginForm (FlaskForm):
     phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
                                                                   Length(min=10, max=10, message = 'Longueur incorrecte.'), 
-                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone invalide.")])
+                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
 
     def get_authentificated_user(self):
@@ -29,7 +29,7 @@ class LoginForm (FlaskForm):
         return user if passwd == user.mdp else None
 
 class RegisterForm (FlaskForm):
-    phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
+    phone_number = StringField("Téléphone", validators=[DataRequired(), 
                                                                Length(min=10, max=10, message = 'Longueur incorrecte.'),
                                                                Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
     name = StringField("Nom", validators=[DataRequired(), 
@@ -100,7 +100,7 @@ def login():
 @app.route("/deconnexion")
 def logout():
     logout_user()
-    return redirect(url_for("accueil"))
+    return redirect(url_for("home"))
 
 @app.route("/inscription", methods = ["GET", "POST"])
 def register():
