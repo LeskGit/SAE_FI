@@ -5,7 +5,6 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
-from email_validator import EmailNotValidError
 from project.models import User
 
 class LoginForm (FlaskForm):

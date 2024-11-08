@@ -693,9 +693,6 @@ def execute_tests():
         db.session.rollback()
         print("Erreur:", e)
 
-    
-    #print(Commandes.query.all())
-
     db.session.commit()
 
 def get_plats():
