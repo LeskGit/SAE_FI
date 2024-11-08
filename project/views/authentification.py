@@ -12,8 +12,6 @@ class LoginForm (FlaskForm):
     phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
                                                                   Length(min=10, max=10, message = 'Longueur incorrecte.'), 
                                                                   Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
-                                                                  Length(min=10, max=10, message = 'Longueur incorrecte.'), 
-                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
 
     def get_authentificated_user(self):
@@ -47,31 +45,14 @@ class RegisterForm (FlaskForm):
 
     address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
 
-
-    email = EmailField("Email", validators=[DataRequired(), Email(message='Adresse mail invalide.'), 
-                                            Length(max=64)])
-
-    address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
-
     password = PasswordField("Mot de passe", validators=[DataRequired(), 
                                                          Length(max=64)])
-
 
     password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), 
                                                                                EqualTo('password', message='Les mots de passe doivent correspondre.'),])
 
-                                                                               EqualTo('password', message='Les mots de passe doivent correspondre.'),])
-
     # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
     #recaptcha = RecaptchaField() 
-
-    def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
-            raise ValidationError("Cet e-mail est déjà utilisé.")
-
-    def validate_phone_number(self, field):
-        if User.query.filter_by(num_tel=field.data).first():
-            raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
@@ -116,13 +97,11 @@ def login():
             login_user(the_user)
             return redirect(url_for("home"))
         return render_template("connexion.html", form = f, error = 'Mot de passe incorrect.')
-        return render_template("connexion.html", form = f, error = 'Mot de passe incorrect.')
     return render_template("connexion.html", form = f)
 
 @app.route("/deconnexion")
 def logout():
     logout_user()
-    return redirect(url_for("home"))
     return redirect(url_for("home"))
 
 @app.route("/inscription", methods = ["GET", "POST"])
