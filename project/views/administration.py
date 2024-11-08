@@ -5,6 +5,8 @@ from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from functools import wraps
+from wtforms import StringField, PasswordField, EmailField, HiddenField
+from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 
 def admin_required(f):
     @wraps(f)
@@ -15,6 +17,12 @@ def admin_required(f):
             return redirect(url_for("home"))
         return f(*args, **kwargs)
     return decorated_function
+
+class PlatForm(FlaskForm):
+    nom = StringField("Nom", validators=[DataRequired(), 
+                                          Length(max=32)])
+    prix = StringField("Prix", validators=[DataRequired(), 
+                                                   Length(max=32)])
 
 @app.route("/admin")
 @admin_required
@@ -46,11 +54,11 @@ def creation_offre():
 @app.route("/edition/plat")
 @admin_required
 def edition_plat():
-    print(Plats.get_all_plats(Plats))
     return render_template(
         "edition_plat.html",
         plats=Plats.get_all_plats(Plats)
         )
+
 
 @app.route("/edition/offre")
 @admin_required
