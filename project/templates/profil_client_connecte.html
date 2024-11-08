@@ -8,64 +8,122 @@
 {% block content %}
 <div class="container-fluid d-flex mb-5">
     <!-- Sidebar -->
-    <aside class="bg-light p-4 rounded shadow-sm me-4" style="width: 300px;">
-        <div class="d-flex align-items-center mb-4">
-            <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="rounded-circle me-3" style="width: 50px; height: 50px;">
-            <p class="pseudo mb-0 fw-bold">Xiaopang</p>
-        </div>
-        <nav>
-            <ul class="list-unstyled">
-                <a href="profil" class="d-flex text-decoration-none text-dark">
-                <li class="d-flex align-items-center mb-3 active section_effect flex-grow-1">
-                        <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="me-2" style="width: 30px;">
-                    <p class="mb-0">Profil</p>
-                </li>
-                </a>
-                <a href="fidelite" class="d-flex text-decoration-none text-dark">
-                <li class="d-flex align-items-center mb-3 section_effect flex-grow-1">
-                    <img src="{{ url_for('static', filename='img/logo_fidelite.png') }}" alt="Logo fidelite" class="me-2" style="width: 30px;">
-                    <p class="mb-0">Programme fidélité</p>
-                </li>
-                </a>
-                <a href="historique" class="d-flex text-decoration-none text-dark">
-                <li class="d-flex align-items-center mb-3 section_effect flex-grow-1">
-                    <img src="{{ url_for('static', filename='img/logo_historique.png') }}" alt="Logo historique" class="me-2" style="width: 30px;">
-                    <p class="mb-0">Historique des commandes</p>
-                </li>
-                </a>
-            </ul>
-        </nav>
-    </aside>
+    {% from "macro_client_aside.html" import sidebar_client with context %}
+    {{ sidebar_client() }}
+
     <div class="p-5 rounded shadow w-100 main_profil">
         <!-- Main content area -->
         <div class="w-50">
             <h2 class="mb-4">Profil</h2>
-            <form>
-                <div class="mb-5">
-                    <label for="prenom" class="form-label">Prénom</label>
-                    <input type="text" class="form-control w-100" id="prenom" placeholder="Entrez votre prénom">
-                </div>
-                
+            <form method="POST" action="{{ url_for ('client_profil') }}">
+                {{ form.hidden_tag() }}
+
+                <!--Numéro téléphone-->
                 <div class="mb-3">
-                    <label for="nom" class="form-label">Nom</label>
-                    <input type="text" class="form-control w-100" id="nom" placeholder="Entrez votre nom">
+                    <label for="phone_number" class="form-label">
+                        {{ form.phone_number.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.phone_number(size=50, class_="form-control",
+                                class="form-control w-100",
+                                disabled=(True if not edit else False),
+                                placeholder="Entrez votre numéro de téléphone") }}
                 </div>
-                
+
+                <!--Erreur si numéro déja dans BD ou si ce n'est pas que des chiffres-->
+                {% if form.phone_number.errors %}
+                    <ul class="list-group">
+                        {% for e in form.phone_number.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Nom-->
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control w-100" id="email" placeholder="Entrez votre email">
+                    <label for="name" class="form-label">
+                        {{ form.name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.name(size=50, class_="form-control",
+                                class="form-control w-100",
+                                disabled=(True if not edit else False),
+                                placeholder="Entrez votre nom") }}
                 </div>
-                
+                {% if form.name.errors %}
+                    <ul class="list-group">
+                        {% for e in form.name.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Prénom-->
                 <div class="mb-3">
-                    <label for="telephone" class="form-label">Téléphone <span class="text-danger">*</span></label>
-                    <input type="tel" class="form-control w-100" id="telephone" placeholder="Entrez votre numéro de téléphone">
+                    <label for="first_name" class="form-label">
+                        {{ form.first_name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.first_name(size=50, class_="form-control",
+                                class="form-control w-100",
+                                disabled=(True if not edit else False),
+                                placeholder="Entrez votre prénom") }}
+                </div>
+                {% if form.first_name.errors %}
+                    <ul class="list-group">
+                        {% for e in form.first_name.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Email-->
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        {{ form.email.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.email(size=50, class_="form-control",
+                                class="form-control w-100",
+                                disabled=(True if not edit else False),
+                                placeholder="Entrez votre email") }}
+                </div>
+
+                <!--Erreur Email invalide-->
+                {% if form.email.errors %}
+                    <ul class="list-group">
+                        {% for e in form.email.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Addresse-->
+                <div class="mb-3">
+                    <label for="address" class="form-label">
+                        {{ form.address.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.address(size=50, class_="form-control",
+                                class="form-control w-100",
+                                disabled=(True if not edit else False),
+                                placeholder="Entrez votre adresse postale") }}
+                </div>
+                {% if form.address.errors %}
+                <ul class="list-group">
+                    {% for e in form.address.errors %}
+                        <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+                <div class="d-flex">
+                    <div class="mb-3 ms-auto">
+                        {% if edit %}
+                            <a href="{{ url_for('client_profil') }}" class="btn btn_color">Annuler</a>
+                            <input class="btn btn_color" type="submit" value="Enregistrer">
+                        {% else %}
+                            <a href="{{ url_for('client_profil', edit=True) }}" class="btn btn_color">Modifier</a>
+                        {% endif %}
+                    </div>
                 </div>
             </form>
-            <div class="d-flex">
-                <div class="mb-3 ms-auto">
-                    <input class="btn btn_color" type="submit" value="Enregistrer">
-                </div>
-            </div>
+
             <h2 class="mb-4">Mot de passe</h2>
             <form>    
                 <div class="mb-3">
