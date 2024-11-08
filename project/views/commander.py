@@ -9,7 +9,10 @@ from project.models import get_desserts, get_plats, get_formules
 @app.route("/commander")
 def commander() :
     type = request.args.get('type', 'p')
-    return render_template("commander.html",plats=get_plats(), formules=get_formules(), desserts=get_desserts(), type=type)
+    plats=get_plats()
+    formules=get_formules()
+    desserts=get_desserts()
+    return render_template("commander.html",plats=plats, formules=formules , desserts=desserts, type=type, nb_plats=len(plats), nb_formules=len(formules), nb_desserts=len(desserts))
 
 @app.route("/commander_plat", methods = ("POST",))
 def ajout_plat() :
