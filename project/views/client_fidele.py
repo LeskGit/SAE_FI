@@ -4,8 +4,9 @@ from flask import render_template, url_for, redirect, request
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
+from project.models import User
 from project.views.authentification import RegisterForm
-from wtforms import StringField, PasswordField, EmailField
+from wtforms import StringField, PasswordField, EmailField, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 
 class PersoForm(FlaskForm):
@@ -21,6 +22,14 @@ class PersoForm(FlaskForm):
     address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
     email = EmailField("Email", validators=[DataRequired(), Email(message='addresse mail invalide'), 
                                             Length(max=64)])
+    
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError("Cet e-mail est déjà utilisé.")
+
+    def validate_phone_number(self, field):
+        if User.query.filter_by(num_tel=field.data).first():
+            raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
 
 @app.route("/client/profil", methods=["GET", "POST"])
 @login_required
