@@ -12,7 +12,7 @@ def syncdb():
     from .models import TriggerManager, execute_tests
     TriggerManager()
 
-    #execute_tests()
+    execute_tests()
 
     #TODO : Not implemented yet
 
