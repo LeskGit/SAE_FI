@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
         unique=True
     )
     blackliste = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default = False)
     points_fidelite = db.Column(db.Integer, default=0)
     prix_panier = db.Column(db.Float, default=0)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
