@@ -26,7 +26,7 @@ aside nav ul li.active::before {
 
 /* Style de base pour le bouton */
 .btn_color {
-    background-color: #dc3545;   /* Couleur de fond rouge */
+    background-color: #E84D0E;   /* Couleur de fond rouge */
     color: #ffffff;              /* Texte blanc */      /* Espace interne */
     border: none;                /* Suppression de la bordure par défaut */
     border-radius: 5px;          /* Coins arrondis */       /* Curseur en forme de main */
@@ -35,13 +35,13 @@ aside nav ul li.active::before {
 
 /* Effet de survol pour le bouton */
 .btn_color:hover {
-    background-color: #c82333;   /* Teinte plus foncée pour le survol */
+    background-color: #dc3545;   /* Couleur plus foncée au survol */
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Ombre légèrement plus prononcée */
 }
 
 /* Effet de clic */
 .btn_color:active {
-    background-color: #a71d2a;   /* Couleur encore plus foncée au clic */
+    background-color: #dc3545;   /* Couleur encore plus foncée au clic */
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2); /* Réduit l'ombre pour effet de pression */
     transform: translateY(1px);  /* Légère translation pour effet de clic */
 }
