@@ -10,8 +10,8 @@ from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 
 class PersoForm(FlaskForm):
     phone_number = StringField("Téléphone", validators=[DataRequired(), 
-                                                               Length(min=10, max=10, message = 'Longueur incorrect'),
-                                                               Regexp(r'^\d{10}$', message="Le numéro de téléphone invalide.")])
+                                                               Length(min=10, max=10, message = 'Longueur incorrecte.'),
+                                                               Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
     name = StringField("Nom", validators=[DataRequired(), 
                                           Length(max=32)])
     

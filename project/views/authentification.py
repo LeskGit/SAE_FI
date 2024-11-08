@@ -10,7 +10,7 @@ from project.models import User
 class LoginForm (FlaskForm):
     phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
                                                                   Length(min=10, max=10, message = 'Longueur incorrecte.'), 
-                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone invalide.")])
+                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
     password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
 
     def get_authentificated_user(self):
