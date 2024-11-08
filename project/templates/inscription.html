@@ -7,7 +7,7 @@
 <div class = "background">
     <img src="{{ url_for('static', filename='img/notre_magasin.jpg')}}" class="background_image" alt="Background">
     <div class="form_container mx-auto">
-        <form class="form-horizontal" role="form" method ="POST"
+        <form method="POST" novalidate class="form-horizontal" role="form"
             action ="{{ url_for ('register') }}">
             {{ form.hidden_tag() }}
 
