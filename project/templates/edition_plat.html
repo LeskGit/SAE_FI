@@ -11,7 +11,7 @@
 </div>
 
 <div class="container-fluid w-75 bg-light justify-content-center align-items-center">
-    <nav class="navbar sticky-top navbar-expand-md navbar-light bg-light">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
         <div class="container-fluid justify-content-center align-items-center">
             <div class="navbar-nav w-75 d-flex">
                 <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Tous</a>
@@ -24,17 +24,26 @@
     </nav>
     <div class="container-fluid w-75 justify-content-center align-items-center edition">
         <div class="container-fluid d-flex">
-            <div class="container-fluid">
-                <h5>Nom Plat</h5>
-                <hr class="w-100 mx-auto bar"/>
-            </div>
-            <div class="container-fluid d-flex">
-            </div>
+            <div class="container-fluid plat_cards">
+                {% for p in plats %}
+                <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
+                    <h5 class="text-center font-weight-bold">{{ p.nom_plat }}</h5>
+                    <hr class="w-50 mx-auto bar"/>
+                    <div class="text-center">
+                        <img src="{{ url_for('static', filename=p.img) }}" class="img_plat rounded" alt="{{ p.nom_plat }}">
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-secondary edit_button mr-2"></button>
+                        <button class="btn btn-danger delete_button"></button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>            
         </div>
     </div>
 </div>
-
-
-
 
 {% endblock %}

@@ -75,6 +75,16 @@ class Plats(db.Model):
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
+    
+    def get_all_plats(self):
+
+        """ retourne tous les plats
+
+
+        Returns:
+            List[self]: une liste de plats
+        """
+        return self.query.all() 
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)

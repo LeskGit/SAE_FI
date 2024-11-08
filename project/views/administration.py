@@ -24,7 +24,9 @@ def admin():
 @app.route("/suivi/commande")
 @admin_required
 def suivi_commande() :
-    return render_template("suivi_commandes.html")
+    return render_template(
+        "suivi_commandes.html",
+        )
 
 @app.route("/suivi/stock")
 @admin_required
@@ -44,7 +46,11 @@ def creation_offre():
 @app.route("/edition/plat")
 @admin_required
 def edition_plat():
-    return render_template("edition_plat.html")
+    print(Plats.get_all_plats(Plats))
+    return render_template(
+        "edition_plat.html",
+        plats=Plats.get_all_plats(Plats)
+        )
 
 @app.route("/edition/offre")
 @admin_required
