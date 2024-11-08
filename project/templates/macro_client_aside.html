@@ -1,0 +1,37 @@
+
+{% macro sidebar_client(name="", endpoint="", li_classes="", a_classes="") %} 
+<aside class="bg-light p-4 rounded shadow-sm me-4" style="width: 300px;">
+    <div class="d-flex align-items-center mb-4">
+        <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+        <p class="pseudo mb-0 fw-bold">
+            {% if current_user.is_authenticated %}
+                {{ current_user.prenom }}
+            {% else %}
+                Utilisateur
+            {% endif %}
+        </p>
+    </div>
+    <nav>
+        <ul class="list-unstyled">
+            <a href="{{ url_for('client_profil') }}" class="d-flex text-decoration-none text-dark">
+            <li class="d-flex align-items-center p-1 mb-3 section_effect flex-grow-1 {% if request.endpoint == 'client_profil' %}active{% endif %}">
+                    <img src="{{ url_for('static', filename='img/logo_profil.png') }}" alt="Logo profil" class="me-2" style="width: 30px;">
+                <p class="mb-0">Profil</p>
+            </li>
+            </a>
+            <a href="{{ url_for('client_fidelite') }}" class="d-flex text-decoration-none text-dark">
+            <li class="d-flex align-items-center p-1 mb-3 section_effect flex-grow-1 {% if request.endpoint == 'client_fidelite' %}active{% endif %}">
+                <img src="{{ url_for('static', filename='img/logo_fidelite.png') }}" alt="Logo fidelite" class="me-2" style="width: 30px;">
+                <p class="mb-0">Programme fidélité</p>
+            </li>
+            </a>
+            <a href="{{ url_for('client_historique') }}" class="d-flex text-decoration-none text-dark">
+            <li class="d-flex align-items-center p-1 mb-3 section_effect flex-grow-1 {% if request.endpoint == 'client_historique' %}active{% endif %}">
+                <img src="{{ url_for('static', filename='img/logo_historique.png') }}" alt="Logo historique" class="me-2" style="width: 30px;">
+                <p class="mb-0">Historique des commandes</p>
+            </li>
+            </a>
+        </ul>
+    </nav>
+</aside>
+{% endmacro %}
