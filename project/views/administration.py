@@ -72,6 +72,23 @@ def update_plat(id):
         "edition_plat.html",
         plats=Plats.query.all()  # Récupérer tous les plats de la base
     )
+    
+@app.route("/delete_plat/<string:id>", methods=["POST"])
+def delete_plat(id):
+    # Récupérer le plat par son ID
+    plat = db.session.query(Plats).filter_by(nom_plat=id).first()
+    if not plat:
+        return f"Erreur : Le plat '{id}' n'existe pas.", 404
+
+    # Supprimer le plat
+    db.session.delete(plat)
+    db.session.commit()
+
+    # Retourner la liste mise à jour des plats
+    return render_template(
+        "edition_plat.html",
+        plats=Plats.query.all()  # Récupérer tous les plats de la base
+    )
 
 
 
