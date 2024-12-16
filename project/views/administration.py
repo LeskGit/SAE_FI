@@ -41,6 +41,38 @@ def edition_plat():
         "edition_plat.html",
         plats=Plats.get_all_plats(Plats)
         )
+    
+@app.route("/update_plat/<string:id>", methods=["POST"])
+def update_plat(id):
+    # Récupération des données du formulaire
+    nom_plat = request.form.get("nom_plat")
+    prix = request.form.get("prix")
+
+    # Validation des données
+    if not nom_plat or not prix:
+        return "Erreur : Les champs nom_plat et prix sont requis.", 400
+
+    try:
+        prix = float(prix)  # Conversion en float
+    except ValueError:
+        return "Erreur : Le prix doit être un nombre valide.", 400
+
+    # Récupérer le plat par son ID
+    plat = db.session.query(Plats).filter_by(nom_plat=id).first()
+    if not plat:
+        return f"Erreur : Le plat '{id}' n'existe pas.", 404
+
+    # Mise à jour des informations
+    plat.nom_plat = nom_plat
+    plat.prix = prix
+    db.session.commit()
+
+    # Retourner la liste mise à jour des plats
+    return render_template(
+        "edition_plat.html",
+        plats=Plats.query.all()  # Récupérer tous les plats de la base
+    )
+
 
 
 @app.route("/edition/offre")

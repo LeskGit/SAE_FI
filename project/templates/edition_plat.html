@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
@@ -6,7 +7,7 @@
 
 {% block content %}
 <div class="top-info">
-    <h1 class="text-center my-3">Edition plats</h1>
+    <h1 class="text-center my-3">Édition des plats</h1>
     <hr class="w-25 mx-auto bg-dark bar"/>
 </div>
 
@@ -15,51 +16,54 @@
         <div class="container-fluid justify-content-center align-items-center">
             <div class="navbar-nav w-75 d-flex">
                 <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Tous</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Plats chauds</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Plats froids</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Sushis</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Desserts</a>
+                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}?type=Plat%20chaud">Plats chauds</a>
+                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}?type=Plat%20froid">Plats froids</a>
+                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}?type=Sushi">Sushis</a>
+                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}?type=Dessert">Desserts</a>
             </div>
         </div>
     </nav>
+
     <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition" style="height: 500px; overflow-y: auto;">
         <div class="container-fluid d-flex">
-                <div class="container-fluid plat_cards">
-                    {% for p in plats %}
-                    <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
-                        <h5 class="text-center font-weight-bold">{{ p.nom_plat }}</h5>
-                        <hr class="w-50 mx-auto bar"/>
-                        <div class="text-center">
-                            <img src="{{ url_for('static', filename=p.img) }}" class="img_plat rounded" alt="{{ p.nom_plat }}">
-                        </div>
-                        <div class="text-center mt-3">
-                            <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
-                        </div>
-                        <div class="d-flex justify-content-end mt-2">
-                            <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal" data-id="{{ p.id }}" data-nom="{{ p.nom_plat }}" data-prix="{{ p.prix }}"></button>
-                            <button class="btn btn-danger delete_button"></button>
-                        </div>
+            <div class="container-fluid plat_cards">
+                {% for p in plats %}
+                <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
+                    <h5 class="text-center font-weight-bold">{{ p.nom_plat }}</h5>
+                    <hr class="w-50 mx-auto bar"/>
+                    <div class="text-center">
+                        <img src="{{ url_for('static', filename=p.img) }}" class="img_plat rounded" alt="{{ p.nom_plat }}">
                     </div>
-                <!-- Modale pour l'édition -->
-                <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ p.nom_plat }}"></button>
+                        <form method="POST" action="{{ url_for('delete_plat', id=p.nom_plat) }}" style="display:inline-block;">
+                            <button class="btn btn-danger delete_button" type="submit"></button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Modal d'édition -->
+                <div class="modal fade" id="editModal_{{ p.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel_{{ p.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="editForm">
+                            <form method="POST" action="{{ url_for('update_plat', id=p.nom_plat) }}">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabel">Modifier le plat</h5>
+                                    <h5 class="modal-title" id="editModalLabel_{{ p.nom_plat }}">Modifier le plat</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    <input type="hidden" id="platId" name="plat_id">
                                     <div class="form-group">
-                                        <label for="platNom">Nom du plat</label>
-                                        <input type="text" class="form-control" id="platNom" name="nom_plat">
+                                        <label for="platNom_{{ p.nom_plat }}">Nom du plat</label>
+                                        <input type="text" class="form-control" id="platNom_{{ p.nom_plat }}" name="nom_plat" value="{{ p.nom_plat }}" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="platPrix">Prix</label>
-                                        <input type="number" class="form-control" id="platPrix" name="prix">
+                                        <label for="platPrix_{{ p.nom_plat }}">Prix</label>
+                                        <input type="number" step="0.01" class="form-control" id="platPrix_{{ p.nom_plat }}" name="prix" value="{{ p.prix }}" required>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -71,9 +75,8 @@
                     </div>
                 </div>
                 {% endfor %}
-            </div>            
+            </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
