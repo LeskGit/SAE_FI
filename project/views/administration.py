@@ -20,10 +20,10 @@ def admin_required(f):
     return decorated_function
 
 class PlatForm(FlaskForm):
-    nom = StringField("Nom", validators=[DataRequired(), 
-                                          Length(max=32)])
-    prix = StringField("Prix", validators=[DataRequired(), 
-                                                   Length(max=32)])
+    nom = StringField("Nom du plat", validators=[DataRequired(), Length(max=32)])
+    prix = StringField("Prix", validators=[DataRequired(), Length(max=10)])
+    csrf_token = HiddenField()
+
 
 
 @app.route("/admin")
@@ -101,10 +101,12 @@ def reinitialiser_stock():
     return redirect(url_for('suivi_stock'))  # Redirige vers la page principale des stocks
 
 
-@app.route("/creation/plat")
+@app.route("/creation/plat", methods=["GET"])
 @admin_required
 def creation_plat():
-    return render_template("creation_plat.html")
+    form = PlatForm()
+    return render_template("creation_plat.html", form=form)
+
 
 @app.route("/creation/offre")
 @admin_required
@@ -120,6 +122,7 @@ def edition_plat():
         )
     
 @app.route("/update_plat/<string:id>", methods=["POST"])
+@admin_required
 def update_plat(id):
     # Récupération des données du formulaire
     nom_plat = request.form.get("nom_plat")
@@ -151,6 +154,7 @@ def update_plat(id):
     )
     
 @app.route("/delete_plat/<string:id>", methods=["POST"])
+@admin_required
 def delete_plat(id):
     # Récupérer le plat par son ID
     plat = db.session.query(Plats).filter_by(nom_plat=id).first()
@@ -166,6 +170,32 @@ def delete_plat(id):
         "edition_plat.html",
         plats=Plats.query.all()  # Récupérer tous les plats de la base
     )
+
+@app.route("/ajout_plat", methods=["GET", "POST"])
+@admin_required
+def add_plat():
+    form = PlatForm()
+    if form.validate_on_submit():
+        # Récupérer les données du formulaire
+        nom_plat = form.nom.data
+        prix = form.prix.data
+
+        # Validation supplémentaire côté serveur
+        try:
+            prix = float(prix)
+        except ValueError:
+            flash("Le prix doit être un nombre valide.", "danger")
+            return render_template("creation_plat.html", form=form)
+
+        # Créer et ajouter le plat à la base
+        plat = Plats(nom_plat=nom_plat, prix=prix)
+        db.session.add(plat)
+        db.session.commit()
+        flash("Le plat a été ajouté avec succès.", "success")
+        return redirect(url_for("edition_plat"))
+
+    # En cas d'échec de validation ou GET
+    return render_template("creation_plat.html", form=form)
 
 
 @app.route("/edition/offre")

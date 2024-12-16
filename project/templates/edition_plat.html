@@ -32,7 +32,11 @@
                     <h5 class="text-center font-weight-bold">{{ p.nom_plat }}</h5>
                     <hr class="w-50 mx-auto bar"/>
                     <div class="text-center">
-                        <img src="{{ url_for('static', filename=p.img) }}" class="img_plat rounded" alt="{{ p.nom_plat }}">
+                        <img 
+                            src="{{ url_for('static', filename=p.img) if p.img else url_for('static', filename='default.jpg') }}" 
+                            class="img_plat rounded" 
+                            alt="{{ p.nom_plat }}">
+
                     </div>
                     <div class="text-center mt-3">
                         <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
