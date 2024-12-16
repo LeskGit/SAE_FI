@@ -72,8 +72,24 @@
         {% else %}
             Table {{ table }} : <span class = disponible> Disponible</span>
         {% endif %}
-    {% endfor %}           
+    {% endfor %}
+</div>
 
+<div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle-fill" viewBox="0 0 16 16">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z"/>
+    </svg>
+    Liste noire :
+    <br>
+    {% for client in blacklist %}
+        {{ client.prenom }} {{ client.nom }} {{ client.num_tel }}
+        <a type="button" class="btn-secondary btn-lg" href="{{ url_for('blackliste_supprimer', id_client = client.num_tel) }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
+                <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+            </svg>
+        </a>
+
+    {% endfor %}
 </div>
 
 {% endblock %}
