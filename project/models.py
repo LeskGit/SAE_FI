@@ -18,7 +18,6 @@ class User(db.Model, UserMixin):
     blackliste = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default = False)
     points_fidelite = db.Column(db.Integer, default=0)
-    prix_panier = db.Column(db.Float, default=0)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
 
     @validates("email")
@@ -29,6 +28,9 @@ class User(db.Model, UserMixin):
     
     def get_id(self):
         return self.num_tel
+
+    def get_panier(self):
+        return Commandes.query.filter_by(num_tel = self.num_tel, etat = "Panier").first()
 
 @login_manager.user_loader
 def load_user(num_tel):
@@ -60,6 +62,9 @@ class Commandes(db.Model):
 
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
+    
+    def calculer_prix(self):
+        return sum([plat.prix for plat in self.les_plats])
 
 class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
@@ -198,7 +203,7 @@ class TriggerManager:
         BEGIN
             DECLARE current DATETIME DEFAULT NOW();
 
-            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 THEN
+            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 and OLD.etat != 'Panier' THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de modifier une commande après 15 minutes';
             END IF;
@@ -215,7 +220,7 @@ class TriggerManager:
             DECLARE current DATETIME DEFAULT NOW();
 
 
-            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 THEN
+            IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 and OLD.etat != 'Panier' THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de supprimer une commande après 15 minutes';
             END IF;
