@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
         unique=True
     )
     blackliste = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default = False)
     points_fidelite = db.Column(db.Integer, default=0)
     prix_panier = db.Column(db.Float, default=0)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
@@ -74,6 +75,16 @@ class Plats(db.Model):
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
+    
+    def get_all_plats(self):
+
+        """ retourne tous les plats
+
+
+        Returns:
+            List[self]: une liste de plats
+        """
+        return self.query.all() 
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)
