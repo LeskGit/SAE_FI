@@ -4,7 +4,7 @@ from project.models import Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user
+from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
 from wtforms import StringField, PasswordField, EmailField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
@@ -24,6 +24,7 @@ class PlatForm(FlaskForm):
                                           Length(max=32)])
     prix = StringField("Prix", validators=[DataRequired(), 
                                                    Length(max=32)])
+
 
 @app.route("/admin")
 @admin_required
@@ -55,7 +56,23 @@ def suivi_commande() :
 @app.route("/suivi/stock")
 @admin_required
 def suivi_stock() :
-    return render_template("suivi_stock.html")
+    plats_chauds=get_plats_chauds()
+    plats_froids=get_plats_froids()
+    sushis=get_sushis()
+    desserts=get_desserts()
+    return render_template("suivi_stock.html",plats_froids=plats_froids, plats_chauds=plats_chauds, sushis=sushis, desserts=desserts )
+
+@app.route("/modifier_stock", methods=["POST"])
+def modifier_stock():
+    for key, value in request.form.items():
+        nom_plat = key  
+        nouveau_stock = int(value)            
+        plat = db.session.query(Plats).filter_by(nom_plat=nom_plat).one()
+        plat.quantite_stock = nouveau_stock
+        db.session.commit()
+    
+    return redirect(url_for("suivi_stock"))
+
 
 @app.route("/creation/plat")
 @admin_required
