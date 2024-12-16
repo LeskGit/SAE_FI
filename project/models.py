@@ -29,7 +29,7 @@ class User(db.Model, UserMixin):
     
     def get_id(self):
         return self.num_tel
-
+    
 @login_manager.user_loader
 def load_user(num_tel):
     return User.query.get(num_tel)
@@ -723,3 +723,13 @@ def get_plats_froids():
 
 def get_sushis():
     return  Plats.query.filter_by(type_plat = "Sushi").all()
+
+def get_sur_place_today() :
+    today = datetime.today().date()
+    return Commandes.query.filter(db.func.date(Commandes.date) == today, Commandes.sur_place.is_(True)).all()
+ 
+def get_blackliste() :
+    return User.query.filter_by(blackliste = True).all()
+
+def get_user(num_tel) :
+    return User.query.get(num_tel)
