@@ -19,8 +19,10 @@ def ajout_plat() :
     ...
 
 @app.route("/panier")
-def panier() :
-    return render_template("panier.html")
+def panier():
+    panier = current_user.get_panier()
+    print(panier)
+    return render_template("panier.html", panier=panier)
 
 @app.route("/choix_paiement")
 def choix_paiement() :
