@@ -72,16 +72,37 @@
                 <h2>{{nb_plats}} plats disponibles</h2>
                 {% for plat in plats %}
                 <div class="col-md-4">
-                    <div class="card">
-                        <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="Sushi">
+                    <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.nom_plat }}">
+                        <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
                         <div class="card-body text-center">
-                            <p>{{plat.nom_plat}}</p>
-                            <div class="d-flex justify-content-center align-items-center mb-2">
-                                <button class="btn btn-outline-danger btn-sm">-</button>
-                                <span class="mx-2">0</span>
-                                <button class="btn btn-outline-danger btn-sm">+</button>
+                            <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
+                        </div>
+                    </div>
+
+                    <!-- Modal spécifique au plat -->
+                    <div class="modal fade" id="editModal{{ plat.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat.nom_plat }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="editForm{{ plat.nom_plat }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editModalLabel{{ plat.nom_plat }}">{{ plat.nom_plat }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="quantity{{ plat.nom_plat }}">Quantité</label>
+                                            <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantity" min="1" value="1" max="{{plat.quantite_stock}}">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                                    </div>
+                                </form>
                             </div>
-                            <small class="text-muted">Stock disponible : {{ plat.quantite_stock }}</small>
                         </div>
                     </div>
                 </div>
