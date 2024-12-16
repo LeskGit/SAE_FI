@@ -65,6 +65,7 @@ class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
     type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
     quantite_stock = db.Column(db.Integer)
+    quantite_defaut = db.Column(db.Integer)
     prix = db.Column(db.Float)
     quantite_promo = db.Column(db.Integer)
     prix_reduc = db.Column(db.Float)
@@ -534,6 +535,7 @@ def execute_tests():
     plat1 = Plats(nom_plat = 'plat1',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
+                quantite_defaut = 7,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -541,6 +543,7 @@ def execute_tests():
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 quantite_stock = 10,
+                quantite_defaut = 6,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -548,6 +551,7 @@ def execute_tests():
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 quantite_stock = 10,
+                quantite_defaut = 8,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -555,6 +559,7 @@ def execute_tests():
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
                 quantite_stock = 10,
+                quantite_defaut = 12,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -562,6 +567,7 @@ def execute_tests():
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
+                quantite_defaut = 18,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
