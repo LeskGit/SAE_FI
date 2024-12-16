@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
         unique=True
     )
     blackliste = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default = False)
     points_fidelite = db.Column(db.Integer, default=0)
     prix_panier = db.Column(db.Float, default=0)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
@@ -28,7 +29,7 @@ class User(db.Model, UserMixin):
     
     def get_id(self):
         return self.num_tel
-
+    
 @login_manager.user_loader
 def load_user(num_tel):
     return User.query.get(num_tel)
@@ -64,6 +65,7 @@ class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
     type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
     quantite_stock = db.Column(db.Integer)
+    quantite_defaut = db.Column(db.Integer)
     prix = db.Column(db.Float)
     quantite_promo = db.Column(db.Integer)
     prix_reduc = db.Column(db.Float)
@@ -533,6 +535,7 @@ def execute_tests():
     plat1 = Plats(nom_plat = 'plat1',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
+                quantite_defaut = 7,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -540,6 +543,7 @@ def execute_tests():
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 quantite_stock = 10,
+                quantite_defaut = 6,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -547,6 +551,7 @@ def execute_tests():
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 quantite_stock = 10,
+                quantite_defaut = 8,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -554,6 +559,7 @@ def execute_tests():
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
                 quantite_stock = 10,
+                quantite_defaut = 12,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -561,6 +567,7 @@ def execute_tests():
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
+                quantite_defaut = 18,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -713,3 +720,22 @@ def get_formules():
 
 def get_desserts():
     return  Plats.query.filter_by(type_plat = "Dessert").all()
+
+def get_plats_chauds():
+    return  Plats.query.filter_by(type_plat = "Plat chaud").all()
+
+def get_plats_froids():
+    return  Plats.query.filter_by(type_plat = "Plat froid").all()
+
+def get_sushis():
+    return  Plats.query.filter_by(type_plat = "Sushi").all()
+
+def get_sur_place_today() :
+    today = datetime.today().date()
+    return Commandes.query.filter(db.func.date(Commandes.date) == today, Commandes.sur_place.is_(True)).all()
+ 
+def get_blackliste() :
+    return User.query.filter_by(blackliste = True).all()
+
+def get_user(num_tel) :
+    return User.query.get(num_tel)
