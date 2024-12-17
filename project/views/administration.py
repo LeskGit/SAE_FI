@@ -4,7 +4,7 @@ from project.models import Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
+from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
 from wtforms import StringField, PasswordField, EmailField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
@@ -34,7 +34,7 @@ def admin():
     dico_tables = {i: False for i in range(1, 13)}
     for table in commandes_sur_place :
         dico_tables[table.sur_place] = True
-    
+
     # Blacklist
     liste_noire = get_blackliste()
     return render_template("admin_traiteur.html", tables = dico_tables, blacklist = liste_noire)
@@ -48,10 +48,9 @@ def blackliste_supprimer() :
 
 @app.route("/suivi/commande")
 @admin_required
-def suivi_commande() :
-    return render_template(
-        "suivi_commandes.html",
-        )
+def suivi_commande():
+    commandes = get_commandes_today()
+    return render_template("suivi_commandes.html", les_commandes=commandes)
 
 @app.route("/suivi/stock")
 @admin_required
@@ -65,12 +64,11 @@ def suivi_stock() :
 @app.route("/modifier_stock", methods=["POST"])
 def modifier_stock():
     for key, value in request.form.items():
-        nom_plat = key  
-        nouveau_stock = int(value)            
+        nom_plat = key
+        nouveau_stock = int(value)
         plat = db.session.query(Plats).filter_by(nom_plat=nom_plat).one()
         plat.quantite_stock = nouveau_stock
         db.session.commit()
-    
     return redirect(url_for("suivi_stock"))
 
 @app.route('/reinitialiser_stock', methods=['POST'])
