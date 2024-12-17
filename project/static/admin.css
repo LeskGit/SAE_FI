@@ -5,3 +5,21 @@ span.occupee {
 span.disponible {
     color: green;
 }
+
+body{
+    background-image: url("img/background_dashboard.jpg");
+    background-size: cover; 
+    background-position: center;
+    background-attachment: fixed; 
+    background-repeat: no-repeat;
+}
+
+.row.justify-content-center{
+    margin-top: 4em;
+}
+
+.scrollbar-container {
+    max-height: 300px; /* Hauteur maximale pour les listes */
+    overflow-y: auto;  /* Active la scrollbar verticale */
+    padding: 5px;      /* Espacement interne */
+}
