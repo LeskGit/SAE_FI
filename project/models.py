@@ -4,6 +4,7 @@ from .app import db, login_manager
 from flask_login import UserMixin
 import re
 from datetime import datetime
+from hashlib import sha256
 
 class User(db.Model, UserMixin):
     num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), primary_key = True)
@@ -547,10 +548,15 @@ class TriggerManager:
 
 def execute_tests():
 
+    password = "password"
+    m = sha256()
+    m.update(password.encode())
+    hashed_password = m.hexdigest()
+
     usr = User(num_tel = '0123456759',
                 nom = 'Doe',
                 prenom = 'John',
-                mdp = 'password',
+                mdp = hashed_password,
                 adresse = '1 rue de la Paix',
                 email = 'a@b.com',
                 blackliste = False,
