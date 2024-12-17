@@ -715,13 +715,6 @@ def execute_tests():
     commande = Commandes.query.get(1)
 
     try:
-        commande.etat = "Payée"
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print("Erreur:", e)
-
-    try:
         # Ajouter des plats à Constituer pour la commande
         constituer_assoc = [
             Constituer(nom_plat='plat1', num_commande=commande.num_commande, quantite_plat=2),
