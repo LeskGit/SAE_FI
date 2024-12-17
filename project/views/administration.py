@@ -6,8 +6,13 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
-from wtforms import StringField, PasswordField, EmailField, HiddenField
+from wtforms import StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
+from werkzeug.utils import secure_filename
+import os
+from project.app import mkpath
+import uuid
+
 
 def admin_required(f):
     @wraps(f)
@@ -21,7 +26,9 @@ def admin_required(f):
 
 class PlatForm(FlaskForm):
     nom = StringField("Nom du plat", validators=[DataRequired(), Length(max=32)])
-    prix = StringField("Prix", validators=[DataRequired(), Length(max=10)])
+    prix = FloatField("Prix", validators=[DataRequired()])
+    type = StringField("Type de plat", validators=[DataRequired(), Length(max=32)])
+    img = FileField("Image")
     csrf_token = HiddenField()
 
 
@@ -124,35 +131,34 @@ def edition_plat():
 @app.route("/update_plat/<string:id>", methods=["POST"])
 @admin_required
 def update_plat(id):
-    # Récupération des données du formulaire
-    nom_plat = request.form.get("nom_plat")
-    prix = request.form.get("prix")
+    # Récupérer le plat depuis la base de données (exemple)
+    plat = Plats.query.get(id)
 
-    # Validation des données
-    if not nom_plat or not prix:
-        return "Erreur : Les champs nom_plat et prix sont requis.", 400
+    # Récupérer le fichier image
+    if 'img' in request.files:
+        file = request.files['img']
+        if file:
+            # Sauvegarder le fichier avec un nom unique
+            filename = secure_filename(file.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{filename}"
+            img_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
 
-    try:
-        prix = float(prix)  # Conversion en float
-    except ValueError:
-        return "Erreur : Le prix doit être un nombre valide.", 400
+            # Sauvegarder l'image dans le dossier 'static/img'
+            file.save(img_path)
 
-    # Récupérer le plat par son ID
-    plat = db.session.query(Plats).filter_by(nom_plat=id).first()
-    if not plat:
-        return f"Erreur : Le plat '{id}' n'existe pas.", 404
+            # Mettre à jour le champ img du plat
+            plat.img = f"{unique_filename}"
 
-    # Mise à jour des informations
-    plat.nom_plat = nom_plat
-    plat.prix = prix
+    # Mettre à jour les autres champs du plat
+    plat.nom_plat = request.form['nom_plat']
+    plat.type_plat = request.form['type_plat']
+    plat.prix = request.form['prix']
+
+    # Enregistrer les modifications dans la base de données
     db.session.commit()
 
-    # Retourner la liste mise à jour des plats
-    return render_template(
-        "edition_plat.html",
-        plats=Plats.query.all()  # Récupérer tous les plats de la base
-    )
-    
+    return redirect(url_for('edition_plat'))
+
 @app.route("/delete_plat/<string:id>", methods=["POST"])
 @admin_required
 def delete_plat(id):
@@ -176,27 +182,49 @@ def delete_plat(id):
 def add_plat():
     form = PlatForm()
     if form.validate_on_submit():
-        # Récupérer les données du formulaire
+
+        # Récupération des données du formulaire
         nom_plat = form.nom.data
         prix = form.prix.data
+        type_plat = form.type.data
+        img = form.img.data
 
-        # Validation supplémentaire côté serveur
-        try:
-            prix = float(prix)
-        except ValueError:
-            flash("Le prix doit être un nombre valide.", "danger")
-            return render_template("creation_plat.html", form=form)
+        # Validation des données
+        if not nom_plat or not prix or not type_plat:
+            flash("Erreur : Les champs nom, prix et type sont requis.", "danger")
+            return render_template('creation_plat.html', form=form)
+        
+        # Vérifier si le plat existe déjà
+        plat = Plats.query.filter_by(nom_plat=nom_plat).first()
+        if plat:
+            flash(f"Erreur : Le plat '{nom_plat}' existe déjà.", "danger")
+            return render_template('creation_plat.html', form=form)
 
-        # Créer et ajouter le plat à la base
-        plat = Plats(nom_plat=nom_plat, prix=prix)
+        # Enregistrement de l'image
+        if img:
+            filename = secure_filename(img.filename)
+            upload_folder = mkpath('static/img')  # Utilisation de mkpath pour récupérer le chemin absolu du dossier
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)  # Crée le dossier s'il n'existe pas
+
+            img.save(os.path.join(upload_folder, filename))
+        else:
+            filename = None
+
+        # Création du plat
+        plat = Plats(
+            nom_plat=nom_plat,
+            prix=prix,
+            type_plat=type_plat,
+            img=filename
+        )
         db.session.add(plat)
         db.session.commit()
-        flash("Le plat a été ajouté avec succès.", "success")
-        return redirect(url_for("edition_plat"))
 
-    # En cas d'échec de validation ou GET
-    return render_template("creation_plat.html", form=form)
+        flash(f"Le plat '{nom_plat}' a été ajouté avec succès.", "success")
+        return redirect(url_for('creation_plat'))
 
+    return render_template('creation_plat.html', form=form)
 
 @app.route("/edition/offre")
 @admin_required

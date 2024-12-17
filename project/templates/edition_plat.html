@@ -33,17 +33,20 @@
                     <hr class="w-50 mx-auto bar"/>
                     <div class="text-center">
                         <img 
-                            src="{{ url_for('static', filename=p.img) if p.img else url_for('static', filename='default.jpg') }}" 
+                            src="{{ url_for('static', filename='img/' ~ p.img) if p.img else url_for('static', filename='img/logo_oumami.jpg') }}"
                             class="img_plat rounded" 
                             alt="{{ p.nom_plat }}">
 
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Type : <strong>{{ p.type_plat }}</strong></p>
                     </div>
                     <div class="text-center mt-3">
                         <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
                     </div>
                     <div class="d-flex justify-content-end mt-2">
                         <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ p.nom_plat }}"></button>
-                        <form method="POST" action="{{ url_for('delete_plat', id=p.nom_plat) }}" style="display:inline-block;">
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_plat', id=p.nom_plat) }}" style="display:inline-block;">
                             <button class="btn btn-danger delete_button" type="submit"></button>
                         </form>
                     </div>
@@ -53,7 +56,7 @@
                 <div class="modal fade" id="editModal_{{ p.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel_{{ p.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form method="POST" action="{{ url_for('update_plat', id=p.nom_plat) }}">
+                            <form method="POST" enctype="multipart/form-data" action="{{ url_for('update_plat', id=p.nom_plat) }}">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editModalLabel_{{ p.nom_plat }}">Modifier le plat</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -64,6 +67,19 @@
                                     <div class="form-group">
                                         <label for="platNom_{{ p.nom_plat }}">Nom du plat</label>
                                         <input type="text" class="form-control" id="platNom_{{ p.nom_plat }}" name="nom_plat" value="{{ p.nom_plat }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="platImg_{{ p.nom_plat }}">Image</label>
+                                        <input type="file" class="form-control" id="platImg_{{ p.nom_plat }}" name="img" accept="image/*">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="platType_{{ p.nom_plat }}">Type</label>
+                                        <select class="form-control" id="platType_{{ p.nom_plat }}" name="type_plat" required>
+                                            <option value="Plat chaud" {% if p.type_plat == "Plat chaud" %}selected{% endif %}>Plat chaud</option>
+                                            <option value="Plat froid" {% if p.type_plat == "Plat froid" %}selected{% endif %}>Plat froid</option>
+                                            <option value="Sushi" {% if p.type_plat == "Sushi" %}selected{% endif %}>Sushi</option>
+                                            <option value="Dessert" {% if p.type_plat == "Dessert" %}selected{% endif %}>Dessert</option>
+                                        </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="platPrix_{{ p.nom_plat }}">Prix</label>
