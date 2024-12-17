@@ -516,6 +516,28 @@ class TriggerManager:
         END;
         """
 
+    def trigger_panier_insert(self) -> str:
+        """
+        Un utilisateur doit avoir un seul et unique panier en même temps
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_panier_insert BEFORE insert ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE id INT;
+
+            IF NEW.etat = "Panier" THEN
+                SELECT etat into id FROM commandes
+                WHERE num_tel = NEW.num_tel and
+                etat = "Panier";
+
+                IF id IS NOT NULL THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = "On ne peut avoir qu'un panier à la fois";
+                END IF;
+            END IF;
+        END
+        """
+
 def execute_tests():
 
     usr = User(num_tel = '0123456759',
@@ -665,14 +687,14 @@ def execute_tests():
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
-                        etat = "Payée")
+                        etat = "Panier")
 
     com13 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 6, 13),
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
-                        etat = "Payée")
+                        etat = "Non Payée")
 
     db.session.add_all([com1, com2, com3, com4, com5, com6, com7, com8, com9, com10, com11, com12, com13])
 
