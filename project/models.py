@@ -733,3 +733,10 @@ def get_blackliste() :
 
 def get_user(num_tel) :
     return User.query.get(num_tel)
+
+def get_commandes_today() :
+    #today = datetime.today().date()
+    today = datetime(2024, 11, 6, 12)
+    #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
+    return Commandes.query.all()
+    
