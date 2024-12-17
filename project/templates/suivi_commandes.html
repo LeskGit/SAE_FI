@@ -44,14 +44,14 @@
                         {% endif %}
                     </div>
                 </div>
-                <ul class="d-flex justify-content-around bg-light rounded-bottom">
+                <ul class="d-flex justify-content-around bg-light rounded-bottom flex-column">
                     {% for association in commande.constituer_assoc %}
                         <li class="d-flex align-items-center flex-grow-1">    
-                            <img src="{{ url_for('static', filename=association.plat.img) }}" class="img_plat rounded me-3 ms-2 mt-2" alt="{{ association.plat.nom_plat }}">
+                            <img src="{{ url_for('static', filename=association.plat.img) }}" class="img_plat rounded me-3 ms-5 mt-2 mb-2" alt="{{ association.plat.nom_plat }}">
                             <h3 class = "mb-0 me-3">
                                 {{ association.plat.nom_plat }}
                             </h3>
-                            <h4 class="mb-0 ms-auto">
+                            <h4 class="mb-0 ms-auto me-5">
                                 X {{association.quantite_plat}}
                             </h4>
                         </li>
