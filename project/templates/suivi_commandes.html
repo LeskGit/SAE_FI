@@ -45,14 +45,14 @@
                     </div>
                 </div>
                 <ul class="d-flex justify-content-around bg-light rounded-bottom">
-                    {% for plat in commande.les_plats %}
+                    {% for association in commande.constituer_assoc %}
                         <li class="d-flex align-items-center flex-grow-1">    
-                            <img src="{{ url_for('static', filename=plat.img) }}" class="img_plat rounded me-3 ms-2 mt-2" alt="{{ plat.nom_plat }}">
+                            <img src="{{ url_for('static', filename=association.plat.img) }}" class="img_plat rounded me-3 ms-2 mt-2" alt="{{ association.plat.nom_plat }}">
                             <h3 class = "mb-0 me-3">
-                                {{ plat.nom_plat }}
+                                {{ association.plat.nom_plat }}
                             </h3>
                             <h4 class="mb-0 ms-auto">
-                                X 
+                                X {{association.quantite_plat}}
                             </h4>
                         </li>
                     {% endfor %}
