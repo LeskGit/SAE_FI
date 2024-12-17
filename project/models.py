@@ -36,18 +36,18 @@ def load_user(num_tel):
 CONTENIR_NOM_PLAT = "plats.nom_plat"
 
 contenir = db.Table("contenir",
+    db.metadata,
     db.Column("nom", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
     db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
 )
 
 class Constituer(db.Model):
     __tablename__ = "constituer"
-    nom_plat = db.Column("nom_plat", db.String(64), db.ForeignKey("plats.nom_plat"), primary_key=True)
-    num_commande = db.Column("num_commande", db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
-    quantite_plat = db.Column("quantite_plat", db.Integer, default=1)
-    les_plats = db.relationship("Plats", back_populates = "constituer_assoc")
-    les_commandes = db.relationship("Commandes", back_populates = "constituer_assoc")
-
+    nom_plat = db.Column(db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True)
+    num_commande = db.Column(db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
+    quantite_plat = db.Column(db.Integer, default=1)
+    plat = db.relationship("Plats", back_populates="constituer_assoc", overlaps="les_commandes,commande")
+    commande = db.relationship("Commandes", back_populates="constituer_assoc", overlaps="les_plats,plat")
 
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -57,9 +57,10 @@ class Commandes(db.Model):
     sur_place = db.Column(db.Boolean)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"), default = "Panier")
-    les_plats = db.relationship("Plats", secondary = 'constituer', back_populates = "les_commandes")
-    les_clients = db.relationship("User", back_populates = "les_commandes")
-    constituer_assoc = db.relationship("Constituer", back_populates = "les_commandes")
+
+    les_plats = db.relationship("Plats", secondary = "constituer", back_populates = "les_commandes", overlaps="constituer_assoc,plat")
+    les_clients = db.relationship("User", back_populates="les_commandes")
+    constituer_assoc = db.relationship("Constituer", back_populates="commande", overlaps="les_plats,plat")
 
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
@@ -72,11 +73,13 @@ class Plats(db.Model):
     prix = db.Column(db.Float)
     quantite_promo = db.Column(db.Integer)
     prix_reduc = db.Column(db.Float)
-    les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats")
-    les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
     est_bento = db.Column(db.Boolean, default=False)
     img = db.Column(db.String(200))
-    constituer_assoc = db.relationship("Constituer", back_populates = "les_plats")
+
+    les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
+
+    les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats")
+    constituer_assoc = db.relationship("Constituer", back_populates="plat", overlaps="les_commandes,commande")
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
@@ -713,12 +716,13 @@ def execute_tests():
         print("Erreur:", e)
 
     try:
-        association = constituer.insert().values(
-            nom_plat=plat1.nom_plat,
-            num_commande=commande.num_commande,
-            quantite_plat=9
-        )
-        db.session.execute(association)
+        # Ajouter des plats à Constituer pour la commande
+        constituer_assoc = [
+            Constituer(nom_plat='plat1', num_commande=commande.num_commande, quantite_plat=2),
+            Constituer(nom_plat='plat2', num_commande=commande.num_commande, quantite_plat=3),
+            Constituer(nom_plat='plat3', num_commande=commande.num_commande, quantite_plat=1)
+        ]
+        db.session.add_all(constituer_assoc)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
