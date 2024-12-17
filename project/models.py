@@ -78,7 +78,7 @@ class Plats(db.Model):
 
     les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
 
-    les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats")
+    les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats", overlaps="constituer_assoc,commande")
     constituer_assoc = db.relationship("Constituer", back_populates="plat", overlaps="les_commandes,commande")
 
     def __repr__(self):

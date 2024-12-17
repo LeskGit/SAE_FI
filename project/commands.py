@@ -16,7 +16,7 @@ def syncdb():
 
     create_admin()
 
-    execute_tests()
+    #execute_tests()
 
 @app.cli.command()
 def dropdb():
