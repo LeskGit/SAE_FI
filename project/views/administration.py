@@ -4,7 +4,7 @@ from project.models import Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
+from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
 from wtforms import StringField, PasswordField, EmailField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
@@ -49,8 +49,11 @@ def blackliste_supprimer() :
 @app.route("/suivi/commande")
 @admin_required
 def suivi_commande() :
+    commandes = get_commandes_today()
+    for commande in commandes :
+            print(commande)
     return render_template(
-        "suivi_commandes.html",
+        "suivi_commandes.html", les_commandes = commandes
         )
 
 @app.route("/suivi/stock")
