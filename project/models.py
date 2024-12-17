@@ -43,11 +43,14 @@ contenir = db.Table("contenir",
     db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
 )
 
-constituer = db.Table("constituer",
-    db.Column("nom_plat", db.String(64), db.ForeignKey("plats.nom_plat"), primary_key=True),
-    db.Column("num_commande", db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True),
-    db.Column("quantite_plat", db.Integer, default=1)
-)
+class Constituer(db.Model):
+    __tablename__ = "constituer"
+    nom_plat = db.Column("nom_plat", db.String(64), db.ForeignKey("plats.nom_plat"), primary_key=True)
+    num_commande = db.Column("num_commande", db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
+    quantite_plat = db.Column("quantite_plat", db.Integer, default=1)
+    les_plats = db.relationship("Plats", back_populates = "constituer_assoc")
+    les_commandes = db.relationship("Commandes", back_populates = "constituer_assoc")
+
 
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -57,8 +60,9 @@ class Commandes(db.Model):
     sur_place = db.Column(db.Boolean)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"), default = "Panier")
-    les_plats = db.relationship("Plats", secondary = constituer, back_populates = "les_commandes")
+    les_plats = db.relationship("Plats", secondary = 'constituer', back_populates = "les_commandes")
     les_clients = db.relationship("User", back_populates = "les_commandes")
+    constituer_assoc = db.relationship("Constituer", back_populates = "les_commandes")
 
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
@@ -70,13 +74,15 @@ class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
     type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
     quantite_stock = db.Column(db.Integer)
+    quantite_defaut = db.Column(db.Integer)
     prix = db.Column(db.Float)
     quantite_promo = db.Column(db.Integer)
     prix_reduc = db.Column(db.Float)
-    les_commandes = db.relationship("Commandes", secondary = constituer, back_populates = "les_plats")
+    les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats")
     les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
     est_bento = db.Column(db.Boolean, default=False)
     img = db.Column(db.String(200))
+    constituer_assoc = db.relationship("Constituer", back_populates = "les_plats")
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
@@ -520,6 +526,28 @@ class TriggerManager:
         END;
         """
 
+    def trigger_panier_insert(self) -> str:
+        """
+        Un utilisateur doit avoir un seul et unique panier en même temps
+        """
+        return """
+        CREATE OR REPLACE TRIGGER trigger_panier_insert BEFORE insert ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE id INT;
+
+            IF NEW.etat = "Panier" THEN
+                SELECT etat into id FROM commandes
+                WHERE num_tel = NEW.num_tel and
+                etat = "Panier";
+
+                IF id IS NOT NULL THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = "On ne peut avoir qu'un panier à la fois";
+                END IF;
+            END IF;
+        END
+        """
+
 def execute_tests():
 
     usr = User(num_tel = '0123456759',
@@ -529,8 +557,7 @@ def execute_tests():
                 adresse = '1 rue de la Paix',
                 email = 'a@b.com',
                 blackliste = False,
-                points_fidelite = 0,
-                prix_panier = 0)
+                points_fidelite = 0)
     
     db.session.add(usr)
     db.session.commit()
@@ -539,6 +566,7 @@ def execute_tests():
     plat1 = Plats(nom_plat = 'plat1',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
+                quantite_defaut = 7,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -546,6 +574,7 @@ def execute_tests():
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 quantite_stock = 10,
+                quantite_defaut = 6,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -553,6 +582,7 @@ def execute_tests():
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 quantite_stock = 10,
+                quantite_defaut = 8,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -560,6 +590,7 @@ def execute_tests():
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
                 quantite_stock = 10,
+                quantite_defaut = 12,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -567,6 +598,7 @@ def execute_tests():
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
+                quantite_defaut = 18,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
@@ -664,14 +696,14 @@ def execute_tests():
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
-                        etat = "Payée")
+                        etat = "Panier")
 
     com13 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 6, 13),
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
-                        etat = "Payée")
+                        etat = "Non Payée")
 
     db.session.add_all([com1, com2, com3, com4, com5, com6, com7, com8, com9, com10, com11, com12, com13])
 
@@ -728,3 +760,13 @@ def get_plats_froids():
 
 def get_sushis():
     return  Plats.query.filter_by(type_plat = "Sushi").all()
+
+def get_sur_place_today() :
+    today = datetime.today().date()
+    return Commandes.query.filter(db.func.date(Commandes.date) == today, Commandes.sur_place.is_(True)).all()
+ 
+def get_blackliste() :
+    return User.query.filter_by(blackliste = True).all()
+
+def get_user(num_tel) :
+    return User.query.get(num_tel)

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block styles %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='positionnement.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css')}}">
 {% endblock %}
 {% block content %}
 
@@ -62,6 +62,34 @@
             <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M5 4h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1m-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5M5 8h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1m0 2h3a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1"/>
         </svg>
     </a>
+</div>
+
+<!--Création du tableau des tables disponibles ou non-->
+<div>
+    {% for table in tables.keys() %}
+        {% if tables[table] %}
+            Table {{ table }} : <span class = occupee> Occupée</span>
+        {% else %}
+            Table {{ table }} : <span class = disponible> Disponible</span>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle-fill" viewBox="0 0 16 16">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z"/>
+    </svg>
+    Liste noire :
+    <br>
+    {% for client in blacklist %}
+        {{ client.prenom }} {{ client.nom }} {{ client.num_tel }}
+        <a type="button" class="btn-secondary btn-lg" href="{{ url_for('blackliste_supprimer', id_client = client.num_tel) }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
+                <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+            </svg>
+        </a>
+
+    {% endfor %}
 </div>
 
 {% endblock %}
