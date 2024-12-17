@@ -20,8 +20,11 @@ def ajout_plat() :
 
 @app.route("/panier")
 def panier():
-    panier = current_user.get_panier()
-    print(panier)
+    if not current_user.is_authenticated:
+        panier = None
+    else:
+        panier = current_user.get_panier()
+
     return render_template("panier.html", panier=panier)
 
 @app.route("/choix_paiement")
