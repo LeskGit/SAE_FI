@@ -76,6 +76,33 @@ def modifier_stock():
     
     return redirect(url_for("suivi_stock"))
 
+@app.route('/reinitialiser_stock', methods=['POST'])
+def reinitialiser_stock():
+    category = request.form.get('category')
+    print(category)
+    if category == "plats_chauds":
+        print(1)
+        # Réinitialiser les plats chauds
+        for plat in Plats.query.filter_by(type_plat="Plat chaud"):
+            print(plat)
+            plat.quantite_stock = plat.quantite_defaut
+    elif category == "plats_froids":
+        print(2)
+        # Réinitialiser les plats froids
+        for plat in Plats.query.filter_by(type_plat="Plat froid"):
+            plat.quantite_stock = plat.quantite_defaut
+    elif category == "sushis":
+        # Réinitialiser les sushis
+        for plat in Plats.query.filter_by(type_plat="Sushi"):
+            plat.quantite_stock = plat.quantite_defaut
+    elif category == "desserts":
+        # Réinitialiser les desserts
+        for plat in Plats.query.filter_by(type_plat="Dessert"):
+            plat.quantite_stock = plat.quantite_defaut
+
+    db.session.commit()
+    return redirect(url_for('suivi_stock'))  # Redirige vers la page principale des stocks
+
 
 @app.route("/creation/plat")
 @admin_required
