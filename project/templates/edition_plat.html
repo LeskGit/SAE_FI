@@ -33,7 +33,7 @@
                     <hr class="w-50 mx-auto bar"/>
                     <div class="text-center">
                         <img 
-                            src="{{ url_for('static', filename='img/' ~ p.img) if p.img else url_for('static', filename='img/logo_oumami.jpg') }}"
+                            src="{{ url_for('static', filename='img/product/' ~ p.img) if p.img else url_for('static', filename='img/logo_oumami.jpg') }}"
                             class="img_plat rounded" 
                             alt="{{ p.nom_plat }}">
 

@@ -14,7 +14,7 @@ def mkpath(p):
 
 app = Flask(__name__)
 app.config['BOOSTRAP_SERVE_LOCAL'] = True
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'img')
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'img', 'product')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 bootstrap = Bootstrap5(app)
 

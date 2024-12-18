@@ -7,6 +7,7 @@ from hashlib import sha256
 from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
 from wtforms import StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
+from flask_wtf.file import FileAllowed
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from werkzeug.utils import secure_filename
 import os
@@ -28,7 +29,7 @@ class PlatForm(FlaskForm):
     nom = StringField("Nom du plat", validators=[DataRequired(), Length(max=32)])
     prix = FloatField("Prix", validators=[DataRequired()])
     type = StringField("Type de plat", validators=[DataRequired(), Length(max=32)])
-    img = FileField("Image")
+    img = FileField("Image", validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'])])
     csrf_token = HiddenField()
 
 
@@ -203,7 +204,7 @@ def add_plat():
         # Enregistrement de l'image
         if img:
             filename = secure_filename(img.filename)
-            upload_folder = mkpath('static/img')  # Utilisation de mkpath pour récupérer le chemin absolu du dossier
+            upload_folder = mkpath('static/img/product')  # Utilisation de mkpath pour récupérer le chemin absolu du dossier
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)  # Crée le dossier s'il n'existe pas
 
