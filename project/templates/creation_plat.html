@@ -14,10 +14,12 @@
 <div class="container-fluid w-75 bg-light justify-content-center align-items-center">
     <form method="POST" novalidate class="form-horizontal" enctype="multipart/form-data" role="form" action="{{ url_for('add_plat') }}">
         {{ form.hidden_tag() }} <!-- CSRF Token -->
+        
         <div class="form-group">
             <label for="name">Nom du plat :</label>
             {{ form.nom(class="form-control", id="name", placeholder="Entrez le nom du plat") }}
         </div>
+
         <div class="form-group">
             <label for="type">Type :</label>
             <select class="form-control" id="type" name="type" required>
@@ -28,15 +30,39 @@
                 <option value="Dessert">Dessert</option>
             </select>
         </div>
+
+        <!-- Allergènes avec checkboxes -->
+        <div class="form-group">
+            <label for="platAllergenes">Allergènes :</label>
+            <div class="form-check">
+                {% for allergene in allergenes %}
+                    <div class="form-check">
+                        <input type="checkbox" 
+                            class="form-check-input" 
+                            id="allergene_{{ allergene.nom_allergene }}" 
+                            name="allergenes" 
+                            value="{{ allergene.nom_allergene }}"
+                            {% if allergene.nom_allergene in form.allergenes.data %} checked {% endif %}>
+                        <label class="form-check-label" for="allergene_{{ allergene.nom_allergene }}">
+                            {{ allergene.nom_allergene }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+
         <div class="form-group">
             <label for="price">Prix :</label>
             {{ form.prix(class="form-control", id="price", placeholder="Entrez le prix en euros") }}
         </div>
+
         <div class="form-group">
             <label for="image">Image :</label>
             {{ form.img(class="form-control", id="image", accept="image/*", required=True) }}
         </div>
-        
+
         <button type="submit" class="btn btn-primary mt-3">Ajouter le plat</button>
     </form>
 </div>

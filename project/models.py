@@ -804,3 +804,8 @@ def get_commandes_today() :
     #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
     return Commandes.query.all()
     
+def get_allergenes() :
+    return Allergenes.query.all()
+
+def get_allergenes_plat(nom_plat) :
+    return Plats.query.get(nom_plat).les_allergenes
