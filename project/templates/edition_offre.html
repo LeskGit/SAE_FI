@@ -30,31 +30,44 @@
 
     <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition" style="height: 500px; overflow-y: auto;">
         <div class="container-fluid d-flex">
-            <div class="container-fluid formule_cards">
+            <div class="row g-5 mt-2">
                 {% for formule in formules %}
-                <div class="formule_card container-fluid p-3 my-3 shadow-sm rounded">
-                    <h5 class="text-center font-weight-bold">{{ formule.libelle_formule }}</h5>
-                    <hr class="w-50 mx-auto bar"/>
-                    <div class="text-center mt-3">
-                        <p class="text-muted">Prix : <strong>{{ formule.prix }}</strong> €</p>
-                    </div>
-                    <div class="text-center mt-3">
-                        <p class="text-muted">Plats inclus :</p>
-                        <ul>
-                            {% for plat in formule.les_plats %}
-                            <li>{{ plat.nom_plat }} ({{ plat.type_plat }})</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="d-flex justify-content-end mt-2">
-                        <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ formule.id_formule }}"></button>
-                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_offre', id=formule.id_formule) }}" style="display:inline-block;">
-                            <button class="btn btn-danger delete_button" type="submit"></button>
-                        </form>
+                <div class="col-md-4">
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ formule.libelle_formule }}</h5>
+                            <p class="card-text">Prix : <strong>{{ formule.prix }}</strong> €</p>
+                            <p class="card-text">Plats inclus :</p>
+                            <ul>
+                                {% for plat in formule.les_plats %}
+                                <li>
+                                    {{ plat.nom_plat }}
+                                    {% if plat.type_plat == "Plat chaud" %}
+                                    <span class="badge bg-danger">Chaud</span>
+                                    {% elif plat.type_plat == "Plat froid" %}
+                                    <span class="badge bg-info">Froid</span>
+                                    {% elif plat.type_plat == "Sushi" %}
+                                    <span class="badge bg-warning text-dark">Sushi</span>
+                                    {% elif plat.type_plat == "Dessert" %}
+                                    <span class="badge bg-success">Dessert</span>
+                                    {% endif %}
+                                </li>
+                                
+                                {% endfor %}
+                            </ul>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ formule.id_formule }}">
+                                </button>
+                                <form method="POST" action="{{ url_for('delete_offre', id=formule.id_formule) }}">
+                                    <button class="btn btn-danger delete_button" type="submit"></button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            
         </div>
     </div>
 </div>
