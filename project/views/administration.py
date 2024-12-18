@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Plats
+from project.models import Plats, get_plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -124,9 +124,21 @@ def creation_offre():
 @app.route("/edition/plat")
 @admin_required
 def edition_plat():
+    type = request.args.get('type', 'a')
+    plats = get_plats()
+    plats_chauds = get_plats_chauds()
+    plats_froids = get_plats_froids()
+    sushis = get_sushis()
+    desserts = get_desserts()
+    
     return render_template(
         "edition_plat.html",
-        plats=Plats.get_all_plats(Plats)
+        plats=plats,
+        plats_chauds=plats_chauds,
+        plats_froids=plats_froids,
+        sushis=sushis,
+        desserts=desserts,
+        type=type
         )
     
 @app.route("/update_plat/<string:id>", methods=["POST"])
@@ -223,7 +235,7 @@ def add_plat():
         db.session.commit()
 
         flash(f"Le plat '{nom_plat}' a été ajouté avec succès.", "success")
-        return redirect(url_for('creation_plat'))
+        return redirect(url_for('edition_plat'))
 
     return render_template('creation_plat.html', form=form)
 
