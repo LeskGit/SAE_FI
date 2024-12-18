@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="top-info">
+    <h1 class="text-center my-3">Création des plats</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container-fluid w-75 bg-light justify-content-center align-items-center">
+    <form method="POST" novalidate class="form-horizontal" enctype="multipart/form-data" role="form" action="{{ url_for('add_plat') }}">
+        {{ form.hidden_tag() }} <!-- CSRF Token -->
+        <div class="form-group">
+            <label for="name">Nom du plat :</label>
+            {{ form.nom(class="form-control", id="name", placeholder="Entrez le nom du plat") }}
+        </div>
+        <div class="form-group">
+            <label for="type">Type :</label>
+            <select class="form-control" id="type" name="type" required>
+                <option value="" disabled selected>-- Sélectionnez un type --</option>
+                <option value="Plat chaud">Plat chaud</option>
+                <option value="Plat froid">Plat froid</option>
+                <option value="Sushi">Sushi</option>
+                <option value="Dessert">Dessert</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="price">Prix :</label>
+            {{ form.prix(class="form-control", id="price", placeholder="Entrez le prix en euros") }}
+        </div>
+        <div class="form-group">
+            <label for="image">Image :</label>
+            {{ form.img(class="form-control", id="image", accept="image/*", required=True) }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-3">Ajouter le plat</button>
+    </form>
+</div>
+{% endblock %}
