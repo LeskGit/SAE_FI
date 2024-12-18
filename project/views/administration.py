@@ -183,10 +183,7 @@ def delete_plat(id):
     db.session.commit()
 
     # Retourner la liste mise à jour des plats
-    return render_template(
-        "edition_plat.html",
-        plats=Plats.query.all()  # Récupérer tous les plats de la base
-    )
+    return redirect(url_for('edition_plat'))
 
 @app.route("/ajout_plat", methods=["GET", "POST"])
 @admin_required
