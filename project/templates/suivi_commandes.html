@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='suivi_commandes.css') }}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+{% endblock %}
+{% block content %}
+<form action="{{ url_for('suivi_commande') }}" method="POST">
+    <div class="container my-5 text-center bg-gris-clair rounded">
+        <h1 class="mb-4">Suivi des commandes 
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="black" class="bi bi-clock-history" viewBox="0 0 16 16">
+            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+            </svg>
+        </h1>
+        <div>
+            <ul class="list-unstyled">
+            {% for commande in les_commandes %}
+            <li> 
+                <div class="d-flex bg-secondary justify-content-between align-items-center rounded-top">
+                    <h5 class="p-2"> 
+                        {{ commande.les_clients.nom }} {{ commande.les_clients.prenom }} <br> {{commande.les_clients.num_tel}}
+                    </h5>
+                
+                    <div class="p-2">  
+                        {% if commande.sur_place %}
+                            <h5>
+                                Sur place
+                            </h5>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-house-fill" viewBox="0 0 16 16">
+                                <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/>
+                                <path d="m8 3.293 6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293z"/>
+                            </svg>
+                        {% else %}
+                        <h5>
+                            À emporter
+                        </h5>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bag-fill" viewBox="0 0 16 16">
+                            <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4z"/>
+                        </svg>
+                        {% endif %}
+                    </div>
+                </div>
+                <ul class="d-flex justify-content-around bg-light rounded-bottom flex-column">
+                    {% for association in commande.constituer_assoc %}
+                        <li class="d-flex align-items-center flex-grow-1">    
+                            <img src="{{ url_for('static', filename=association.plat.img) }}" class="img_plat rounded me-3 ms-5 mt-2 mb-2" alt="{{ association.plat.nom_plat }}">
+                            <h3 class = "mb-0 me-3">
+                                {{ association.plat.nom_plat }}
+                            </h3>
+                            <h4 class="mb-0 ms-auto me-5">
+                                X {{association.quantite_plat}}
+                            </h4>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+    </div>
+</form>
+{% endblock %}
