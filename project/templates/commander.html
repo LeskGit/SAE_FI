@@ -11,7 +11,7 @@
     <h1 class="text-center my-3">Commander</h1>
     <hr class="w-25 mx-auto bg-dark bar">
 </div>
-<div class="row">
+<div class="row me-0">
     <!-- Liste des allergènes -->
     <div class="col-md-3 bg-light p-3">
         <h5>Liste des allergènes</h5>
@@ -68,7 +68,7 @@
             </ul>
             {% if type=="p" %}
             <!-- Grille des plats -->
-            <div class="row g-3 rounded">
+            <div class="row g-3 rounded me-0">
                 <h2>{{nb_plats}} plats disponibles</h2>
                 {% for plat in plats %}
                 <div class="col-md-4">
