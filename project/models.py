@@ -87,7 +87,7 @@ class Plats(db.Model):
     img = db.Column(db.String(200))
     les_allergenes = db.relationship("Allergenes", secondary = "contenir_allergene", back_populates = "les_plats")
     les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
-
+    
     les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats", overlaps="constituer_assoc,commande")
     constituer_assoc = db.relationship("Constituer", back_populates="plat", overlaps="les_commandes,commande")
 
@@ -562,6 +562,22 @@ def execute_tests():
     
     db.session.add(usr)
     db.session.commit()
+    
+    #Allergenes
+    
+    allergene1 = Allergenes(nom_allergene = 'allergene1')
+    allergene2 = Allergenes(nom_allergene = 'allergene2')
+    allergene3 = Allergenes(nom_allergene = 'allergene3')
+    allergene4 = Allergenes(nom_allergene = 'allergene4')
+    allergene5 = Allergenes(nom_allergene = 'allergene5')
+    allergene6 = Allergenes(nom_allergene = 'allergene6')
+    allergene7 = Allergenes(nom_allergene = 'allergene7')
+    allergene8 = Allergenes(nom_allergene = 'allergene8')
+    allergene9 = Allergenes(nom_allergene = 'allergene9')
+    allergene10 = Allergenes(nom_allergene = 'allergene10')
+    
+    db.session.add_all([allergene1, allergene2, allergene3, allergene4, allergene5, allergene6, allergene7, allergene8, allergene9, allergene10])
+    db.session.commit()
 
     #5 Plats
     plat1 = Plats(nom_plat = 'plat1',
@@ -572,42 +588,60 @@ def execute_tests():
                 quantite_promo = 0,
                 prix_reduc = 0,
                 img = 'sushi.jpg')
+    
     plat2 = Plats(nom_plat = 'plat2',
-                type_plat = 'Plat froid',
-                quantite_stock = 10,
-                quantite_defaut = 6,
-                prix = 10,
-                quantite_promo = 0,
-                prix_reduc = 0,
-                img = 'sushi.jpg')
-    plat3 = Plats(nom_plat = 'plat3',
-                type_plat = 'Sushi',
-                quantite_stock = 10,
-                quantite_defaut = 8,
-                prix = 10,
-                quantite_promo = 0,
-                prix_reduc = 0,
-                img = 'sushi.jpg')
-    plat4 = Plats(nom_plat = 'plat4',
-                type_plat = 'Dessert',
-                quantite_stock = 10,
-                quantite_defaut = 12,
-                prix = 10,
-                quantite_promo = 0,
-                prix_reduc = 0,
-                img = 'sushi.jpg')
-    plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
-                quantite_defaut = 18,
+                quantite_defaut = 7,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
                 img = 'sushi.jpg')
     
+    plat3 = Plats(nom_plat = 'plat3',
+                type_plat = 'Plat chaud',
+                quantite_stock = 10,
+                quantite_defaut = 7,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0,
+                img = 'sushi.jpg')
+    
+    plat4 = Plats(nom_plat = 'plat4',
+                type_plat = 'Plat chaud',
+                quantite_stock = 10,
+                quantite_defaut = 7,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0,
+                img = 'sushi.jpg')
+    
+    plat5 = Plats(nom_plat = 'plat5',
+                type_plat = 'Plat chaud',
+                quantite_stock = 10,
+                quantite_defaut = 7,
+                prix = 10,
+                quantite_promo = 0,
+                prix_reduc = 0,
+                img = 'sushi.jpg')
+    
+    
     db.session.add_all([plat1, plat2, plat3, plat4, plat5])
 
-
+    # Ajouter les allergènes aux plats
+    plat1.les_allergenes.append(allergene1)
+    plat1.les_allergenes.append(allergene2)
+    plat2.les_allergenes.append(allergene3)
+    plat2.les_allergenes.append(allergene4)
+    plat3.les_allergenes.append(allergene5)
+    plat3.les_allergenes.append(allergene6)
+    plat4.les_allergenes.append(allergene7)
+    plat4.les_allergenes.append(allergene8)
+    plat5.les_allergenes.append(allergene9)
+    plat5.les_allergenes.append(allergene10)
+    db.session.commit()
+    
+    
     #Formule
     formule1 = Formule(id_formule = 1,
                         libelle_formule = 'formule1',
