@@ -64,6 +64,16 @@ class Commandes(db.Model):
 
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
+    
+class Allergenes(db.Model):
+    nom_allergene = db.Column(db.String(64), primary_key = True)
+    les_plats = db.relationship("Plats", secondary = "contenir_allergene", back_populates = "les_allergenes")
+    
+contenir_allergene = db.Table("contenir_allergene",
+    db.metadata,
+    db.Column("nom_plat", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
+    db.Column("nom_allergene", db.String(64), db.ForeignKey("allergenes.nom_allergene"), primary_key=True)
+)
 
 class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
@@ -75,7 +85,7 @@ class Plats(db.Model):
     prix_reduc = db.Column(db.Float)
     est_bento = db.Column(db.Boolean, default=False)
     img = db.Column(db.String(200))
-
+    les_allergenes = db.relationship("Allergenes", secondary = "contenir_allergene", back_populates = "les_plats")
     les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
 
     les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats", overlaps="constituer_assoc,commande")
@@ -84,15 +94,7 @@ class Plats(db.Model):
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
     
-    def get_all_plats(self):
-
-        """ retourne tous les plats
-
-
-        Returns:
-            List[self]: une liste de plats
-        """
-        return self.query.all() 
+    
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)
@@ -102,6 +104,8 @@ class Formule(db.Model):
 
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
+    
+    
 
 #--------
 
