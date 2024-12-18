@@ -622,7 +622,7 @@ def execute_tests():
                         date_creation = datetime(2024, 11, 6),
                         sur_place = True,
                         num_table = 1,
-                        etat = "Non Payée")
+                        etat = "Payée")
 
     com2 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 3, 12),
@@ -695,18 +695,17 @@ def execute_tests():
                         etat = "Payée")
 
     com12 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 4, 12),
-                        date_creation = datetime(2024, 11, 4, 10),
-                        sur_place = True,
-                        num_table = 12,
-                        etat = "Panier")
-
-    com13 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 6, 13),
-                        date_creation = datetime(2024, 11, 4, 10),
+                        date = datetime(2024, 12, 18, 13),
+                        date_creation = datetime(2024, 12, 18, 10, 20),
                         sur_place = True,
                         num_table = 12,
                         etat = "Non Payée")
+    
+    com13 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 12, 18, 13),
+                        date_creation = datetime(2024, 12, 18, 10, 5),
+                        sur_place = False,
+                        etat = "Panier")
 
     db.session.add_all([com1, com2, com3, com4, com5, com6, com7, com8, com9, com10, com11, com12, com13])
 

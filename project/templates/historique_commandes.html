@@ -25,6 +25,7 @@
                     <th>Status</th>
                     <th>Date</th>
                     <th>Heure</th>
+                    <th>Action</th> <!-- Nouvelle colonne -->
                 </tr>
             </thead>
             <tbody>
@@ -37,11 +38,18 @@
                             <td><span class="{{ item.statut_class }}">{{ item.statut_label }}</span></td>
                             <td>{{ item.date_str }}</td>
                             <td>{{ item.heure_str }}</td>
+                            <td>
+                                {% if item.can_modify %}
+                                    <a href="{{ url_for('client_modif', num_commande=item.num_commande) }}" class="btn btn_color">Modifier</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="6" class="text-center">Aucune commande passée</td>
+                        <td colspan="7" class="text-center">Aucune commande passée</td>
                     </tr>
                 {% endif %}
             </tbody>
