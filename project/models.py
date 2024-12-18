@@ -567,7 +567,7 @@ def execute_tests():
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
-                img = 'img/sushi.jpg')
+                img = 'sushi.jpg')
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 quantite_stock = 10,
@@ -575,7 +575,7 @@ def execute_tests():
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
-                img = 'img/sushi.jpg')
+                img = 'sushi.jpg')
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 quantite_stock = 10,
@@ -583,7 +583,7 @@ def execute_tests():
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
-                img = 'img/sushi.jpg')
+                img = 'sushi.jpg')
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
                 quantite_stock = 10,
@@ -591,7 +591,7 @@ def execute_tests():
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
-                img = 'img/sushi.jpg')
+                img = 'sushi.jpg')
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 quantite_stock = 10,
@@ -599,7 +599,7 @@ def execute_tests():
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
-                img = 'img/sushi.jpg')
+                img = 'sushi.jpg')
     
     db.session.add_all([plat1, plat2, plat3, plat4, plat5])
 
