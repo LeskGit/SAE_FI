@@ -11,7 +11,7 @@
     <h1 class="text-center my-3">Commander</h1>
     <hr class="w-25 mx-auto bg-dark bar">
 </div>
-<div class="row">
+<div class="row me-0">
     <!-- Liste des allergènes -->
     <div class="col-md-3 bg-light p-3">
         <h5>Liste des allergènes</h5>
@@ -68,20 +68,44 @@
             </ul>
             {% if type=="p" %}
             <!-- Grille des plats -->
-            <div class="row g-3 rounded">
+            <div class="row g-3 rounded me-0">
                 <h2>{{nb_plats}} plats disponibles</h2>
                 {% for plat in plats %}
                 <div class="col-md-4">
-                    <div class="card">
-                        <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="Sushi">
+                    <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.nom_plat }}">
+                        <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
                         <div class="card-body text-center">
-                            <p>{{plat.nom_plat}}</p>
-                            <div class="d-flex justify-content-center align-items-center mb-2">
-                                <button class="btn btn-outline-danger btn-sm">-</button>
-                                <span class="mx-2">0</span>
-                                <button class="btn btn-outline-danger btn-sm">+</button>
+                            <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
+                        </div>
+                    </div>
+
+                    <!-- Modal spécifique au plat -->
+                    <div class="modal fade" id="editModal{{ plat.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat.nom_plat }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="editForm{{ plat.nom_plat }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editModalLabel{{ plat.nom_plat }}">{{ plat.nom_plat }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="quantity{{ plat.nom_plat }}">Quantité</label>
+                                            <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantity" min="1" value="1" max="{{plat.quantite_stock}}">
+                                        </div>
+                                        <div class="form-group mt-3">
+                                            <p>Prix unitaire : <span id="totalPrice{{ plat.id }}">{{ plat.prix }}</span>€</p>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                                    </div>
+                                </form>
                             </div>
-                            <small class="text-muted">Stock disponible : {{ plat.quantite_stock }}</small>
                         </div>
                     </div>
                 </div>
@@ -90,27 +114,63 @@
             {% endif %}
 
             {% if type=="f" %}
-            <!-- Grille des formules -->
-            <div class="row g-3 rounded">
-                <h2>{{nb_formules}} formules disponibles</h2>
-                {% for formule in formules %}
-                <div class="col-md-4">
-                    <div class="card">
-                        <h5 class="text-center">{{formule.libelle_formule}}</h5>
-                        {% for p in formule.les_plats %}
-                        <p>{{p}}</p>
-                        {% endfor %}
-                        <div class="card-body text-center">
-                            <div class="d-flex justify-content-center align-items-center mb-2">
-                                <button class="btn btn-outline-danger btn-sm">-</button>
-                                <span class="mx-2">0</span>
-                                <button class="btn btn-outline-danger btn-sm">+</button>
+<!-- Grille des formules -->
+<div class="row g-3 rounded">
+    <h2 class="text-center mb-4">{{ nb_formules }} formules disponibles</h2>
+    {% for formule in formules %}
+    <div class="col-md-4">
+        <!-- Carte de la formule -->
+        <div class="card shadow-sm h-100 border-0" data-bs-toggle="modal" data-bs-target="#formuleModal{{ formule.id }}">
+            <div class="card-header text-center bg-primary text-white rounded-top">
+                <h5 class="mb-0">{{ formule.libelle_formule }}</h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="small text-muted">Cliquez pour voir les détails</p>
+            </div>
+        </div>
+
+        <!-- Modal pour la formule -->
+        <div class="modal fade" id="formuleModal{{ formule.id }}" tabindex="-1" aria-labelledby="formuleModalLabel{{ formule.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                        <!-- En-tête du modal -->
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="formuleModalLabel{{ formule.id }}">{{ formule.libelle_formule }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        
+                        <!-- Corps du modal -->
+                        <div class="modal-body">
+                            <!-- Liste des plats inclus -->
+                            <ul class="list-group mb-3">
+                                {% for p in formule.les_plats %}
+                                <li class="list-group-item">
+                                    {{ p.nom_plat }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="mb-3">
+                                <p>Prix unitaire : <strong>{{ formule.prix }}€</strong></p>
+                            </div>
+                            <!-- Contrôle de quantité -->
+                            <div class="form-group">
+                                <label for="quantity{{ formule.id }}">Quantité</label>
+                                <input type="number" class="form-control" id="quantity{{ formule.id }}" name="quantity" min="1" value="1">
                             </div>
                         </div>
-                    </div>
+                        
+                        <!-- Pied de page du modal -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                        </div>
                 </div>
-                {% endfor %}
             </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
             {% endif %}
 
             {% if type=="d" %}
@@ -119,15 +179,40 @@
                 <h2>{{nb_desserts}} desserts disponibles</h2>
                 {% for dessert in desserts %}
                 <div class="col-md-4">
-                    <div class="card">
-                        <img src="{{ url_for('static', filename=dessert.img) }}" class="card-img-top" alt="Sushi">
+                    <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ dessert.nom_plat }}">
+                        <img src="{{ url_for('static', filename=dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
                         <div class="card-body text-center">
-                            <div class="d-flex justify-content-center align-items-center mb-2">
-                                <button class="btn btn-outline-danger btn-sm">-</button>
-                                <span class="mx-2">0</span>
-                                <button class="btn btn-outline-danger btn-sm">+</button>
+                            <p>{{ dessert.nom_plat }} <br> {{ dessert.prix }}€</p>
+                        </div>
+                    </div>
+
+                    <!-- Modal spécifique au dessert -->
+                    <div class="modal fade" id="editModal{{ dessert.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ dessert.nom_plat }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="editForm{{ dessert.nom_plat }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editModalLabel{{ dessert.nom_plat }}">{{ dessert.nom_plat }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <img src="{{ url_for('static', filename=dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="quantity{{ dessert.nom_plat }}">Quantité</label>
+                                            <input type="number" class="form-control" id="quantity{{ dessert.nom_plat }}" name="quantity" min="1" value="1" max="{{dessert.quantite_stock}}">
+                                        </div>
+                                        <div class="form-group mt-3">
+                                            <p>Prix unitaire : <span id="totalPrice{{ dessert.id }}">{{ dessert.prix }}</span>€</p>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                                    </div>
+                                </form>
                             </div>
-                            <small class="text-muted">Stock disponible : {{ dessert.quantite_stock }}</small>
                         </div>
                     </div>
                 </div>
