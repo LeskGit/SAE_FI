@@ -57,7 +57,7 @@ class Commandes(db.Model):
     date_creation = db.Column(db.DateTime, default = db.func.current_timestamp())
     sur_place = db.Column(db.Boolean)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
-    etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"), default = "Panier")
+    etat = db.Column(db.Enum("Panier", "Non payée", "Payée"), default = "Panier")
 
     les_plats = db.relationship("Plats", secondary = "constituer", back_populates = "les_commandes", overlaps="constituer_assoc,plat")
     les_clients = db.relationship("User", back_populates="les_commandes")
