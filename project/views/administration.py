@@ -1,12 +1,12 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Plats, get_plats
+from project.models import Formule, Plats, get_plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
-from wtforms import StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
+from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
 from flask_wtf.file import FileAllowed
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from werkzeug.utils import secure_filename
@@ -32,6 +32,11 @@ class PlatForm(FlaskForm):
     img = FileField("Image", validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'])])
     csrf_token = HiddenField()
 
+class FormuleForm(FlaskForm):
+    libelle_formule = StringField("Nom de la formule", validators=[DataRequired(), Length(max=64)])
+    prix = FloatField("Prix", validators=[DataRequired()])
+    plats = SelectMultipleField("Plats", coerce=str, validators=[DataRequired()])
+    csrf_token = HiddenField()
 
 
 @app.route("/admin")
@@ -114,10 +119,54 @@ def creation_plat():
     return render_template("creation_plat.html", form=form)
 
 
-@app.route("/creation/offre")
+@app.route("/creation/offre", methods=["GET"])
 @admin_required
 def creation_offre():
-    return render_template("creation_offre.html")
+    form = FormuleForm()
+    form.plats.choices = [(plat.nom_plat, plat.nom_plat) for plat in get_plats()]
+    return render_template("creation_offre.html", form=form, plats=get_plats())
+
+@app.route("/add_offre", methods=["POST"])
+@admin_required
+def add_offre():
+    libelle_formule = request.form.get("libelle_formule")
+    prix = request.form.get("prix")
+    plats_selectionnes = request.form.getlist("plats")  # Récupère tous les plats sélectionnés
+
+    # Validation : Vérifie que tous les champs sont remplis
+    if not libelle_formule or not prix or not plats_selectionnes:
+        flash("Erreur : Veuillez remplir tous les champs et sélectionner au moins un plat.", "danger")
+        return redirect(url_for("creation_offre"))
+    
+    # Validation du nombre de plats
+    if len(plats_selectionnes) > 4:
+        flash("Erreur : Une formule ne peut contenir que 4 plats maximum.", "danger")
+        return redirect(url_for("creation_offre"))
+
+    # Vérifier si la formule existe déjà
+    formule_existante = Formule.query.filter_by(libelle_formule=libelle_formule).first()
+    if formule_existante:
+        flash(f"Erreur : La formule '{libelle_formule}' existe déjà.", "danger")
+        return redirect(url_for("creation_offre"))
+
+    # Créer une nouvelle formule
+    nouvelle_formule = Formule(
+        libelle_formule=libelle_formule,
+        prix=prix
+    )
+
+    # Ajouter les plats sélectionnés
+    for nom_plat in plats_selectionnes:
+        plat = Plats.query.filter_by(nom_plat=nom_plat).first()
+        if plat:
+            nouvelle_formule.les_plats.append(plat)
+
+    db.session.add(nouvelle_formule)
+    db.session.commit()
+
+    flash(f"La formule '{libelle_formule}' a été ajoutée avec succès.", "success")
+    return redirect(url_for("creation_offre"))
+
 
 @app.route("/edition/plat")
 @admin_required
