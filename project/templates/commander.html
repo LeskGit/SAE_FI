@@ -114,7 +114,7 @@
     {% for formule in formules %}
     <div class="col-md-4">
         <!-- Carte de la formule -->
-        <div class="card shadow-sm h-100 border-0" data-bs-toggle="modal" data-bs-target="#formuleModal{{ formule.id }}">
+        <div class="card shadow-sm h-100 border-0" data-bs-toggle="modal" data-bs-target="#formuleModal{{ formule.id_formule }}">
             <div class="card-header text-center bg-primary text-white rounded-top">
                 <h5 class="mb-0">{{ formule.libelle_formule }}</h5>
             </div>
@@ -124,46 +124,47 @@
         </div>
 
         <!-- Modal pour la formule -->
-        <div class="modal fade" id="formuleModal{{ formule.id }}" tabindex="-1" aria-labelledby="formuleModalLabel{{ formule.id }}" aria-hidden="true">
+        <div class="modal fade" id="formuleModal{{ formule.id_formule }}" tabindex="-1" aria-labelledby="formuleModalLabel{{ formule.id_formule }}" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                        <!-- En-tête du modal -->
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="formuleModalLabel{{ formule.id }}">{{ formule.libelle_formule }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <!-- En-tête du modal -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="formuleModalLabel{{ formule.id_formule }}">{{ formule.libelle_formule }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                    <!-- Corps du modal -->
+                    <div class="modal-body">
+                        <!-- Liste des plats inclus -->
+                        <ul class="list-group mb-3">
+                            {% for plat in formule.les_plats %}
+                            <li class="list-group-item">
+                                {{ plat.nom_plat }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="mb-3">
+                            <p>Prix unitaire : <strong>{{ formule.prix }}€</strong></p>
                         </div>
-                        
-                        <!-- Corps du modal -->
-                        <div class="modal-body">
-                            <!-- Liste des plats inclus -->
-                            <ul class="list-group mb-3">
-                                {% for p in formule.les_plats %}
-                                <li class="list-group-item">
-                                    {{ p.nom_plat }}
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            <div class="mb-3">
-                                <p>Prix unitaire : <strong>{{ formule.prix }}€</strong></p>
-                            </div>
-                            <!-- Contrôle de quantité -->
-                            <div class="form-group">
-                                <label for="quantity{{ formule.id }}">Quantité</label>
-                                <input type="number" class="form-control" id="quantity{{ formule.id }}" name="quantity" min="1" value="1">
-                            </div>
+                        <!-- Contrôle de quantité -->
+                        <div class="form-group">
+                            <label for="quantity{{ formule.id_formule }}">Quantité</label>
+                            <input type="number" class="form-control" id="quantity{{ formule.id_formule }}" name="quantity" min="1" value="1">
                         </div>
-                        
-                        <!-- Pied de page du modal -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
-                        </div>
+                    </div>
+                    
+                    <!-- Pied de page du modal -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
 
             {% endif %}
 
