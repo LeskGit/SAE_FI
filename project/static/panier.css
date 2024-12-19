@@ -5,11 +5,19 @@
 
 .inner-shadow {
     box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.5);
-
 }
 
 .separator {
     border-left: 2px solid black;
     height: 50vh;
     margin: 0;
+}
+
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
 }
