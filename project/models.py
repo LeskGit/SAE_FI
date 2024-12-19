@@ -575,6 +575,34 @@ class TriggerManager:
         END;
         """
 
+    def trigger_ferme_insert(self) -> str:
+        """
+        Impossible de faire des commandes le lundi ou dimanche
+        """
+        return """
+        CREATE OR REPLACE TRIGGER ferme_insert BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
+            END IF;
+        END;
+        """
+
+    def trigger_ferme_update(self) -> str:
+        """
+        Impossible de faire des commandes le lundi ou dimanche
+        """
+        return """
+        CREATE OR REPLACE TRIGGER ferme_update BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
+            END IF;
+        END;
+        """
+
 def execute_tests():
 
     usr = User(num_tel = '0123456759',
@@ -649,7 +677,7 @@ def execute_tests():
                         etat = "Non Payée")
 
     com2 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 2,
@@ -663,7 +691,7 @@ def execute_tests():
                         etat = "Payée")
 
     com4 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 4,
@@ -677,7 +705,7 @@ def execute_tests():
                         etat = "Payée")
 
     com6 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 6,
@@ -691,7 +719,7 @@ def execute_tests():
                         etat = "Payée")
 
     com8 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 8,
@@ -705,7 +733,7 @@ def execute_tests():
                         etat = "Payée")
 
     com10 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 10,
@@ -719,7 +747,7 @@ def execute_tests():
                         etat = "Payée")
 
     com12 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 4, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
