@@ -33,21 +33,21 @@ def ajout_plat() :
     if current_user :
         f = CommanderForm()
         if f.num_com.data :
-            commande = Commandes.query.get(f.num_com.data)
-            constituer = Constituer.query.get((f.nom_plat.data, f.num_com.data))
-            if constituer:
-                constituer.quantite_plat += f.quantite.data
-            else:
-                constituer = Constituer(nom_plat = f.nom_plat.data, num_commande = f.num_com.data, quantite_plat = f.quantite.data)
-                commande.constituer_assoc.append(constituer)
-            db.session.add(constituer)
-            db.session.commit()
+            try:
+                commande = Commandes.query.get(f.num_com.data)
+                constituer = Constituer.query.get((f.nom_plat.data, f.num_com.data))
+                if constituer:
+                    constituer.quantite_plat += f.quantite.data
+                else:
+                    constituer = Constituer(nom_plat = f.nom_plat.data, num_commande = f.num_com.data, quantite_plat = f.quantite.data)
+                    commande.constituer_assoc.append(constituer)
+                db.session.add(constituer)
+                db.session.commit()
+            except Exception as e:
+                flash("Erreur : " + str(e._message), "danger")
+                return redirect(url_for('commander'))
 
-    type = request.args.get('type', 'p')
-    plats=get_plats()
-    formules=get_formules()
-    desserts=get_desserts()
-    return render_template("commander.html",plats=plats, formules=formules , desserts=desserts, type=type, nb_plats=len(plats), nb_formules=len(formules), nb_desserts=len(desserts), form = f, num_com = f.num_com.data) 
+    return redirect(url_for('commander'))
 
 @app.route("/panier")
 def panier():
@@ -78,9 +78,7 @@ def modifier_quantite():
         for constituer in panier.constituer_assoc:
             if constituer.nom_plat == nom_plat:
                 if action == 'increment':
-                    print(constituer.quantite_plat +1)
-                    print(int(constituer.plat.quantite_stock * 0.8))
-                    if constituer.quantite_plat +1 < int(constituer.plat.quantite_stock * 0.8):
+                    if constituer.quantite_plat +1 <= int(constituer.plat.stock_utilisable * 0.8):
                         constituer.quantite_plat += 1
                 elif action == 'decrement' and constituer.quantite_plat > 1:
                         constituer.quantite_plat -= 1
@@ -188,15 +186,21 @@ def validation_paiement():
 
     if panier is None:
         return redirect(url_for('panier'))
-    
-    panier.etat = "Non payée"
-    panier.date_creation = datetime.now()
-    #Réduire le stock
+
     try:
+        panier.etat = "Non payée"
+        panier.date_creation = datetime.now()
+
+        for constituer_plat in panier.constituer_assoc:
+            constituer_plat.plat.stock_utilisable -= constituer_plat.quantite_plat
+
         db.session.commit()
+
     except Exception as e:
         flash("Erreur : " + str(e._message), "danger")
         return redirect(url_for('panier'))
+
+
 
 
     return render_template("validation_commande.html", panier=panier)
