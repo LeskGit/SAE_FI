@@ -34,10 +34,14 @@ def ajout_plat() :
         f = CommanderForm()
         if f.num_com.data :
             commande = Commandes.query.get(f.num_com.data)
-            constituer = Constituer(nom_plat = f.nom_plat.data, num_commande = f.num_com.data, quantite_plat = f.quantite.data)
+            constituer = Constituer.query.get((f.nom_plat.data, f.num_com.data))
+            if constituer:
+                constituer.quantite_plat += f.quantite.data
+            else:
+                constituer = Constituer(nom_plat = f.nom_plat.data, num_commande = f.num_com.data, quantite_plat = f.quantite.data)
+                commande.constituer_assoc.append(constituer)
             db.session.add(constituer)
             db.session.commit()
-            commande.constituer_assoc.append(constituer)
 
     type = request.args.get('type', 'p')
     plats=get_plats()
