@@ -13,7 +13,7 @@ class ContactForm(FlaskForm):
 
 @app.route("/")
 def home():
-    images = ["img/slide-1.jpg", "img/slide-2.jpg", "img/slide-3.jpg"]
+    images = ["img/slide-1.jpg", "img/slide-2.jpg", "img/slide-3.jpg", "img/quelques-plats-japonais.jpg"]
     return render_template("home.html",
                            images=images)
 
