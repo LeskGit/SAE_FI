@@ -68,7 +68,8 @@ class Commandes(db.Model):
 class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
     type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
-    quantite_stock = db.Column(db.Integer)
+    stock_utilisable = db.Column(db.Integer)
+    stock_reserve = db.Column(db.Integer)
     quantite_defaut = db.Column(db.Integer)
     prix = db.Column(db.Float)
     quantite_promo = db.Column(db.Integer)
@@ -80,6 +81,11 @@ class Plats(db.Model):
 
     les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats", overlaps="constituer_assoc,commande")
     constituer_assoc = db.relationship("Constituer", back_populates="plat", overlaps="les_commandes,commande")
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.stock_utilisable is not None and self.stock_reserve is None:
+            self.stock_reserve = int(self.stock_utilisable * 0.2)
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
