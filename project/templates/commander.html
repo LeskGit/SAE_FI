@@ -11,9 +11,9 @@
     <h1 class="text-center my-3">Commander</h1>
     <hr class="w-25 mx-auto bg-dark bar">
 </div>
-<div class="row">
+<div class="row me-0">
     <!-- Liste des allergènes -->
-    <div class="col-md-3 bg-light p-3">
+    <div class="col-md-3 bg-light p-3 rounded">
         <h5>Liste des allergènes</h5>
         <ul class="list-group">
             <li class="list-group-item d-flex align-items-center">
@@ -30,33 +30,27 @@
     </div>
 
     <!-- Section de commande -->
-    <div class="col-md-9 ">
+    <div class="col-md-9 rounded ">
 
-        <!-- Section de commande avec scrollbar -->
-        <div class="col-md-9" style="height: 500px; overflow-y: auto;">
+        
             
             <!-- Catégories -->
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link {% if type == 'p' %}active{% endif %}" href="?type=p">Plats</a>
+                    <a class="nav-link {% if type == 'p' %}active{% endif %}" href="?type=p"><h4>Plats</h4></a>
                 </li>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if type == 'f' %}active{% endif %}" href="?type=f">Formules</a>
+                    <a class="nav-link {% if type == 'f' %}active{% endif %}" href="?type=f"><h4>Formules</h4></a>
                 </li>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if type == 'd' %}active{% endif %}" href="?type=d">Desserts</a>
+                    <a class="nav-link {% if type == 'd' %}active{% endif %}" href="?type=d"><h4>Desserts</h4></a>
                 </li>
 
                 <!-- Formulaire de recherche aligné à droite -->
                 <form class="d-flex ms-auto" role="search">
                     <div class="input-group">
-                        <span class="input-group-text bg-light">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-                            </svg>
-                        </span>
                         <input type="text" class="form-control" placeholder="Rechercher">
                         <span class="input-group-text bg-light">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
@@ -68,12 +62,12 @@
             </ul>
             {% if type=="p" %}
             <!-- Grille des plats -->
-            <div class="row g-3 rounded">
+            <div class="row g-3 rounded me-0" style="height: 500px; overflow-y: auto;">
                 <h2>{{nb_plats}} plats disponibles</h2>
                 {% for plat in plats %}
                 <div class="col-md-4">
                     <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.nom_plat }}">
-                        <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
+                        <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
                         <div class="card-body text-center">
                             <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
                         </div>
@@ -83,18 +77,20 @@
                     <div class="modal fade" id="editModal{{ plat.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat.nom_plat }}" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form id="editForm{{ plat.nom_plat }}">
+                                <form id="editForm{{ plat.nom_plat }}" method="POST", action="{{ url_for('ajout_plat') }}", role="form">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="editModalLabel{{ plat.nom_plat }}">{{ plat.nom_plat }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-group">
-                                            <img src="{{ url_for('static', filename=plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
+                                            <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
                                         </div>
                                         <div class="form-group">
                                             <label for="quantity{{ plat.nom_plat }}">Quantité</label>
-                                            <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantity" min="1" value="1" max="{{plat.quantite_stock}}">
+                                            <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantite" min="1" value="1" max="{{plat.quantite_stock}}">
+                                            <input type="hidden" name="nom_plat" value="{{ plat.nom_plat }}">
+                                            <input type="hidden" name="num_com" value="{{ num_com }}">
                                         </div>
                                         <div class="form-group mt-3">
                                             <p>Prix unitaire : <span id="totalPrice{{ plat.id }}">{{ plat.prix }}</span>€</p>
@@ -102,7 +98,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                        <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                                        <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
                                     </div>
                                 </form>
                             </div>
@@ -115,7 +111,7 @@
 
             {% if type=="f" %}
 <!-- Grille des formules -->
-<div class="row g-3 rounded">
+<div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
     <h2 class="text-center mb-4">{{ nb_formules }} formules disponibles</h2>
     {% for formule in formules %}
     <div class="col-md-4">
@@ -162,7 +158,7 @@
                         <!-- Pied de page du modal -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                            <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
                         </div>
                 </div>
             </div>
@@ -175,12 +171,12 @@
 
             {% if type=="d" %}
             <!-- Grille des desserts -->
-            <div class="row g-3 rounded">
+            <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
                 <h2>{{nb_desserts}} desserts disponibles</h2>
                 {% for dessert in desserts %}
                 <div class="col-md-4">
                     <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ dessert.nom_plat }}">
-                        <img src="{{ url_for('static', filename=dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
+                        <img src="{{ url_for('static', filename='img/product/' ~ dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
                         <div class="card-body text-center">
                             <p>{{ dessert.nom_plat }} <br> {{ dessert.prix }}€</p>
                         </div>
@@ -197,7 +193,7 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-group">
-                                            <img src="{{ url_for('static', filename=dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
+                                            <img src="{{ url_for('static', filename='img/product/' ~ dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
                                         </div>
                                         <div class="form-group">
                                             <label for="quantity{{ dessert.nom_plat }}">Quantité</label>
@@ -209,7 +205,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                        <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                                        <button type="submit" class="btn btn-orange shadow ">Ajouter au panier</button>
                                     </div>
                                 </form>
                             </div>

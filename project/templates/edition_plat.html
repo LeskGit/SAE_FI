@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
@@ -6,60 +7,234 @@
 
 {% block content %}
 <div class="top-info">
-    <h1 class="text-center my-3">Edition plats</h1>
+    <h1 class="text-center my-3">Édition des plats</h1>
     <hr class="w-25 mx-auto bg-dark bar"/>
 </div>
 
 <div class="container-fluid w-75 bg-light justify-content-center align-items-center">
     <nav class="navbar navbar-expand-md navbar-light bg-light">
         <div class="container-fluid justify-content-center align-items-center">
-            <div class="navbar-nav w-75 d-flex">
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Tous</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Plats chauds</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Plats froids</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Sushis</a>
-                <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Desserts</a>
-            </div>
-        </div>
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link {% if type == 'a' %}active{% endif %}" href="?type=a">Tous les plats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if type == 'pc' %}active{% endif %}" href="?type=pc">Plats chauds</a>
+                </li>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if type == 'pf' %}active{% endif %}" href="?type=pf">plats froids</a>
+                </li>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if type == 's' %}active{% endif %}" href="?type=s">Sushi</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if type == 'd' %}active{% endif %}" href="?type=d">Desserts</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{{ url_for('creation_plat') }}">Ajouter un plat</a>
+                </li>
+
+                <!-- Formulaire de recherche aligné à droite -->
+                <form class="d-flex ms-auto" role="search">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                            </svg>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Rechercher">
+                        <span class="input-group-text bg-light">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                            </svg>
+                        </span>
+                    </div>
+                </form>
+            </ul>
     </nav>
+
     <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition" style="height: 500px; overflow-y: auto;">
         <div class="container-fluid d-flex">
-                <div class="container-fluid plat_cards">
-                    {% for p in plats %}
-                    <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
-                        <h5 class="text-center font-weight-bold">{{ p.nom_plat }}</h5>
-                        <hr class="w-50 mx-auto bar"/>
-                        <div class="text-center">
-                            <img src="{{ url_for('static', filename=p.img) }}" class="img_plat rounded" alt="{{ p.nom_plat }}">
-                        </div>
-                        <div class="text-center mt-3">
-                            <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
-                        </div>
-                        <div class="d-flex justify-content-end mt-2">
-                            <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal" data-id="{{ p.id }}" data-nom="{{ p.nom_plat }}" data-prix="{{ p.prix }}"></button>
-                            <button class="btn btn-danger delete_button"></button>
-                        </div>
+            <div class="container-fluid plat_cards">
+                {% if type=="a" %}
+                {% for p in plats %}
+                <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
+                    <h5 class="text-center font-weight-bold">{{ p.nom_plat }}</h5>
+                    <hr class="w-50 mx-auto bar"/>
+                    <div class="text-center">
+                        <img 
+                            src="{{ url_for('static', filename='img/product/' ~ p.img) if p.img else url_for('static', filename='img/logo_oumami.jpg') }}"
+                            class="img_plat rounded" 
+                            alt="{{ p.nom_plat }}">
+
                     </div>
-                <!-- Modale pour l'édition -->
-                <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Type : <strong>{{ p.type_plat }}</strong></p>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ p.nom_plat }}"></button>
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_plat', id=p.nom_plat) }}" style="display:inline-block;">
+                            <button class="btn btn-danger delete_button" type="submit"></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                {% if type=="pc" %}
+                {% for plat_c in plats_chauds %}
+                <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
+                    <h5 class="text-center font-weight-bold">{{ plat_c.nom_plat }}</h5>
+                    <hr class="w-50 mx-auto bar"/>
+                    <div class="text-center">
+                        <img 
+                            src="{{ url_for('static', filename='img/product/' ~ plat_c.img) if plat_c.img else url_for('static', filename='img/logo_oumami.jpg') }}"
+                            class="img_plat rounded" 
+                            alt="{{ plat_c.nom_plat }}">
+
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Type : <strong>{{ plat_c.type_plat }}</strong></p>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Prix : <strong>{{ plat_c.prix }}</strong> €</p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ plat_c.nom_plat }}"></button>
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_plat', id=plat_c.nom_plat) }}" style="display:inline-block;">
+                            <button class="btn btn-danger delete_button" type="submit"></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% if type=="pf" %}
+                {% for plat_f in plats_froids %}
+                <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
+                    <h5 class="text-center font-weight-bold">{{ plat_f.nom_plat }}</h5>
+                    <hr class="w-50 mx-auto bar"/>
+                    <div class="text-center">
+                        <img 
+                            src="{{ url_for('static', filename='img/product/' ~ plat_f.img) if plat_f.img else url_for('static', filename='img/logo_oumami.jpg') }}"
+                            class="img_plat rounded" 
+                            alt="{{ plat_f.nom_plat }}">
+
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Type : <strong>{{ plat_f.type_plat }}</strong></p>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Prix : <strong>{{ plat_f.prix }}</strong> €</p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ plat_f.nom_plat }}"></button>
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_plat', id=plat_f.nom_plat) }}" style="display:inline-block;">
+                            <button class="btn btn-danger delete_button" type="submit"></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% if type=="s" %}
+                {% for sushi in sushis %}
+                <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
+                    <h5 class="text-center font-weight-bold">{{ sushi.nom_plat }}</h5>
+                    <hr class="w-50 mx-auto bar"/>
+                    <div class="text-center">
+                        <img 
+                            src="{{ url_for('static', filename='img/product/' ~ sushi.img) if sushi.img else url_for('static', filename='img/logo_oumami.jpg') }}"
+                            class="img_plat rounded" 
+                            alt="{{ sushi.nom_plat }}">
+
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Type : <strong>{{ sushi.type_plat }}</strong></p>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Prix : <strong>{{ sushi.prix }}</strong> €</p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ sushi.nom_plat }}"></button>
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_plat', id=sushi.nom_plat) }}" style="display:inline-block;">
+                            <button class="btn btn-danger delete_button" type="submit"></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% if type=="d" %}
+                {% for dessert in desserts %}
+                <div class="plat_card container-fluid p-3 my-3 shadow-sm rounded">
+                    <h5 class="text-center font-weight-bold">{{ dessert.nom_plat }}</h5>
+                    <hr class="w-50 mx-auto bar"/>
+                    <div class="text-center">
+                        <img 
+                            src="{{ url_for('static', filename='img/product/' ~ dessert.img) if dessert.img else url_for('static', filename='img/logo_oumami.jpg') }}"
+                            class="img_plat rounded" 
+                            alt="{{ dessert.nom_plat }}">
+
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">
+                            Type : <strong>{{ dessert.type_plat }}</strong>
+                        </p>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">
+                            Prix : <strong>{{ dessert.prix }}</strong> €
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ dessert.nom_plat }}"></button>
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_plat', id=dessert.nom_plat) }}" style="display:inline-block;">
+                            <button class="btn btn-danger delete_button" type="submit"></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Modal d'édition -->
+                {% for p in plats %}
+                <div class="modal fade" id="editModal_{{ p.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel_{{ p.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="editForm">
+                            <form method="POST" enctype="multipart/form-data" action="{{ url_for('update_plat', id=p.nom_plat) }}">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabel">Modifier le plat</h5>
+                                    <h5 class="modal-title" id="editModalLabel_{{ p.nom_plat }}">Modifier le plat</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    <input type="hidden" id="platId" name="plat_id">
                                     <div class="form-group">
-                                        <label for="platNom">Nom du plat</label>
-                                        <input type="text" class="form-control" id="platNom" name="nom_plat">
+                                        <label for="platNom_{{ p.nom_plat }}">Nom du plat</label>
+                                        <input type="text" class="form-control" id="platNom_{{ p.nom_plat }}" name="nom_plat" value="{{ p.nom_plat }}" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="platPrix">Prix</label>
-                                        <input type="number" class="form-control" id="platPrix" name="prix">
+                                        <label for="platImg_{{ p.nom_plat }}">Image</label>
+                                        <input type="file" class="form-control" id="platImg_{{ p.nom_plat }}" name="img" accept="image/*">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="platType_{{ p.nom_plat }}">Type</label>
+                                        <select class="form-control" id="platType_{{ p.nom_plat }}" name="type_plat" required>
+                                            <option value="Plat chaud" {% if p.type_plat == "Plat chaud" %}selected{% endif %}>Plat chaud</option>
+                                            <option value="Plat froid" {% if p.type_plat == "Plat froid" %}selected{% endif %}>Plat froid</option>
+                                            <option value="Sushi" {% if p.type_plat == "Sushi" %}selected{% endif %}>Sushi</option>
+                                            <option value="Dessert" {% if p.type_plat == "Dessert" %}selected{% endif %}>Dessert</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="platPrix_{{ p.nom_plat }}">Prix</label>
+                                        <input type="number" step="0.01" class="form-control" id="platPrix_{{ p.nom_plat }}" name="prix" value="{{ p.prix }}" required>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -71,9 +246,8 @@
                     </div>
                 </div>
                 {% endfor %}
-            </div>            
+            </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
