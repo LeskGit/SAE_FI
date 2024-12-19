@@ -213,3 +213,28 @@ ul li {
   font-size: large;
   background-color: #f8f9fa; 
 }
+
+/* Flèche descendante */
+.scroll-down-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+
+/* Section contact */
+.contact-section {
+  background-color: #f8f9fa; 
+  padding: 20px 0; 
+}
+
+.mb-0.fw-bold{
+  color: black;
+}
+
+.contact-item svg {
+  fill: #e87c36; 
+}
+
