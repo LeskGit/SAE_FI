@@ -3,7 +3,7 @@ from sqlalchemy.orm import validates
 from .app import db, login_manager
 from flask_login import UserMixin
 import re
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 class User(db.Model, UserMixin):
     num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), primary_key = True)
@@ -30,7 +30,16 @@ class User(db.Model, UserMixin):
         return self.num_tel
 
     def get_panier(self):
-        return Commandes.query.filter_by(num_tel = self.num_tel, etat = "Panier").first()
+        panier = Commandes.query.filter_by(num_tel = self.num_tel, etat = "Panier").first()
+        return panier
+    
+    def get_or_create_panier(self):
+        panier = self.get_panier()
+        if panier is None:
+            panier = Commandes(num_tel=self.num_tel, etat="Panier")
+            db.session.add(panier)
+            db.session.commit()
+        return panier
 
 @login_manager.user_loader
 def load_user(num_tel):
@@ -57,7 +66,7 @@ class Commandes(db.Model):
     num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
     date = db.Column(db.DateTime)
     date_creation = db.Column(db.DateTime, default = db.func.current_timestamp())
-    sur_place = db.Column(db.Boolean)
+    sur_place = db.Column(db.Boolean, default = False)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"), default = "Panier")
 
@@ -65,11 +74,29 @@ class Commandes(db.Model):
     les_clients = db.relationship("User", back_populates="les_commandes")
     constituer_assoc = db.relationship("Constituer", back_populates="commande", overlaps="les_plats,plat")
 
+    prix_total = 0
+    prix_avec_reduc = 0
+
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
     
     def calculer_prix(self):
-        return sum([plat.prix for plat in self.les_plats])
+        self.prix_total = sum([constituer.plat.prix * constituer.quantite_plat for constituer in self.constituer_assoc])
+        return self.prix_total
+
+    def compute_reduction(self):
+        """
+        Calcule la réduction de la commande :
+        Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
+        """
+        self.prix_avec_reduc = 0
+        for constituer in self.constituer_assoc:
+            if constituer.quantite_plat >= constituer.plat.quantite_promo:
+                self.prix_avec_reduc -= constituer.plat.prix_reduc
+        return self.prix_avec_reduc
+    
+    def get_num_table_dispo(self):
+        return 
 
 class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
@@ -259,7 +286,7 @@ class TriggerManager:
         CREATE OR REPLACE TRIGGER reserver_delais_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
 
-            IF TIMESTAMPDIFF(HOUR, NEW.date_creation, NEW.date) < 2 THEN
+            IF TIMESTAMPDIFF(HOUR, NEW.date_creation, NEW.date) < 2 AND NEW.etat != 'Panier' THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de réserver moins de 2 heures avant la date de la commande';
             END IF;
@@ -571,16 +598,16 @@ def execute_tests():
                 quantite_stock = 10,
                 quantite_defaut = 7,
                 prix = 10,
-                quantite_promo = 0,
-                prix_reduc = 0,
+                quantite_promo = 2,
+                prix_reduc = 10,
                 img = 'img/sushi.jpg')
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 quantite_stock = 10,
                 quantite_defaut = 6,
                 prix = 10,
-                quantite_promo = 0,
-                prix_reduc = 0,
+                quantite_promo = 5,
+                prix_reduc = 2,
                 img = 'img/sushi.jpg')
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
@@ -662,8 +689,8 @@ def execute_tests():
     com7 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 1),
-                        sur_place = True,
-                        num_table = 7,
+                        sur_place = False,
+                        num_table = None,
                         etat = "Payée")
 
     com8 = Commandes(num_tel = '0123456759',
@@ -756,10 +783,24 @@ def get_plats_froids():
 def get_sushis():
     return  Plats.query.filter_by(type_plat = "Sushi").all()
 
-def get_sur_place_today() :
-    today = datetime.today().date()
-    return Commandes.query.filter(db.func.date(Commandes.date) == today, Commandes.sur_place.is_(True)).all()
+def get_sur_place_at(date=datetime.today().date()):
+    return Commandes.query.filter(db.func.date(Commandes.date) == date, Commandes.sur_place.is_(True)).all()
  
+def get_num_table_dispo(commande_date:datetime):
+    """Renvoie le numéro de la première table disponible
+    """
+    commandes_sur_place = get_sur_place_at(commande_date.date())
+
+    dico_tables = {i: False for i in range(1, 13)}
+    for table in commandes_sur_place:
+        dico_tables[table.num_table] = True
+    
+    for num_table, occupe in dico_tables.items():
+        if not occupe:
+            return num_table
+    
+    return -1
+
 def get_blackliste() :
     return User.query.filter_by(blackliste = True).all()
 
