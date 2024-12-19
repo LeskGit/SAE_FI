@@ -18,12 +18,9 @@ class CommanderForm(FlaskForm) :
 
 @app.route("/commander")
 def commander() :
-    if current_user :
-        commande = Commandes(num_tel = current_user.num_tel)
-        db.session.add(commande)
-        db.session.commit()
+    if current_user:
+        commande = current_user.get_or_create_panier()
         num_commande = commande.num_commande
-        print(num_commande)
         form = CommanderForm()
         type = request.args.get('type', 'p')
         plats=get_plats()
@@ -51,11 +48,10 @@ def ajout_plat() :
 @app.route("/panier")
 def panier():
     if not current_user.is_authenticated:
-        panier = None
         return redirect(url_for('login'))
     
     panier = current_user.get_or_create_panier()
-    if panier != None:
+    if panier is not None:
         panier.calculer_prix()
         panier.compute_reduction()
 
