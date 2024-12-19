@@ -178,7 +178,7 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER commandes_sur_place_midi_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
+            IF NOT (HOUR(NEW.date) = 11 AND MINUTE(NEW.date) >= 30 OR HOUR(NEW.date) BETWEEN 12 AND 13 OR HOUR(NEW.date) = 14 AND MINUTE(NEW.date) = 0) THEN
                 IF NEW.sur_place = 1 THEN
                     SIGNAL SQLSTATE '45000'
                     SET MESSAGE_TEXT = 'Impossible de commander sur place avant 12h et après 14h';
@@ -194,7 +194,7 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER commandes_sur_place_midi_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
+            IF NOT (HOUR(NEW.date) = 11 AND MINUTE(NEW.date) >= 30 OR HOUR(NEW.date) BETWEEN 12 AND 13 OR HOUR(NEW.date) = 14 AND MINUTE(NEW.date) = 0) THEN
                 IF NEW.sur_place = 1 THEN
                     SIGNAL SQLSTATE '45000'
                     SET MESSAGE_TEXT = 'Impossible de commander sur place avant 12h et après 14h';
@@ -372,18 +372,14 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
         BEGIN
-            DECLARE stocks INT;
-            DECLARE nb_plat INT;
+            DECLARE stocks_u INT;
+            DECLARE stock_r INT;
 
-            SELECT IFNULL(SUM(quantite_plat), 0) into nb_plat
-            FROM constituer NATURAL JOIN commandes
-            WHERE nom_plat = NEW.nom_plat and DATE(date) = DATE(NOW());
-
-            SELECT quantite_stock into stocks
+            SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF nb_plat + NEW.quantite_plat > stocks * 0.8 THEN
+            IF stocks_u + NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
             END IF;
@@ -398,18 +394,14 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
         BEGIN
-            DECLARE stocks INT;
-            DECLARE nb_plat INT;
+            DECLARE stocks_u INT;
+            DECLARE stock_r INT;
 
-            SELECT SUM(quantite_plat) into nb_plat
-            FROM constituer NATURAL JOIN commandes
-            WHERE nom_plat = NEW.nom_plat and DATE(date) = DATE(NOW());
-
-            SELECT quantite_stock into stocks
+            SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF nb_plat + NEW.quantite_plat > stocks * 0.8 THEN
+            IF stocks_u + NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
             END IF;
@@ -568,7 +560,7 @@ def execute_tests():
     #5 Plats
     plat1 = Plats(nom_plat = 'plat1',
                 type_plat = 'Plat chaud',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 7,
                 prix = 10,
                 quantite_promo = 0,
@@ -576,7 +568,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 6,
                 prix = 10,
                 quantite_promo = 0,
@@ -584,7 +576,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 8,
                 prix = 10,
                 quantite_promo = 0,
@@ -592,7 +584,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 12,
                 prix = 10,
                 quantite_promo = 0,
@@ -600,7 +592,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 18,
                 prix = 10,
                 quantite_promo = 0,
