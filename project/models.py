@@ -66,13 +66,14 @@ class Commandes(db.Model):
         return f"{self.num_commande} : {self.date}"
     
 class Allergenes(db.Model):
-    nom_allergene = db.Column(db.String(64), primary_key = True)
+    id_allergene = db.Column(db.Integer, primary_key = True)
+    nom_allergene = db.Column(db.String(64))
     les_plats = db.relationship("Plats", secondary = "contenir_allergene", back_populates = "les_allergenes")
     
 contenir_allergene = db.Table("contenir_allergene",
     db.metadata,
     db.Column("nom_plat", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
-    db.Column("nom_allergene", db.String(64), db.ForeignKey("allergenes.nom_allergene"), primary_key=True)
+    db.Column("id_allergene", db.Integer, db.ForeignKey("allergenes.id_allergene"), primary_key=True)
 )
 
 class Plats(db.Model):
@@ -565,16 +566,16 @@ def execute_tests():
     
     #Allergenes
     
-    allergene1 = Allergenes(nom_allergene = 'allergene1')
-    allergene2 = Allergenes(nom_allergene = 'allergene2')
-    allergene3 = Allergenes(nom_allergene = 'allergene3')
-    allergene4 = Allergenes(nom_allergene = 'allergene4')
-    allergene5 = Allergenes(nom_allergene = 'allergene5')
-    allergene6 = Allergenes(nom_allergene = 'allergene6')
-    allergene7 = Allergenes(nom_allergene = 'allergene7')
-    allergene8 = Allergenes(nom_allergene = 'allergene8')
-    allergene9 = Allergenes(nom_allergene = 'allergene9')
-    allergene10 = Allergenes(nom_allergene = 'allergene10')
+    allergene1 = Allergenes(id_allergene = 1, nom_allergene = 'allergene1')
+    allergene2 = Allergenes(id_allergene = 2, nom_allergene = 'allergene2')
+    allergene3 = Allergenes(id_allergene = 3, nom_allergene = 'allergene3')
+    allergene4 = Allergenes(id_allergene = 4, nom_allergene = 'allergene4')
+    allergene5 = Allergenes(id_allergene = 5, nom_allergene = 'allergene5')
+    allergene6 = Allergenes(id_allergene = 6, nom_allergene = 'allergene6')
+    allergene7 = Allergenes(id_allergene = 7, nom_allergene = 'allergene7')
+    allergene8 = Allergenes(id_allergene = 8, nom_allergene = 'allergene8')
+    allergene9 = Allergenes(id_allergene = 9, nom_allergene = 'allergene9')
+    allergene10 = Allergenes(id_allergene = 10, nom_allergene = 'allergene10')
     
     db.session.add_all([allergene1, allergene2, allergene3, allergene4, allergene5, allergene6, allergene7, allergene8, allergene9, allergene10])
     db.session.commit()
@@ -809,3 +810,60 @@ def get_allergenes() :
 
 def get_allergenes_plat(nom_plat) :
     return Plats.query.get(nom_plat).les_allergenes
+
+def get_plats_filtered_by_allergenes(selected_allergenes):
+    if len(selected_allergenes) == 0:
+        return get_plats()  
+    else:
+        lst = get_plats()
+        for plats in get_plats():
+            for allergene in plats.les_allergenes:
+                if allergene.id_allergene in selected_allergenes:
+                    lst.remove(plats)
+                    break
+        return lst
+
+def get_plats_chauds_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Plat chaud":
+            plat_trie.remove(plats)
+    return plat_trie
+
+def get_plats_froids_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Plat froid":
+            plat_trie.remove(plats)
+    return plat_trie
+
+def get_sushis_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Sushi":
+            plat_trie.remove(plats)
+    return plat_trie
+
+def get_desserts_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Dessert":
+            plat_trie.remove(plats)
+    return plat_trie
+
+    
+
+def get_formules_filtered_by_allergenes(selected_allergenes):
+    if len(selected_allergenes) == 0:
+        return get_formules()  
+    else:
+        lst = get_formules()
+        for formules in get_formules():
+            for plats in formules.les_plats:
+                for allergene in plats.les_allergenes:
+                    if allergene.id_allergene in selected_allergenes:
+                        lst.remove(formules)
+                        break
+        return lst
+
+
