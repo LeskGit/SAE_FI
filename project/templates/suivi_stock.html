@@ -38,7 +38,7 @@
                 <h5>Plats chauds </h5>
                 <ul class="list-unstyled">
                     {% for plat in plats_chauds %}
-                        <li>{{ plat.nom_plat }} : <input type="number" min="0" name="{{ plat.nom_plat }}" value="{{ plat.quantite_stock }}"></li>
+                        <li>{{ plat.nom_plat }} : <input type="number" min="0" name="{{ plat.nom_plat }}" value="{{ plat.stock_utilisable }}"></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -47,7 +47,7 @@
                 <h5>Plats froids </h5>
                 <ul class="list-unstyled">
                     {% for plat in plats_froids %}
-                        <li>{{ plat.nom_plat }} : <input type="number" min="0" name="{{ plat.nom_plat }}" value="{{ plat.quantite_stock }}"></li>
+                        <li>{{ plat.nom_plat }} : <input type="number" min="0" name="{{ plat.nom_plat }}" value="{{ plat.stock_utilisable }}"></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -56,7 +56,7 @@
                 <h5>Sushis </h5>
                 <ul class="list-unstyled">
                     {% for sushi in sushis %}
-                        <li>{{ sushi.nom_plat }} : <input type="number" min="0" name="{{ sushi.nom_plat }}" value="{{ sushi.quantite_stock }}"></li>
+                        <li>{{ sushi.nom_plat }} : <input type="number" min="0" name="{{ sushi.nom_plat }}" value="{{ sushi.stock_utilisable }}"></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -65,7 +65,7 @@
                 <h5>Desserts </h5>
                 <ul class="list-unstyled">
                     {% for dessert in desserts %}
-                        <li>{{ dessert.nom_plat }} : <input type="number" min="0" name="{{ dessert.nom_plat }}" value="{{ dessert.quantite_stock }}"></li></li>
+                        <li>{{ dessert.nom_plat }} : <input type="number" min="0" name="{{ dessert.nom_plat }}" value="{{ dessert.stock_utilisable }}"></li></li>
                     {% endfor %}
                 </ul>
             </div>
