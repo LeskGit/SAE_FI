@@ -161,7 +161,7 @@ class TriggerManager:
         On ne peut avoir que 12 commandes sur place en même temps
         """
         return """
-        CREATE OR REPLACE TRIGGER limiter_commandes_sur_place_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER limiter_commandes_sur_place_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             DECLARE nb INT;
 
@@ -181,7 +181,7 @@ class TriggerManager:
         On ne peut avoir que 12 commandes sur place en même temps
         """
         return """
-        CREATE OR REPLACE TRIGGER limiter_commandes_sur_place_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER limiter_commandes_sur_place_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE nb INT;
 
@@ -203,7 +203,7 @@ class TriggerManager:
         Permet de réserver une table uniquement le midi
         """
         return """
-        CREATE OR REPLACE TRIGGER commandes_sur_place_midi_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER commandes_sur_place_midi_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
                 IF NEW.sur_place = 1 THEN
@@ -219,7 +219,7 @@ class TriggerManager:
         Permet de réserver une table uniquement le midi
         """
         return """
-        CREATE OR REPLACE TRIGGER commandes_sur_place_midi_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER commandes_sur_place_midi_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
                 IF NEW.sur_place = 1 THEN
@@ -235,7 +235,7 @@ class TriggerManager:
         Trigger qui empêche de modifier une commande après 15 minutes après la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER update_commande BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER update_commande BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE current DATETIME DEFAULT NOW();
 
@@ -251,7 +251,7 @@ class TriggerManager:
         Trigger qui empêche de supprimer une commande après 15 minutes après la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER delete_commande BEFORE DELETE ON commandes FOR EACH ROW
+        CREATE TRIGGER delete_commande BEFORE DELETE ON commandes FOR EACH ROW
         BEGIN
             DECLARE current DATETIME DEFAULT NOW();
 
@@ -268,7 +268,7 @@ class TriggerManager:
         Trigger qui empêche de réserver 2 heures avant la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER reserver_delais_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER reserver_delais_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
 
             IF TIMESTAMPDIFF(HOUR, NEW.date_creation, NEW.date) < 2 THEN
@@ -283,7 +283,7 @@ class TriggerManager:
         Trigger qui empêche de réserver 2 heures avant la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER reserver_delais_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER reserver_delais_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
 
             IF TIMESTAMPDIFF(HOUR, NEW.date_creation, NEW.date) < 2 AND NEW.etat != 'Panier' THEN
@@ -298,7 +298,7 @@ class TriggerManager:
     #    Trigger qui empêche de commander si l'utilisateur a une commande non payée
     #    """
     #    return """
-    #    CREATE OR REPLACE TRIGGER commande_non_payee BEFORE INSERT ON commandes FOR EACH ROW
+    #    CREATE TRIGGER commande_non_payee BEFORE INSERT ON commandes FOR EACH ROW
     #    BEGIN
     #        DECLARE nb INT;##
 
@@ -318,7 +318,7 @@ class TriggerManager:
         Trigger qui empêche de commander si l'utilisateur est blackliste
         """
         return """
-        CREATE OR REPLACE TRIGGER commande_blacklisted_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER commande_blacklisted_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
                 SIGNAL SQLSTATE '45000'
@@ -332,7 +332,7 @@ class TriggerManager:
         Trigger qui empêche de commander si l'utilisateur est blackliste
         """
         return """
-        CREATE OR REPLACE TRIGGER commande_blacklisted_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER commande_blacklisted_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
                 SIGNAL SQLSTATE '45000'
@@ -347,7 +347,7 @@ class TriggerManager:
             venu chercher sa commande
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_black_list_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER black_list_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             DECLARE temps INT;
             DECLARE current DATETIME DEFAULT NOW();
@@ -372,7 +372,7 @@ class TriggerManager:
             venu chercher sa commande
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_black_list_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER black_list_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE temps INT;
             DECLARE current DATETIME DEFAULT NOW();
@@ -397,7 +397,7 @@ class TriggerManager:
             en stock
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
+        CREATE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
         BEGIN
             DECLARE stocks INT;
             DECLARE nb_plat INT;
@@ -423,7 +423,7 @@ class TriggerManager:
             en stock
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
+        CREATE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
         BEGIN
             DECLARE stocks INT;
             DECLARE nb_plat INT;
@@ -448,7 +448,7 @@ class TriggerManager:
         On ne peut réserver une table que si elle est disponible
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_table_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER trigger_table_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             DECLARE num INT;
 
@@ -473,7 +473,7 @@ class TriggerManager:
         On ne peut réserver une table que si elle est disponible
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_table_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER trigger_table_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE num INT;
 
@@ -499,7 +499,7 @@ class TriggerManager:
             catégories différentes
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_formule_insert BEFORE INSERT ON contenir FOR EACH ROW
+        CREATE TRIGGER trigger_formule_insert BEFORE INSERT ON contenir FOR EACH ROW
         BEGIN
             DECLARE nombre int;
             DECLARE type VARCHAR(62);
@@ -538,7 +538,7 @@ class TriggerManager:
             catégories différentes
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_formule_update BEFORE UPDATE ON contenir FOR EACH ROW
+        CREATE TRIGGER trigger_formule_update BEFORE UPDATE ON contenir FOR EACH ROW
         BEGIN
             DECLARE cnt INT DEFAULT 0;
 
@@ -561,7 +561,7 @@ class TriggerManager:
         Un utilisateur doit avoir un seul et unique panier en même temps
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_panier_insert BEFORE insert ON commandes FOR EACH ROW
+        CREATE TRIGGER trigger_panier_insert BEFORE insert ON commandes FOR EACH ROW
         BEGIN
             DECLARE id INT;
 
@@ -608,7 +608,7 @@ def execute_tests():
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
-                img = 'img/sushi.jpg')
+                img = 'sushi.jpg')
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 quantite_stock = 10,
