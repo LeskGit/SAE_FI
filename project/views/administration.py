@@ -1,10 +1,10 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Plats
+from project.models import Plats, get_sur_place_at
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
+from project.models import Commandes, User, get_blackliste, get_user, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
 from wtforms import StringField, PasswordField, EmailField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
@@ -30,10 +30,10 @@ class PlatForm(FlaskForm):
 @admin_required
 def admin():
     # Tables disponibles aujourd'hui
-    commandes_sur_place = get_sur_place_today()
+    commandes_sur_place = get_sur_place_at()
     dico_tables = {i: False for i in range(1, 13)}
     for table in commandes_sur_place :
-        dico_tables[table.sur_place] = True
+        dico_tables[table.num_table] = True
     
     # Blacklist
     liste_noire = get_blackliste()
