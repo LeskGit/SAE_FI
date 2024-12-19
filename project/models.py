@@ -412,9 +412,30 @@ class TriggerManager:
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF stocks_u + NEW.quantite_plat < stocks_r THEN
+            IF stocks_u - NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
+            END IF;
+        END;
+        """
+
+    def trigger_plats_stocks_update(self) -> str:
+        """
+        Trigger qui vérifie si il reste assez de plats en stock
+        """
+        return """
+        CREATE TRIGGER trigger_plats_stocks_update BEFORE UPDATE ON plats FOR EACH ROW
+        BEGIN
+            DECLARE stocks_u INT;
+            DECLARE stocks_r INT;
+
+            SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
+            FROM plats
+            WHERE nom_plat = NEW.nom_plat;
+
+            IF NEW.stock_utilisable < NEW.stock_reserve THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock.";
             END IF;
         END;
         """
@@ -434,7 +455,7 @@ class TriggerManager:
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF stocks_u + NEW.quantite_plat < stocks_r THEN
+            IF stocks_u - NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
             END IF;
@@ -576,44 +597,12 @@ class TriggerManager:
         END
         """
 
-    def trigger_commandes_soir_insert(self) -> str:
-        """
-        Permet de faire une commande uniquement entre 17h et 20h
-        """
-        return """
-        CREATE OR REPLACE TRIGGER commandes_soir_insert BEFORE INSERT ON commandes FOR EACH ROW
-        BEGIN
-            IF NOT (HOUR(NEW.date) BETWEEN 17 AND 20) THEN
-                IF NEW.sur_place = 0 THEN
-                    SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'Impossible de commander à distance avant 17h et après 20h';
-                END IF;
-            END IF;
-        END;
-        """
-
-    def trigger_commandes_soir_update(self) -> str:
-        """
-        Permet de faire une commande uniquement entre 17h et 20h
-        """
-        return """
-        CREATE OR REPLACE TRIGGER commandes_soir_update BEFORE UPDATE ON commandes FOR EACH ROW
-        BEGIN
-            IF NOT (HOUR(NEW.date) BETWEEN 17 AND 20) THEN
-                IF NEW.sur_place = 0 THEN
-                    SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'Impossible de commander à distance avant 17h et après 20h';
-                END IF;
-            END IF;
-        END;
-        """
-
     def trigger_ferme_insert(self) -> str:
         """
         Impossible de faire des commandes le lundi ou dimanche
         """
         return """
-        CREATE OR REPLACE TRIGGER ferme_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER ferme_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
                 SIGNAL SQLSTATE '45000'
@@ -627,7 +616,7 @@ class TriggerManager:
         Impossible de faire des commandes le lundi ou dimanche
         """
         return """
-        CREATE OR REPLACE TRIGGER ferme_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER ferme_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
                 SIGNAL SQLSTATE '45000'
