@@ -84,7 +84,7 @@ class Plats(db.Model):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if self.stock_utilisable is not None and self.stock_reserve is None:
+        if self.stock_utilisable is not None:
             self.stock_reserve = int(self.stock_utilisable * 0.2)
 
     def __repr__(self):
@@ -373,7 +373,7 @@ class TriggerManager:
         CREATE OR REPLACE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
         BEGIN
             DECLARE stocks_u INT;
-            DECLARE stock_r INT;
+            DECLARE stocks_r INT;
 
             SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
@@ -395,7 +395,7 @@ class TriggerManager:
         CREATE OR REPLACE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
         BEGIN
             DECLARE stocks_u INT;
-            DECLARE stock_r INT;
+            DECLARE stocks_r INT;
 
             SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats

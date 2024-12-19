@@ -80,7 +80,8 @@ def modifier_stock():
         nom_plat = key
         nouveau_stock = int(value)
         plat = db.session.query(Plats).filter_by(nom_plat=nom_plat).one()
-        plat.quantite_stock = nouveau_stock
+        plat.stock_utilisable = nouveau_stock
+        plat.stock_reserve = int(nouveau_stock * 0.2)
         db.session.commit()
     return redirect(url_for("suivi_stock"))
 
