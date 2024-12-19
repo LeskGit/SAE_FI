@@ -167,6 +167,34 @@ def add_offre():
     flash(f"La formule '{libelle_formule}' a été ajoutée avec succès.", "success")
     return redirect(url_for("creation_offre"))
 
+@app.route("/update_offre/<int:id>", methods=["POST"])
+@admin_required
+def update_offre(id):
+    formule = Formule.query.get(id)
+    libelle_formule = request.form.get("libelle_formule")
+    prix = request.form.get("prix")
+    plats_selectionnes = request.form.getlist("plats")
+
+    if not libelle_formule or not prix or len(plats_selectionnes) > 4:
+        flash("Erreur : Veuillez remplir tous les champs et sélectionner jusqu'à 4 plats.", "danger")
+        return redirect(url_for("edition_offre"))
+
+    formule.libelle_formule = libelle_formule
+    formule.prix = prix
+    formule.les_plats = [Plats.query.filter_by(nom_plat=nom).first() for nom in plats_selectionnes]
+
+    db.session.commit()
+    flash(f"La formule '{libelle_formule}' a été modifiée avec succès.", "success")
+    return redirect(url_for("edition_offre"))
+
+@app.route("/delete_offre/<int:id>", methods=["POST"])
+@admin_required
+def delete_offre(id):
+    formule = Formule.query.get(id)
+    db.session.delete(formule)
+    db.session.commit()
+    flash("La formule a été supprimée avec succès.", "success")
+    return redirect(url_for("edition_offre"))
 
 @app.route("/edition/plat")
 @admin_required
@@ -286,4 +314,7 @@ def add_plat():
 @app.route("/edition/offre")
 @admin_required
 def edition_offre():
-    return render_template("edition_offre.html")
+    type = request.args.get('type', 'a')
+    formules = Formule.query.all() 
+    plats = Plats.query.all()  
+    return render_template("edition_offre.html", formules=formules, plats=plats, type=type)

@@ -59,3 +59,16 @@ form h5 {
     background-color: #f27a24 !important; /* force la couleur pour écraser le css de bootstrap */
     border-color: #000000 !important; /* force la couleur pour écraser le css de bootstrap */
 }
+
+
+.nav-tabs .nav-link {
+    color: #000; 
+    font-weight: bold;
+}
+
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link.active {
+    color: #f27a24;
+}
+
+
+
