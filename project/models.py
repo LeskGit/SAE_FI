@@ -956,15 +956,21 @@ def get_desserts_filtered_by_allergenes(selected_allergenes):
 
 def get_formules_filtered_by_allergenes(selected_allergenes):
     if len(selected_allergenes) == 0:
-        return get_formules()  
+        return get_formules()
     else:
-        lst = get_formules()
-        for formules in get_formules():
-            for plats in formules.les_plats:
-                for allergene in plats.les_allergenes:
-                    if allergene.id_allergene in selected_allergenes:
-                        lst.remove(formules)
-                        break
-        return lst
+        return filter_formules_by_allergenes(get_formules(), selected_allergenes)
+
+def filter_formules_by_allergenes(formules, selected_allergenes):
+    filtered_formules = []
+    for formule in formules:
+        if not contains_selected_allergenes(formule, selected_allergenes):
+            filtered_formules.append(formule)
+    return filtered_formules
+
+def contains_selected_allergenes(formule, selected_allergenes):
+    for plat in formule.les_plats:
+        if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
+            return True
+    return False
 
 
