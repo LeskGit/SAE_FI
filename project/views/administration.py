@@ -1,10 +1,11 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
 from project.models import Formule, Plats, get_plats
+from project.models import Plats, get_sur_place_at, get_plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
+from project.models import Commandes, User, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
 from functools import wraps
 from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
 from flask_wtf.file import FileAllowed
@@ -43,10 +44,10 @@ class FormuleForm(FlaskForm):
 @admin_required
 def admin():
     # Tables disponibles aujourd'hui
-    commandes_sur_place = get_sur_place_today()
+    commandes_sur_place = get_sur_place_at()
     dico_tables = {i: False for i in range(1, 13)}
     for table in commandes_sur_place :
-        dico_tables[table.sur_place] = True
+        dico_tables[table.num_table] = True
 
     # Blacklist
     liste_noire = get_blackliste()
@@ -142,7 +143,7 @@ def add_offre():
     if not libelle_formule or not prix or not plats_selectionnes:
         flash("Erreur : Veuillez remplir tous les champs et sélectionner au moins un plat.", "danger")
         return redirect(url_for("creation_offre"))
-    
+
     # Validation du nombre de plats
     if len(plats_selectionnes) > 4:
         flash("Erreur : Une formule ne peut contenir que 4 plats maximum.", "danger")
@@ -320,6 +321,6 @@ def add_plat():
 @admin_required
 def edition_offre():
     type = request.args.get('type', 'a')
-    formules = Formule.query.all() 
-    plats = Plats.query.all()  
+    formules = Formule.query.all()
+    plats = Plats.query.all()
     return render_template("edition_offre.html", formules=formules, plats=plats, type=type)

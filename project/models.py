@@ -3,7 +3,7 @@ from sqlalchemy.orm import validates
 from .app import db, login_manager
 from flask_login import UserMixin
 import re
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from hashlib import sha256
 
 class User(db.Model, UserMixin):
@@ -29,7 +29,19 @@ class User(db.Model, UserMixin):
     
     def get_id(self):
         return self.num_tel
+
+    def get_panier(self):
+        panier = Commandes.query.filter_by(num_tel = self.num_tel, etat = "Panier").first()
+        return panier
     
+    def get_or_create_panier(self):
+        panier = self.get_panier()
+        if panier is None:
+            panier = Commandes(num_tel=self.num_tel, etat="Panier")
+            db.session.add(panier)
+            db.session.commit()
+        return panier
+
 @login_manager.user_loader
 def load_user(num_tel):
     return User.query.get(num_tel)
@@ -55,7 +67,7 @@ class Commandes(db.Model):
     num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
     date = db.Column(db.DateTime)
     date_creation = db.Column(db.DateTime, default = db.func.current_timestamp())
-    sur_place = db.Column(db.Boolean)
+    sur_place = db.Column(db.Boolean, default = False)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Non payée", "Payée"), default = "Panier")
 
@@ -63,8 +75,29 @@ class Commandes(db.Model):
     les_clients = db.relationship("User", back_populates="les_commandes")
     constituer_assoc = db.relationship("Constituer", back_populates="commande", overlaps="les_plats,plat")
 
+    prix_total = 0
+    prix_avec_reduc = 0
+
     def __repr__(self):
         return f"{self.num_commande} : {self.date}"
+    
+    def calculer_prix(self):
+        self.prix_total = sum([constituer.plat.prix * constituer.quantite_plat for constituer in self.constituer_assoc])
+        return self.prix_total
+
+    def compute_reduction(self):
+        """
+        Calcule la réduction de la commande :
+        Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
+        """
+        self.prix_avec_reduc = 0
+        for constituer in self.constituer_assoc:
+            if constituer.quantite_plat >= constituer.plat.quantite_promo:
+                self.prix_avec_reduc -= constituer.plat.prix_reduc
+        return self.prix_avec_reduc
+    
+    def get_num_table_dispo(self):
+        return 
 
 class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
@@ -135,7 +168,7 @@ class TriggerManager:
         On ne peut avoir que 12 commandes sur place en même temps
         """
         return """
-        CREATE OR REPLACE TRIGGER limiter_commandes_sur_place_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER limiter_commandes_sur_place_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             DECLARE nb INT;
 
@@ -155,7 +188,7 @@ class TriggerManager:
         On ne peut avoir que 12 commandes sur place en même temps
         """
         return """
-        CREATE OR REPLACE TRIGGER limiter_commandes_sur_place_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER limiter_commandes_sur_place_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE nb INT;
 
@@ -177,7 +210,7 @@ class TriggerManager:
         Permet de réserver une table uniquement le midi
         """
         return """
-        CREATE OR REPLACE TRIGGER commandes_sur_place_midi_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER commandes_sur_place_midi_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             IF NOT (HOUR(NEW.date) = 11 AND MINUTE(NEW.date) >= 30 OR HOUR(NEW.date) BETWEEN 12 AND 13 OR HOUR(NEW.date) = 14 AND MINUTE(NEW.date) = 0) THEN
                 IF NEW.sur_place = 1 THEN
@@ -193,7 +226,7 @@ class TriggerManager:
         Permet de réserver une table uniquement le midi
         """
         return """
-        CREATE OR REPLACE TRIGGER commandes_sur_place_midi_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER commandes_sur_place_midi_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             IF NOT (HOUR(NEW.date) = 11 AND MINUTE(NEW.date) >= 30 OR HOUR(NEW.date) BETWEEN 12 AND 13 OR HOUR(NEW.date) = 14 AND MINUTE(NEW.date) = 0) THEN
                 IF NEW.sur_place = 1 THEN
@@ -209,7 +242,7 @@ class TriggerManager:
         Trigger qui empêche de modifier une commande après 15 minutes après la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER update_commande BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER update_commande BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE current DATETIME DEFAULT NOW();
 
@@ -225,7 +258,7 @@ class TriggerManager:
         Trigger qui empêche de supprimer une commande après 15 minutes après la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER delete_commande BEFORE DELETE ON commandes FOR EACH ROW
+        CREATE TRIGGER delete_commande BEFORE DELETE ON commandes FOR EACH ROW
         BEGIN
             DECLARE current DATETIME DEFAULT NOW();
 
@@ -242,7 +275,7 @@ class TriggerManager:
         Trigger qui empêche de réserver 2 heures avant la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER reserver_delais_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER reserver_delais_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
 
             IF TIMESTAMPDIFF(HOUR, NEW.date_creation, NEW.date) < 2 THEN
@@ -257,10 +290,10 @@ class TriggerManager:
         Trigger qui empêche de réserver 2 heures avant la date de la commande
         """
         return """
-        CREATE OR REPLACE TRIGGER reserver_delais_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER reserver_delais_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
 
-            IF TIMESTAMPDIFF(HOUR, NEW.date_creation, NEW.date) < 2 THEN
+            IF TIMESTAMPDIFF(HOUR, NEW.date_creation, NEW.date) < 2 AND NEW.etat != 'Panier' THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de réserver moins de 2 heures avant la date de la commande';
             END IF;
@@ -272,7 +305,7 @@ class TriggerManager:
     #    Trigger qui empêche de commander si l'utilisateur a une commande non payée
     #    """
     #    return """
-    #    CREATE OR REPLACE TRIGGER commande_non_payee BEFORE INSERT ON commandes FOR EACH ROW
+    #    CREATE TRIGGER commande_non_payee BEFORE INSERT ON commandes FOR EACH ROW
     #    BEGIN
     #        DECLARE nb INT;##
 
@@ -292,7 +325,7 @@ class TriggerManager:
         Trigger qui empêche de commander si l'utilisateur est blackliste
         """
         return """
-        CREATE OR REPLACE TRIGGER commande_blacklisted_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER commande_blacklisted_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
                 SIGNAL SQLSTATE '45000'
@@ -306,7 +339,7 @@ class TriggerManager:
         Trigger qui empêche de commander si l'utilisateur est blackliste
         """
         return """
-        CREATE OR REPLACE TRIGGER commande_blacklisted_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER commande_blacklisted_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
                 SIGNAL SQLSTATE '45000'
@@ -321,7 +354,7 @@ class TriggerManager:
             venu chercher sa commande
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_black_list_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER black_list_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             DECLARE temps INT;
             DECLARE current DATETIME DEFAULT NOW();
@@ -346,7 +379,7 @@ class TriggerManager:
             venu chercher sa commande
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_black_list_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER black_list_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE temps INT;
             DECLARE current DATETIME DEFAULT NOW();
@@ -371,7 +404,7 @@ class TriggerManager:
             en stock
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
+        CREATE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
         BEGIN
             DECLARE stocks_u INT;
             DECLARE stocks_r INT;
@@ -380,9 +413,30 @@ class TriggerManager:
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF stocks_u + NEW.quantite_plat < stocks_r THEN
+            IF stocks_u - NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
+            END IF;
+        END;
+        """
+
+    def trigger_plats_stocks_update(self) -> str:
+        """
+        Trigger qui vérifie si il reste assez de plats en stock
+        """
+        return """
+        CREATE TRIGGER trigger_plats_stocks_update BEFORE UPDATE ON plats FOR EACH ROW
+        BEGIN
+            DECLARE stocks_u INT;
+            DECLARE stocks_r INT;
+
+            SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
+            FROM plats
+            WHERE nom_plat = NEW.nom_plat;
+
+            IF NEW.stock_utilisable < NEW.stock_reserve THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock.";
             END IF;
         END;
         """
@@ -393,7 +447,7 @@ class TriggerManager:
             en stock
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
+        CREATE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
         BEGIN
             DECLARE stocks_u INT;
             DECLARE stocks_r INT;
@@ -402,7 +456,7 @@ class TriggerManager:
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF stocks_u + NEW.quantite_plat < stocks_r THEN
+            IF stocks_u - NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
             END IF;
@@ -414,7 +468,7 @@ class TriggerManager:
         On ne peut réserver une table que si elle est disponible
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_table_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER trigger_table_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
             DECLARE num INT;
 
@@ -439,7 +493,7 @@ class TriggerManager:
         On ne peut réserver une table que si elle est disponible
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_table_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER trigger_table_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
             DECLARE num INT;
 
@@ -465,7 +519,7 @@ class TriggerManager:
             catégories différentes
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_formule_insert BEFORE INSERT ON contenir FOR EACH ROW
+        CREATE TRIGGER trigger_formule_insert BEFORE INSERT ON contenir FOR EACH ROW
         BEGIN
             DECLARE nombre int;
             DECLARE type VARCHAR(62);
@@ -504,7 +558,7 @@ class TriggerManager:
             catégories différentes
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_formule_update BEFORE UPDATE ON contenir FOR EACH ROW
+        CREATE TRIGGER trigger_formule_update BEFORE UPDATE ON contenir FOR EACH ROW
         BEGIN
             DECLARE cnt INT DEFAULT 0;
 
@@ -527,7 +581,7 @@ class TriggerManager:
         Un utilisateur doit avoir un seul et unique panier en même temps
         """
         return """
-        CREATE OR REPLACE TRIGGER trigger_panier_insert BEFORE insert ON commandes FOR EACH ROW
+        CREATE TRIGGER trigger_panier_insert BEFORE insert ON commandes FOR EACH ROW
         BEGIN
             DECLARE id INT;
 
@@ -544,46 +598,14 @@ class TriggerManager:
         END
         """
 
-    def trigger_commandes_soir_insert(self) -> str:
-        """
-        Permet de faire une commande uniquement entre 17h et 20h
-        """
-        return """
-        CREATE OR REPLACE TRIGGER commandes_soir_insert BEFORE INSERT ON commandes FOR EACH ROW
-        BEGIN
-            IF NOT (HOUR(NEW.date) BETWEEN 17 AND 20) THEN
-                IF NEW.sur_place = 0 THEN
-                    SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'Impossible de commander à distance avant 17h et après 20h';
-                END IF;
-            END IF;
-        END;
-        """
-
-    def trigger_commandes_soir_update(self) -> str:
-        """
-        Permet de faire une commande uniquement entre 17h et 20h
-        """
-        return """
-        CREATE OR REPLACE TRIGGER commandes_soir_update BEFORE UPDATE ON commandes FOR EACH ROW
-        BEGIN
-            IF NOT (HOUR(NEW.date) BETWEEN 17 AND 20) THEN
-                IF NEW.sur_place = 0 THEN
-                    SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'Impossible de commander à distance avant 17h et après 20h';
-                END IF;
-            END IF;
-        END;
-        """
-
     def trigger_ferme_insert(self) -> str:
         """
         Impossible de faire des commandes le lundi ou dimanche
         """
         return """
-        CREATE OR REPLACE TRIGGER ferme_insert BEFORE INSERT ON commandes FOR EACH ROW
+        CREATE TRIGGER ferme_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+            IF DAYOFWEEK(NEW.date) IN (1, 2) THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
             END IF;
@@ -595,9 +617,9 @@ class TriggerManager:
         Impossible de faire des commandes le lundi ou dimanche
         """
         return """
-        CREATE OR REPLACE TRIGGER ferme_update BEFORE UPDATE ON commandes FOR EACH ROW
+        CREATE TRIGGER ferme_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+            IF DAYOFWEEK(NEW.date) IN (1, 2) THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
             END IF;
@@ -629,8 +651,8 @@ def execute_tests():
                 stock_utilisable = 10,
                 quantite_defaut = 7,
                 prix = 10,
-                quantite_promo = 0,
-                prix_reduc = 0,
+                quantite_promo = 2,
+                prix_reduc = 10,
                 img = 'sushi.jpg')
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
@@ -720,8 +742,8 @@ def execute_tests():
     com7 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 1),
-                        sur_place = True,
-                        num_table = 7,
+                        sur_place = False,
+                        num_table = None,
                         etat = "Payée")
 
     com8 = Commandes(num_tel = '0123456759',
@@ -820,10 +842,24 @@ def get_plats_froids():
 def get_sushis():
     return  Plats.query.filter_by(type_plat = "Sushi").all()
 
-def get_sur_place_today() :
-    today = datetime.today().date()
-    return Commandes.query.filter(db.func.date(Commandes.date) == today, Commandes.sur_place.is_(True)).all()
+def get_sur_place_at(date=datetime.today().date()):
+    return Commandes.query.filter(db.func.date(Commandes.date) == date, Commandes.sur_place.is_(True)).all()
  
+def get_num_table_dispo(commande_date:datetime):
+    """Renvoie le numéro de la première table disponible
+    """
+    commandes_sur_place = get_sur_place_at(commande_date.date())
+
+    dico_tables = {i: False for i in range(1, 13)}
+    for table in commandes_sur_place:
+        dico_tables[table.num_table] = True
+    
+    for num_table, occupe in dico_tables.items():
+        if not occupe:
+            return num_table
+    
+    return -1
+
 def get_blackliste() :
     return User.query.filter_by(blackliste = True).all()
 
