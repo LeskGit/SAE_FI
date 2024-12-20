@@ -779,7 +779,7 @@ def execute_tests():
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
-                        etat = "Panier")
+                        etat = "Payée")
 
     com13 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 6, 13),
