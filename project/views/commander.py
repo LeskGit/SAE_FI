@@ -163,17 +163,6 @@ def choix_paiement():
 
 @app.route("/paiement")
 def paiement_cb():
-    # com1 = Commandes(num_tel = '0123456789',
-    #                 date = datetime(2024, 12, 18, 12),
-    #                 date_creation = datetime(2024, 11, 6),
-    #                 sur_place = False,
-    #                 num_table = None,
-    #                 etat = "Panier")
-    # db.session.add(com1)
-
-    # com1.constituer_assoc.append(Constituer(nom_plat="plat1", num_commande=com1.num_commande, quantite_plat = 3))
-    # com1.constituer_assoc.append(Constituer(nom_plat="plat2", num_commande=com1.num_commande, quantite_plat = 3))
-    # db.session.commit()
     f = ...
     return render_template("paiement_cb.html", form=f)
 
