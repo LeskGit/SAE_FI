@@ -1,12 +1,12 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Plats, get_plats
+from project.models import Formule, Plats, get_plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats, get_allergenes, get_allergenes_plat
 from functools import wraps
-from wtforms import StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
+from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
 from wtforms.widgets import CheckboxInput
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from flask_wtf.file import FileAllowed
@@ -41,6 +41,11 @@ class PlatForm(FlaskForm):
     img = FileField("Image", validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'])])
     csrf_token = HiddenField()
 
+class FormuleForm(FlaskForm):
+    libelle_formule = StringField("Nom de la formule", validators=[DataRequired(), Length(max=64)])
+    prix = FloatField("Prix", validators=[DataRequired()])
+    plats = SelectMultipleField("Plats", coerce=str, validators=[DataRequired()])
+    csrf_token = HiddenField()
 
 
 @app.route("/admin")
@@ -84,7 +89,8 @@ def modifier_stock():
         nom_plat = key
         nouveau_stock = int(value)
         plat = db.session.query(Plats).filter_by(nom_plat=nom_plat).one()
-        plat.quantite_stock = nouveau_stock
+        plat.stock_utilisable = nouveau_stock
+        plat.stock_reserve = int(nouveau_stock * 0.2)
         db.session.commit()
     return redirect(url_for("suivi_stock"))
 
@@ -97,20 +103,24 @@ def reinitialiser_stock():
         # Réinitialiser les plats chauds
         for plat in Plats.query.filter_by(type_plat="Plat chaud"):
             print(plat)
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
     elif category == "plats_froids":
         print(2)
         # Réinitialiser les plats froids
         for plat in Plats.query.filter_by(type_plat="Plat froid"):
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
     elif category == "sushis":
         # Réinitialiser les sushis
         for plat in Plats.query.filter_by(type_plat="Sushi"):
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
     elif category == "desserts":
         # Réinitialiser les desserts
         for plat in Plats.query.filter_by(type_plat="Dessert"):
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
 
     db.session.commit()
     return redirect(url_for('suivi_stock'))  # Redirige vers la page principale des stocks
@@ -123,10 +133,82 @@ def creation_plat():
     return render_template("creation_plat.html", form=form, allergenes=get_allergenes())
 
 
-@app.route("/creation/offre")
+@app.route("/creation/offre", methods=["GET"])
 @admin_required
 def creation_offre():
-    return render_template("creation_offre.html")
+    form = FormuleForm()
+    form.plats.choices = [(plat.nom_plat, plat.nom_plat) for plat in get_plats()]
+    return render_template("creation_offre.html", form=form, plats=get_plats())
+
+@app.route("/add_offre", methods=["POST"])
+@admin_required
+def add_offre():
+    libelle_formule = request.form.get("libelle_formule")
+    prix = request.form.get("prix")
+    plats_selectionnes = request.form.getlist("plats")  # Récupère tous les plats sélectionnés
+
+    # Validation : Vérifie que tous les champs sont remplis
+    if not libelle_formule or not prix or not plats_selectionnes:
+        flash("Erreur : Veuillez remplir tous les champs et sélectionner au moins un plat.", "danger")
+        return redirect(url_for("creation_offre"))
+    
+    # Validation du nombre de plats
+    if len(plats_selectionnes) > 4:
+        flash("Erreur : Une formule ne peut contenir que 4 plats maximum.", "danger")
+        return redirect(url_for("creation_offre"))
+
+    # Vérifier si la formule existe déjà
+    formule_existante = Formule.query.filter_by(libelle_formule=libelle_formule).first()
+    if formule_existante:
+        flash(f"Erreur : La formule '{libelle_formule}' existe déjà.", "danger")
+        return redirect(url_for("creation_offre"))
+
+    # Créer une nouvelle formule
+    nouvelle_formule = Formule(
+        libelle_formule=libelle_formule,
+        prix=prix
+    )
+
+    # Ajouter les plats sélectionnés
+    for nom_plat in plats_selectionnes:
+        plat = Plats.query.filter_by(nom_plat=nom_plat).first()
+        if plat:
+            nouvelle_formule.les_plats.append(plat)
+
+    db.session.add(nouvelle_formule)
+    db.session.commit()
+
+    flash(f"La formule '{libelle_formule}' a été ajoutée avec succès.", "success")
+    return redirect(url_for("creation_offre"))
+
+@app.route("/update_offre/<int:id>", methods=["POST"])
+@admin_required
+def update_offre(id):
+    formule = Formule.query.get(id)
+    libelle_formule = request.form.get("libelle_formule")
+    prix = request.form.get("prix")
+    plats_selectionnes = request.form.getlist("plats")
+
+    if not libelle_formule or not prix or len(plats_selectionnes) > 4:
+        flash("Erreur : Veuillez remplir tous les champs et sélectionner jusqu'à 4 plats.", "danger")
+        return redirect(url_for("edition_offre"))
+
+    formule.libelle_formule = libelle_formule
+    formule.prix = prix
+    formule.les_plats = [Plats.query.filter_by(nom_plat=nom).first() for nom in plats_selectionnes]
+
+    db.session.commit()
+    flash(f"La formule '{libelle_formule}' a été modifiée avec succès.", "success")
+    return redirect(url_for("edition_offre"))
+
+@app.route("/delete_offre/<int:id>", methods=["POST"])
+@admin_required
+def delete_offre(id):
+    formule = Formule.query.get(id)
+    db.session.delete(formule)
+    db.session.commit()
+    flash("La formule a été supprimée avec succès.", "success")
+    return redirect(url_for("edition_offre"))
 
 @app.route("/edition/plat")
 @admin_required
@@ -258,4 +340,7 @@ def add_plat():
 @app.route("/edition/offre")
 @admin_required
 def edition_offre():
-    return render_template("edition_offre.html")
+    type = request.args.get('type', 'a')
+    formules = Formule.query.all() 
+    plats = Plats.query.all()  
+    return render_template("edition_offre.html", formules=formules, plats=plats, type=type)

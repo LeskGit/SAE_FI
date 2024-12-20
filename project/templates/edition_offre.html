@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="top-info">
+    <h1 class="text-center my-3">Édition des formules</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container-fluid w-75 bg-light justify-content-center align-items-center">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <div class="container-fluid justify-content-center align-items-center">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link {% if type == 'a' %}active{% endif %}" href="?type=a">Toutes les formules</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{{ url_for('creation_offre') }}">Ajouter une formule</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{{ url_for('admin') }}">Accueil admin</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition" style="height: 500px; overflow-y: auto;">
+        <div class="container-fluid d-flex">
+            <div class="row g-5 mt-2">
+                {% for formule in formules %}
+                <div class="col-md-4">
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ formule.libelle_formule }}</h5>
+                            <p class="card-text">Prix : <strong>{{ formule.prix }}</strong> €</p>
+                            <p class="card-text">Plats inclus :</p>
+                            <ul>
+                                {% for plat in formule.les_plats %}
+                                <li>
+                                    {{ plat.nom_plat }}
+                                    {% if plat.type_plat == "Plat chaud" %}
+                                    <span class="badge bg-danger">Chaud</span>
+                                    {% elif plat.type_plat == "Plat froid" %}
+                                    <span class="badge bg-info">Froid</span>
+                                    {% elif plat.type_plat == "Sushi" %}
+                                    <span class="badge bg-warning text-dark">Sushi</span>
+                                    {% elif plat.type_plat == "Dessert" %}
+                                    <span class="badge bg-success">Dessert</span>
+                                    {% endif %}
+                                </li>
+                                
+                                {% endfor %}
+                            </ul>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ formule.id_formule }}">
+                                </button>
+                                <form method="POST" action="{{ url_for('delete_offre', id=formule.id_formule) }}">
+                                    <button class="btn btn-danger delete_button" type="submit"></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Modals pour modifier les formules -->
+{% for formule in formules %}
+<div class="modal fade" id="editModal_{{ formule.id_formule }}" tabindex="-1" aria-labelledby="editModalLabel_{{ formule.id_formule }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('update_offre', id=formule.id_formule) }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel_{{ formule.id_formule }}">Modifier la formule</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="formuleNom_{{ formule.id_formule }}">Nom de la formule</label>
+                        <input type="text" class="form-control" id="formuleNom_{{ formule.id_formule }}" name="libelle_formule" value="{{ formule.libelle_formule }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="formulePrix_{{ formule.id_formule }}">Prix</label>
+                        <input type="number" step="0.01" class="form-control" id="formulePrix_{{ formule.id_formule }}" name="prix" value="{{ formule.prix }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="plats">Plats inclus</label>
+                        <select class="form-control" id="plats_{{ formule.id_formule }}" name="plats" multiple>
+                            {% for plat in plats %}
+                            <option value="{{ plat.nom_plat }}" {% if plat in formule.les_plats %}selected{% endif %}>
+                                {{ plat.nom_plat }} ({{ plat.type_plat }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Vous pouvez sélectionner jusqu'à 4 plats.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

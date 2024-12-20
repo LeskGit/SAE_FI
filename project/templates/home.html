@@ -38,32 +38,49 @@
         <span class="sr-only"></span>
     </a>
 </section>
-<section class="contact-section">
+
+<section class="scroll-down-indicator">
+    <a href="#offres" class="scroll-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" class="bi bi-chevron-down bounce" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+        </svg>
+    </a>
+</section>
+
+<section class="contact-section py-4" id="offres">
     <div class="container">
-        <div class="row">
-            <div class="col-md-4 text-start">
-                <p>4, place de la Halle</p>
+        <div class="row align-items-center text-white">
+            <div class="col-md-4 text-center">
+                <div class="contact-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" class="bi bi-geo-alt-fill mb-2" viewBox="0 0 16 16">
+                        <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
+                        <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                      </svg>
+                    <p class="mb-0 fw-bold">4, place de la Halle</p>
+                </div>
             </div>
             <div class="col-md-4 text-center">
-                <p>|41250 BRACIEUX|</p>
+                <div class="contact-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" class="bi bi-geo-alt-fill mb-2" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+                    </svg>
+                    <p class="mb-0 fw-bold">| 41250 BRACIEUX |</p>
+                </div>
             </div>
-            <div class="col-md-4 text-end">
-                <p>02.54.79.05.48</p>
+            <div class="col-md-4 text-center">
+                <div class="contact-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" class="bi bi-geo-alt-fill mb-2" viewBox="0 0 16 16">
+                        <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
+                    </svg>
+                    <p class="mb-0 fw-bold">02.54.79.05.48</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 
-<section class="full-width-image">
-    <img src="{{ url_for('static', filename='img/quelques-plats-japonais.jpg') }}" alt="Background Image">
-    <div class="text-overlay">
-        <h2>Bienvenue à <br>OUMAMI</h2>
-        <p> Traiteur et Plats à emporter</p>
-    </div>
-</section>
-
-<section class="offres-section">
+<section class="offres-section" >
     <h2 class="offres-title">Découvrez nos offres</h2>
     <hr class="offres-divider">
     <div class="container">
