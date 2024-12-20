@@ -80,7 +80,8 @@ def modifier_stock():
         nom_plat = key
         nouveau_stock = int(value)
         plat = db.session.query(Plats).filter_by(nom_plat=nom_plat).one()
-        plat.quantite_stock = nouveau_stock
+        plat.stock_utilisable = nouveau_stock
+        plat.stock_reserve = int(nouveau_stock * 0.2)
         db.session.commit()
     return redirect(url_for("suivi_stock"))
 
@@ -93,20 +94,24 @@ def reinitialiser_stock():
         # Réinitialiser les plats chauds
         for plat in Plats.query.filter_by(type_plat="Plat chaud"):
             print(plat)
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
     elif category == "plats_froids":
         print(2)
         # Réinitialiser les plats froids
         for plat in Plats.query.filter_by(type_plat="Plat froid"):
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
     elif category == "sushis":
         # Réinitialiser les sushis
         for plat in Plats.query.filter_by(type_plat="Sushi"):
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
     elif category == "desserts":
         # Réinitialiser les desserts
         for plat in Plats.query.filter_by(type_plat="Dessert"):
-            plat.quantite_stock = plat.quantite_defaut
+            plat.stock_utilisable = plat.quantite_defaut
+            plat.stock_reserve = int(plat.quantite_defaut * 0.2)
 
     db.session.commit()
     return redirect(url_for('suivi_stock'))  # Redirige vers la page principale des stocks

@@ -68,7 +68,8 @@ class Commandes(db.Model):
 class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
     type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
-    quantite_stock = db.Column(db.Integer)
+    stock_utilisable = db.Column(db.Integer)
+    stock_reserve = db.Column(db.Integer)
     quantite_defaut = db.Column(db.Integer)
     prix = db.Column(db.Float)
     quantite_promo = db.Column(db.Integer)
@@ -80,6 +81,11 @@ class Plats(db.Model):
 
     les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats", overlaps="constituer_assoc,commande")
     constituer_assoc = db.relationship("Constituer", back_populates="plat", overlaps="les_commandes,commande")
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.stock_utilisable is not None:
+            self.stock_reserve = int(self.stock_utilisable * 0.2)
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
@@ -172,10 +178,10 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER commandes_sur_place_midi_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
+            IF NOT (HOUR(NEW.date) = 11 AND MINUTE(NEW.date) >= 30 OR HOUR(NEW.date) BETWEEN 12 AND 13 OR HOUR(NEW.date) = 14 AND MINUTE(NEW.date) = 0) THEN
                 IF NEW.sur_place = 1 THEN
                     SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'Impossible de commander sur place avant 12h et après 14h';
+                    SET MESSAGE_TEXT = 'Impossible de commander sur place avant 11h30 et après 14h';
                 END IF;
             END IF;
         END;
@@ -188,10 +194,10 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER commandes_sur_place_midi_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            IF HOUR(NEW.date) NOT BETWEEN 12 AND 13 THEN
+            IF NOT (HOUR(NEW.date) = 11 AND MINUTE(NEW.date) >= 30 OR HOUR(NEW.date) BETWEEN 12 AND 13 OR HOUR(NEW.date) = 14 AND MINUTE(NEW.date) = 0) THEN
                 IF NEW.sur_place = 1 THEN
                     SIGNAL SQLSTATE '45000'
-                    SET MESSAGE_TEXT = 'Impossible de commander sur place avant 12h et après 14h';
+                    SET MESSAGE_TEXT = 'Impossible de commander sur place avant 11h30 et après 14h';
                 END IF;
             END IF;
         END;
@@ -366,18 +372,14 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER trigger_stocks_insert BEFORE INSERT ON constituer FOR EACH ROW
         BEGIN
-            DECLARE stocks INT;
-            DECLARE nb_plat INT;
+            DECLARE stocks_u INT;
+            DECLARE stocks_r INT;
 
-            SELECT IFNULL(SUM(quantite_plat), 0) into nb_plat
-            FROM constituer NATURAL JOIN commandes
-            WHERE nom_plat = NEW.nom_plat and DATE(date) = DATE(NOW());
-
-            SELECT quantite_stock into stocks
+            SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF nb_plat + NEW.quantite_plat > stocks * 0.8 THEN
+            IF stocks_u + NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
             END IF;
@@ -392,18 +394,14 @@ class TriggerManager:
         return """
         CREATE OR REPLACE TRIGGER trigger_stocks_update BEFORE UPDATE ON constituer FOR EACH ROW
         BEGIN
-            DECLARE stocks INT;
-            DECLARE nb_plat INT;
+            DECLARE stocks_u INT;
+            DECLARE stocks_r INT;
 
-            SELECT SUM(quantite_plat) into nb_plat
-            FROM constituer NATURAL JOIN commandes
-            WHERE nom_plat = NEW.nom_plat and DATE(date) = DATE(NOW());
-
-            SELECT quantite_stock into stocks
+            SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
             WHERE nom_plat = NEW.nom_plat;
 
-            IF nb_plat + NEW.quantite_plat > stocks * 0.8 THEN
+            IF stocks_u + NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = "Le plat que vous souhaitez n'est plus en stock";
             END IF;
@@ -545,6 +543,66 @@ class TriggerManager:
         END
         """
 
+    def trigger_commandes_soir_insert(self) -> str:
+        """
+        Permet de faire une commande uniquement entre 17h et 20h
+        """
+        return """
+        CREATE OR REPLACE TRIGGER commandes_soir_insert BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            IF NOT (HOUR(NEW.date) BETWEEN 17 AND 20) THEN
+                IF NEW.sur_place = 0 THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Impossible de commander à distance avant 17h et après 20h';
+                END IF;
+            END IF;
+        END;
+        """
+
+    def trigger_commandes_soir_update(self) -> str:
+        """
+        Permet de faire une commande uniquement entre 17h et 20h
+        """
+        return """
+        CREATE OR REPLACE TRIGGER commandes_soir_update BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+            IF NOT (HOUR(NEW.date) BETWEEN 17 AND 20) THEN
+                IF NEW.sur_place = 0 THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Impossible de commander à distance avant 17h et après 20h';
+                END IF;
+            END IF;
+        END;
+        """
+
+    def trigger_ferme_insert(self) -> str:
+        """
+        Impossible de faire des commandes le lundi ou dimanche
+        """
+        return """
+        CREATE OR REPLACE TRIGGER ferme_insert BEFORE INSERT ON commandes FOR EACH ROW
+        BEGIN
+            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
+            END IF;
+        END;
+        """
+
+    def trigger_ferme_update(self) -> str:
+        """
+        Impossible de faire des commandes le lundi ou dimanche
+        """
+        return """
+        CREATE OR REPLACE TRIGGER ferme_update BEFORE UPDATE ON commandes FOR EACH ROW
+        BEGIN
+            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
+            END IF;
+        END;
+        """
+
 def execute_tests():
 
     usr = User(num_tel = '0123456759',
@@ -562,7 +620,7 @@ def execute_tests():
     #5 Plats
     plat1 = Plats(nom_plat = 'plat1',
                 type_plat = 'Plat chaud',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 7,
                 prix = 10,
                 quantite_promo = 0,
@@ -570,7 +628,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 6,
                 prix = 10,
                 quantite_promo = 0,
@@ -578,7 +636,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 8,
                 prix = 10,
                 quantite_promo = 0,
@@ -586,7 +644,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 12,
                 prix = 10,
                 quantite_promo = 0,
@@ -594,7 +652,7 @@ def execute_tests():
                 img = 'sushi.jpg')
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
-                quantite_stock = 10,
+                stock_utilisable = 10,
                 quantite_defaut = 18,
                 prix = 10,
                 quantite_promo = 0,
@@ -619,7 +677,7 @@ def execute_tests():
                         etat = "Non Payée")
 
     com2 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 2,
@@ -633,7 +691,7 @@ def execute_tests():
                         etat = "Payée")
 
     com4 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 4,
@@ -647,7 +705,7 @@ def execute_tests():
                         etat = "Payée")
 
     com6 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 6,
@@ -661,7 +719,7 @@ def execute_tests():
                         etat = "Payée")
 
     com8 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 8,
@@ -675,7 +733,7 @@ def execute_tests():
                         etat = "Payée")
 
     com10 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 3, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 10,
@@ -689,7 +747,7 @@ def execute_tests():
                         etat = "Payée")
 
     com12 = Commandes(num_tel = '0123456759',
-                        date = datetime(2024, 11, 4, 12),
+                        date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
