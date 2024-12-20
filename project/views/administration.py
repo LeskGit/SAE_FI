@@ -6,11 +6,11 @@ from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from project.models import Commandes, User, get_sur_place_today, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats, get_allergenes, get_allergenes_plat
 from functools import wraps
-from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
-from wtforms.widgets import CheckboxInput
+from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
+from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from flask_wtf.file import FileAllowed
-from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
+from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, NumberRange
 from werkzeug.utils import secure_filename
 import os
 from project.app import mkpath
@@ -29,17 +29,47 @@ def admin_required(f):
     return decorated_function
 
 class PlatForm(FlaskForm):
-    nom = StringField("Nom du plat", validators=[DataRequired(), Length(max=32)])
-    prix = FloatField("Prix", validators=[DataRequired()])
-    type = StringField("Type de plat", validators=[DataRequired(), Length(max=32)])
-    allergenes = QuerySelectMultipleField(
-        'Allergènes',
-        query_factory=lambda: get_allergenes(),
-        get_label='nom_allergene',
-        widget=CheckboxInput()  # Utilisation de widget pour afficher sous forme de checkboxes
+    nom = StringField(
+        "Nom du plat",
+        validators=[
+            DataRequired(message="Le nom du plat est requis."),
+            Length(max=32, message="Le nom du plat doit contenir au maximum 32 caractères.")
+        ]
     )
-    img = FileField("Image", validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'])])
-    csrf_token = HiddenField()
+
+    prix = FloatField(
+        "Prix",
+        validators=[
+            DataRequired(message="Le prix est requis."),
+            NumberRange(min=0, message="Le prix doit être un nombre positif.")
+        ]
+    )
+
+    type = SelectField(
+        "Type de plat",
+        choices=[
+            ("Plat chaud", "Plat chaud"),
+            ("Plat froid", "Plat froid"),
+            ("Sushi", "Sushi"),
+            ("Dessert", "Dessert")
+        ],
+        validators=[DataRequired(message="Le type de plat est requis.")]
+    )
+
+    allergenes = QuerySelectMultipleField(
+        "Allergènes",
+        query_factory=lambda: get_allergenes(),
+        get_label="nom_allergene",
+        widget=ListWidget(prefix_label=False),
+        option_widget=CheckboxInput()
+    )
+
+    img = FileField(
+        "Image",
+        validators=[
+            FileAllowed(["jpg", "jpeg", "png", "gif"], message="Seules les images au format JPG, JPEG, PNG ou GIF sont autorisées.")
+        ]
+    )
 
 class FormuleForm(FlaskForm):
     libelle_formule = StringField("Nom de la formule", validators=[DataRequired(), Length(max=64)])
@@ -299,6 +329,8 @@ def add_plat():
         prix = form.prix.data
         type_plat = form.type.data
         img = form.img.data
+        allergenes = form.allergenes.data
+        print(allergenes)
 
         # Validation des données
         if not nom_plat or not prix or not type_plat:
@@ -329,6 +361,7 @@ def add_plat():
             type_plat=type_plat,
             img=filename
         )
+        plat.add_allergene(allergenes)
         db.session.add(plat)
         db.session.commit()
 

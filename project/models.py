@@ -97,6 +97,12 @@ class Plats(db.Model):
         super().__init__(**kwargs)
         if self.stock_utilisable is not None:
             self.stock_reserve = int(self.stock_utilisable * 0.2)
+            
+    def add_allergene(self, lst_allergenes):
+        for allergene in lst_allergenes:
+            self.les_allergenes.append(allergene)
+        
+        
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"

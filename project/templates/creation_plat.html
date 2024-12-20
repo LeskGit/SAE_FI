@@ -22,33 +22,28 @@
 
         <div class="form-group">
             <label for="type">Type :</label>
-            <select class="form-control" id="type" name="type" required>
+            <select class="form-control" id="type" name="type">
                 <option value="" disabled selected>-- Sélectionnez un type --</option>
                 <option value="Plat chaud">Plat chaud</option>
                 <option value="Plat froid">Plat froid</option>
                 <option value="Sushi">Sushi</option>
                 <option value="Dessert">Dessert</option>
-            </select>
+            </select>            
         </div>
 
         <!-- Allergènes avec checkboxes -->
         <div class="form-group">
-            <label for="platAllergenes">Allergènes :</label>
+            <label for="platAllergenes_">Allergènes :</label>
             <div class="form-check">
-                {% for allergene in allergenes %}
+                {% for allergene in form.allergenes %}
                     <div class="form-check">
-                        <input type="checkbox" 
-                            class="form-check-input" 
-                            id="allergene_{{ allergene.nom_allergene }}" 
-                            name="allergenes" 
-                            value="{{ allergene.nom_allergene }}"
-                            {% if allergene.nom_allergene in form.allergenes.data %} checked {% endif %}>
-                        <label class="form-check-label" for="allergene_{{ allergene.nom_allergene }}">
-                            {{ allergene.nom_allergene }}
+                        {{ allergene }}
+                        <label class="form-check-label" for="{{ allergene.id }}">
+                            {{ allergene.label.text }}
                         </label>
                     </div>
                 {% endfor %}
-            </div>
+            </div>            
         </div>
 
 
