@@ -149,7 +149,7 @@
                 <!-- Bouton -->
                  
                     <form action="{{ url_for('validation_paiement') }}" method="post">
-                        <button type="submit" class="btn btn-orange px-4 mt-4 fw-bold" {% if panier.constituer_assoc|length == 0 %}disabled{% endif %}>COMMANDER</button>
+                        <button type="submit" class="btn btn-orange px-4 mt-4 fw-bold" {% if panier.constituer_assoc|length == 0 or panier.date is none %}disabled{% endif %}>COMMANDER</button>1
                     </form>
              
             </div>
