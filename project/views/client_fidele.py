@@ -1,12 +1,13 @@
 from project import app, db
-from flask import render_template, url_for, redirect, request
-#from .models import
+from flask import render_template, url_for, redirect, request, flash
+from project.models import Commandes
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
 from project.views.authentification import RegisterForm
-from wtforms import StringField, PasswordField, EmailField
+from wtforms import StringField, PasswordField, EmailField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
+from datetime import datetime, timedelta
 
 class PersoForm(FlaskForm):
     phone_number = StringField("Téléphone", validators=[DataRequired(), 
@@ -22,34 +23,93 @@ class PersoForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email(message='addresse mail invalide'), 
                                             Length(max=64)])
 
+class ChangePasswordForm(FlaskForm):
+    old_password = PasswordField("Ancien mot de passe", validators=[DataRequired()])
+    new_password = PasswordField("Nouveau mot de passe", validators=[DataRequired()])
+    confirm_password = PasswordField("Confirmer le nouveau mot de passe", validators=[
+        DataRequired(),
+        EqualTo('new_password', message="Les mots de passe ne correspondent pas")
+    ])
+    change_password = SubmitField("Enregistrer")
+
 @app.route("/client/profil", methods=["GET", "POST"])
 @login_required
 def client_profil():
     f = PersoForm()
-    
+    pw_form = ChangePasswordForm()
+
     edit = request.args.get('edit', False, type=bool)
 
-    if f.validate_on_submit():        
-        current_user.num_tel = f.phone_number.data
-        current_user.nom = f.name.data
-        current_user.prenom = f.first_name.data
-        current_user.adresse = f.address.data
-        current_user.email = f.email.data
-        db.session.commit()
-        return redirect(url_for("client_profil"))
-    
-    f = PersoForm(phone_number=current_user.num_tel,
-                name=current_user.nom,
-                first_name=current_user.prenom,
-                address=current_user.adresse,
-                email=current_user.email)
+    if request.method == 'GET':
+        f.phone_number.data = current_user.num_tel
+        f.name.data = current_user.nom
+        f.first_name.data = current_user.prenom
+        f.address.data = current_user.adresse
+        f.email.data = current_user.email
 
-    return render_template("profil_client_connecte.html", form=f, edit=edit)
+    if request.method == 'POST':
+        if 'save_profile' in request.form and f.validate():
+            current_user.nom = f.name.data
+            current_user.prenom = f.first_name.data
+            current_user.adresse = f.address.data
+            current_user.email = f.email.data
+            db.session.commit()
+            flash("Profil mis à jour avec succès", "success")
+            return redirect(url_for("client_profil"))
+
+        if 'change_password' in request.form and pw_form.validate():
+            old_hash = sha256(pw_form.old_password.data.encode()).hexdigest()
+            if old_hash != current_user.mdp:
+                flash("Ancien mot de passe incorrect", "danger")
+            else:
+                new_hash = sha256(pw_form.new_password.data.encode()).hexdigest()
+                current_user.mdp = new_hash
+                db.session.commit()
+                flash("Mot de passe mis à jour avec succès", "success")
+                return redirect(url_for("client_profil"))
+
+    return render_template("profil_client_connecte.html", form=f, edit=edit, pw_form=pw_form)
 
 @app.route("/client/historique")
 @login_required
 def client_historique():
-    return render_template("historique_commandes.html")
+    commandes = (Commandes.query.filter_by(num_tel=current_user.num_tel).filter(Commandes.etat != "Panier").order_by(Commandes.num_commande.desc()).all())
+    
+    historique = []
+    now = datetime.now()
+    for com in commandes:
+        if com.etat == "Payée":
+            statut_label = "TERMINE"
+            statut_class = "status-termine"
+        else:
+            statut_label = "EN COURS"
+            statut_class = "status-encours"
+        
+        if com.constituer_assoc:
+            plats_names = ", ".join([assoc.plat.nom_plat for assoc in com.constituer_assoc])
+            total_price = sum([assoc.plat.prix * assoc.quantite_plat for assoc in com.constituer_assoc])
+        else:
+            plats_names = "-"
+            total_price = "-"
+        
+        can_modify = False
+        if com.etat != "Payée":
+            elapsed = now - com.date_creation
+            if elapsed < timedelta(minutes=15):
+                can_modify = True
+
+        historique.append({
+            "num_commande": com.num_commande,
+            "plat": plats_names,
+            "prix": total_price,
+            "statut_label": statut_label,
+            "statut_class": statut_class,
+            "date_str": com.date.strftime('%Y/%m/%d') if com.date else '-',
+            "heure_str": com.date.strftime('%H:%M') if com.date else '-',
+            "can_modify": can_modify
+        })
+
+    return render_template("historique_commandes.html", historique=historique)
 
 @app.route("/client/fidelite")
 @login_required

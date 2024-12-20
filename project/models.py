@@ -4,6 +4,7 @@ from .app import db, login_manager
 from flask_login import UserMixin
 import re
 from datetime import date, datetime, timedelta
+from hashlib import sha256
 
 class User(db.Model, UserMixin):
     num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), primary_key = True)
@@ -68,7 +69,7 @@ class Commandes(db.Model):
     date_creation = db.Column(db.DateTime, default = db.func.current_timestamp())
     sur_place = db.Column(db.Boolean, default = False)
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
-    etat = db.Column(db.Enum("Panier", "Livraison", "Non payée", "Payée"), default = "Panier")
+    etat = db.Column(db.Enum("Panier", "Non payée", "Payée"), default = "Panier")
 
     les_plats = db.relationship("Plats", secondary = "constituer", back_populates = "les_commandes", overlaps="constituer_assoc,plat")
     les_clients = db.relationship("User", back_populates="les_commandes")
@@ -639,10 +640,15 @@ class TriggerManager:
 
 def execute_tests():
 
+    password = "password"
+    m = sha256()
+    m.update(password.encode())
+    hashed_password = m.hexdigest()
+
     usr = User(num_tel = '0123456759',
                 nom = 'Doe',
                 prenom = 'John',
-                mdp = 'password',
+                mdp = hashed_password,
                 adresse = '1 rue de la Paix',
                 email = 'a@b.com',
                 blackliste = False,
@@ -742,7 +748,7 @@ def execute_tests():
                         date_creation = datetime(2024, 11, 6),
                         sur_place = True,
                         num_table = 1,
-                        etat = "Non Payée")
+                        etat = "Payée")
 
     com2 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 5, 12),
@@ -819,7 +825,7 @@ def execute_tests():
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
-                        etat = "Panier")
+                        etat = "Payée")
 
     com13 = Commandes(num_tel = '0123456759',
                         date = datetime(2024, 11, 6, 13),
@@ -827,6 +833,12 @@ def execute_tests():
                         sur_place = True,
                         num_table = 12,
                         etat = "Non Payée")
+    
+    com13 = Commandes(num_tel = '0123456759',
+                        date = datetime(2024, 12, 18, 13),
+                        date_creation = datetime(2024, 12, 18, 10, 5),
+                        sur_place = False,
+                        etat = "Panier")
 
     db.session.add_all([com1, com2, com3, com4, com5, com6, com7, com8, com9, com10, com11, com12, com13])
 

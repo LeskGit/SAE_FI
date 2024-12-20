@@ -10,9 +10,50 @@
     <!-- Sidebar -->
     {% from "macro_client_aside.html" import sidebar_client with context %}
     {{ sidebar_client() }}
+
     <div class="p-5 rounded shadow w-100 main_profil">
-        <!-- Main content area -->
-    
+        <!-- Titre et ligne de séparation -->
+        <h1 class="historique-title">Historique Commande</h1>
+        <div class="separator"></div>
+        
+        <table class="historique-table">
+            <thead>
+                <tr>
+                    <th>référence commande</th>
+                    <th>Article(s) commandé(s)</th>
+                    <th>Prix</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Heure</th>
+                    <th>Action</th> <!-- Nouvelle colonne -->
+                </tr>
+            </thead>
+            <tbody>
+                {% if historique and historique|length > 0 %}
+                    {% for item in historique %}
+                        <tr>
+                            <td>{{ item.num_commande }}</td>
+                            <td>{{ item.plat }}</td>
+                            <td>{{ item.prix }}</td>
+                            <td><span class="{{ item.statut_class }}">{{ item.statut_label }}</span></td>
+                            <td>{{ item.date_str }}</td>
+                            <td>{{ item.heure_str }}</td>
+                            <td>
+                                {% if item.can_modify %}
+                                    <a href="{{ url_for('client_modif', num_commande=item.num_commande) }}" class="btn btn_color">Modifier</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">Aucune commande passée</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
