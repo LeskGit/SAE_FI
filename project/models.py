@@ -604,7 +604,7 @@ class TriggerManager:
         return """
         CREATE TRIGGER ferme_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+            IF DAYOFWEEK(NEW.date) IN (1, 2) THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
             END IF;
@@ -618,7 +618,7 @@ class TriggerManager:
         return """
         CREATE TRIGGER ferme_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            IF DAYOFWEEK(NEW.date) IN (2, 6) THEN
+            IF DAYOFWEEK(NEW.date) IN (1, 2) THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Impossible de commander le lundi ou le dimanche';
             END IF;
