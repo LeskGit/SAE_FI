@@ -238,3 +238,6 @@ ul li {
   fill: #e87c36; 
 }
 
+.text-overlay {
+  -webkit-text-stroke: 1px black;
+}
