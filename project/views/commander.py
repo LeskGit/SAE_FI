@@ -11,15 +11,9 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import get_desserts, get_plats, get_formules, get_allergenes, get_desserts_filtered_by_allergenes, get_plats_chauds_filtered_by_allergenes, get_plats_froids_filtered_by_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, get_sushis_filtered_by_allergenes, Constituer, Commandes
+from project.models import get_desserts, get_num_table_dispo, get_plats, get_formules, get_allergenes, get_desserts_filtered_by_allergenes, get_plats_chauds_filtered_by_allergenes, get_plats_froids_filtered_by_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, get_sushis_filtered_by_allergenes, Constituer, Commandes
 
-
-class AllergeneForm(FlaskForm):
-    allergene = BooleanField('Allergène', validators=[DataRequired()])
-    type = StringField('Type', validators=[DataRequired()])
-    submit = SubmitField('Filtrer')
-
-class CommanderForm(FlaskForm) :
+class CommanderForm(FlaskForm):
     nom_plat = HiddenField()
     num_com = HiddenField()
     quantite = IntegerField(validators=[DataRequired()])
@@ -29,9 +23,7 @@ def commander():
     if current_user:
         commande = current_user.get_or_create_panier()
         num_commande = commande.num_commande
-        formC = CommanderForm()
-
-        formA = AllergeneForm()  
+        form = CommanderForm()
         selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
         type = request.args.get('type', 'p')
         allergenes = get_allergenes()
@@ -44,9 +36,9 @@ def commander():
 
         return render_template("commander.html", 
                             plats=plats, 
-                                plats_chauds=plats_chauds,
-                                plats_froids=plats_froids,
-                                sushi=sushi,
+                            plats_chauds=plats_chauds,
+                            plats_froids=plats_froids,
+                            sushi=sushi,
                             formules=formules, 
                             desserts=desserts, 
                             type=type, 
@@ -55,13 +47,15 @@ def commander():
                             nb_desserts=len(desserts), 
                             allergenes=allergenes, 
                             selected_allergenes=selected_allergenes,
-                            formA=formA,
-                            formC=formC,
+                            form=form,
                             num_com = num_commande)
     
 @app.route("/filter_allergenes", methods=["GET", "POST"])
 def filter_allergenes():
-    formA = AllergeneForm()
+
+    if not current_user:
+        return redirect(url_for('commander'))
+    
     # Récupérer la liste des allergènes sélectionnés
     if request.method == "POST":
         selected_allergenes = request.form.getlist('allergenes') # Liste des allergènes cochés
@@ -78,10 +72,9 @@ def filter_allergenes():
             print(selected_allergenes)
         else:
             selected_allergenes = []
+            
     type = request.args.get('type', 'p')
     
-   
-        
     allergenes = get_allergenes()
     plats = get_plats_filtered_by_allergenes(selected_allergenes)
     plats_chauds = get_plats_chauds_filtered_by_allergenes(selected_allergenes)
@@ -90,8 +83,10 @@ def filter_allergenes():
     formules = get_formules_filtered_by_allergenes(selected_allergenes)
     desserts = get_desserts_filtered_by_allergenes(selected_allergenes)
     
-    
-        
+
+    commande = current_user.get_or_create_panier()
+    num_commande = commande.num_commande
+    form = CommanderForm()
 
     resp = make_response(render_template("commander.html", 
                            plats=plats, 
@@ -103,7 +98,9 @@ def filter_allergenes():
                            formules=formules, 
                            desserts=desserts, 
                            selected_allergenes=selected_allergenes,
-                           formA=formA))
+                           form=form,
+                           num_com = num_commande
+                           ))
     
     if request.method == "POST":
         string_allergenes = ""

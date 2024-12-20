@@ -13,7 +13,6 @@
 <div class="row me-0 mt-3">
     <div class="col-md-3">
         <form method="POST" action="{{ url_for('filter_allergenes') }}">
-            {{ form.hidden_tag() }} <!-- CSRF Token -->
             <div class="bg-light p-3 rounded">
                 <h5>Liste des allergènes</h5>
                 <ul class="list-group">
@@ -82,7 +81,7 @@
                 <div class="modal fade" id="editModal{{ plat.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="editForm{{ plat.nom_plat }}">
+                            <form id="editForm{{ plat.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editModalLabel{{ plat.nom_plat }}">{{ plat.nom_plat }}</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -93,11 +92,13 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="quantity{{ plat.nom_plat }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantity" min="1" value="1" max="{{plat.quantite_stock}}">
+                                        <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantite" min="1" value="1" max="{{plat.quantite_stock}}">
+                                        <input type="hidden" name="nom_plat" value="{{ plat.nom_plat }}">
+                                        <input type="hidden" name="num_com" value="{{ num_com }}">
                                     </div>
                                     <div class="form-group">
-                                        <label for="comment{{ plat.nom_plat }}">Allergènes</label>
-                                        <select class="form-select" id="comment{{ plat.nom_plat }}" name="comment">
+                                        <label>Allergènes</label>
+                                        <select class="form-select" id="comment{{ plat.nom_plat }}">
                                             <option value="" selected>-- Voir les allergenes --</option>
                                             {% for allergene in plat.les_allergenes %}
                                             <option value="{{ allergene.nom_allergene }}">{{ allergene.nom_allergene }}</option>
@@ -138,7 +139,7 @@
                 <div class="modal fade" id="editModal{{ plat_chaud.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat_chaud.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="editForm{{ plat_chaud.nom_plat }}">
+                            <form id="editForm{{ plat_chaud.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editModalLabel{{ plat_chaud.nom_plat }}">{{ plat_chaud.nom_plat }}</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -149,7 +150,9 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="quantity{{ plat_chaud.nom_plat }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantity{{ plat_chaud.nom_plat }}" name="quantity" min="1" value="1">
+                                        <input type="number" class="form-control" id="quantity{{ plat_chaud.nom_plat }}" name="quantite" min="1" value="1" max="{{plat_chaud.quantite_stock}}">
+                                        <input type="hidden" name="nom_plat" value="{{ plat_chaud.nom_plat }}">
+                                        <input type="hidden" name="num_com" value="{{ num_com }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="comment{{ plat_chaud.nom_plat }}">Allergènes</label>
@@ -194,7 +197,7 @@
                 <div class="modal fade">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="editForm{{ plat_froid.nom_plat }}">
+                            <form id="editForm{{ plat_froid.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editModalLabel{{ plat_froid.nom_plat }}">{{ plat_froid.nom_plat }}</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -205,7 +208,9 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="quantity{{ plat_froid.nom_plat }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantity{{ plat_froid.nom_plat }}" name="quantity" min="1" value="1">
+                                        <input type="number" class="form-control" id="quantity{{ plat_froid.nom_plat }}" name="quantite" min="1" value="1" max="{{plat_froid.quantite_stock}}">
+                                        <input type="hidden" name="nom_plat" value="{{ plat_froid.nom_plat }}">
+                                        <input type="hidden" name="num_com" value="{{ num_com }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="comment{{ plat_froid.nom_plat }}">Allergènes</label>
@@ -250,7 +255,7 @@
                 <div class="modal fade">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="editFormSushi{{ sushi.nom_sushi }}">
+                            <form id="editFormSushi{{ sushi.nom_sushi }}" method="POST" action="{{ url_for('ajout_plat') }}">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editModalLabelSushi{{ sushi.nom_sushi }}">{{ sushi.nom_sushi }}</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -260,8 +265,10 @@
                                         <img src="{{ url_for('static', filename='img/product/' ~ sushi.img) }}" class="card-img-top" alt="{{ sushi.nom_sushi }}">
                                     </div>
                                     <div class="form-group">
-                                        <label for="quantitySushi{{ sushi.nom_sushi }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantitySushi{{ sushi.nom_sushi }}" name="quantity" min="1" value="1">
+                                        <label for="quantity{{ sushi.nom_plat }}">Quantité</label>
+                                        <input type="number" class="form-control" id="quantity{{ sushi.nom_plat }}" name="quantite" min="1" value="1" max="{{sushi.quantite_stock}}">
+                                        <input type="hidden" name="nom_plat" value="{{ sushi.nom_plat }}">
+                                        <input type="hidden" name="num_com" value="{{ num_com }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="commentSushi{{ sushi.nom_sushi }}">Allergènes</label>
@@ -350,6 +357,11 @@
         </div>
         {% endif %}
 
+        <!-- Bouton Commander -->
+        <div class="text-center mt-4">
+            <a href="{{ url_for('panier') }}" class="btn btn-orange shadow rounded-pill px-4 py-2">Commander</a>
+        </div>
+
         {% if type=="d" %}
         <!-- Grille des desserts -->
         <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
@@ -367,7 +379,7 @@
                 <div class="modal fade" id="editModalDessert{{ dessert.nom_dessert }}" tabindex="-1" aria-labelledby="editModalLabelDessert{{ dessert.nom_dessert }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="editFormDessert{{ dessert.nom_dessert }}">
+                            <form id="editFormDessert{{ dessert.nom_dessert }}" method="POST" action="{{ url_for('ajout_plat') }}">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editModalLabelDessert{{ dessert.nom_dessert }}">{{ dessert.nom_dessert }}</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -377,8 +389,10 @@
                                         <img src="{{ url_for('static', filename='img/product/' ~ dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_dessert }}">
                                     </div>
                                     <div class="form-group">
-                                        <label for="quantityDessert{{ dessert.nom_dessert }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantityDessert{{ dessert.nom_dessert }}" name="quantity" min="1" value="1">
+                                        <label for="quantity{{ dessert.nom_plat }}">Quantité</label>
+                                        <input type="number" class="form-control" id="quantity{{ dessert.nom_plat }}" name="quantite" min="1" value="1" max="{{dessert.quantite_stock}}">
+                                        <input type="hidden" name="nom_plat" value="{{ dessert.nom_plat }}">
+                                        <input type="hidden" name="num_com" value="{{ num_com }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="commentDessert{{ dessert.nom_dessert }}">Allergènes</label>
@@ -405,6 +419,7 @@
             {% endfor %}
         </div>
         {% endif %}
+
     </div>
 </div>
 {% endblock %}
