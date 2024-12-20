@@ -85,6 +85,20 @@
                     <div class="text-center mt-3">
                         <p class="text-muted">Prix : <strong>{{ p.prix }}</strong> €</p>
                     </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Allergènes :</p>
+                        {% if p.les_allergenes %}
+                            <ul class="list-group" style="background-color: #343a40; border-radius: 5px; padding: 10px;">
+                                {% for aller in p.les_allergenes %}
+                                    <li class="list-group-item" style="background-color: #495057; color: white; border: none; margin-bottom: 5px;">
+                                        {{ aller.nom_allergene }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="color: white; background-color:rgb(86, 94, 103); padding: 10px; border-radius: 5px;">Aucun allergène.</p>
+                        {% endif %}
+                    </div>                                                               
                     <div class="d-flex justify-content-end mt-2">
                         <button class="btn btn-secondary edit_button mr-2" data-toggle="modal" data-target="#editModal_{{ p.nom_plat }}"></button>
                         <form method="POST" enctype="multipart/form-data" action="{{ url_for('delete_plat', id=p.nom_plat) }}" style="display:inline-block;">
@@ -110,6 +124,20 @@
                     <div class="text-center mt-3">
                         <p class="text-muted">Type : <strong>{{ plat_c.type_plat }}</strong></p>
                     </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Allergènes :</p>
+                        {% if plat_c.les_allergenes %}
+                            <ul class="list-group" style="background-color: #343a40; border-radius: 5px; padding: 10px;">
+                                {% for aller in plat_c.les_allergenes %}
+                                    <li class="list-group-item" style="background-color: #495057; color: white; border: none; margin-bottom: 5px;">
+                                        {{ aller.nom_allergene }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="color: white; background-color:rgb(86, 94, 103); padding: 10px; border-radius: 5px;">Aucun allergène.</p>
+                        {% endif %}
+                    </div> 
                     <div class="text-center mt-3">
                         <p class="text-muted">Prix : <strong>{{ plat_c.prix }}</strong> €</p>
                     </div>
@@ -139,6 +167,20 @@
                         <p class="text-muted">Type : <strong>{{ plat_f.type_plat }}</strong></p>
                     </div>
                     <div class="text-center mt-3">
+                        <p class="text-muted">Allergènes :</p>
+                        {% if plat_f.les_allergenes %}
+                            <ul class="list-group" style="background-color: #343a40; border-radius: 5px; padding: 10px;">
+                                {% for aller in plat_f.les_allergenes %}
+                                    <li class="list-group-item" style="background-color: #495057; color: white; border: none; margin-bottom: 5px;">
+                                        {{ aller.nom_allergene }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="color: white; background-color:rgb(86, 94, 103); padding: 10px; border-radius: 5px;">Aucun allergène.</p>
+                        {% endif %}
+                    </div> 
+                    <div class="text-center mt-3">
                         <p class="text-muted">Prix : <strong>{{ plat_f.prix }}</strong> €</p>
                     </div>
                     <div class="d-flex justify-content-end mt-2">
@@ -166,6 +208,20 @@
                     <div class="text-center mt-3">
                         <p class="text-muted">Type : <strong>{{ sushi.type_plat }}</strong></p>
                     </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Allergènes :</p>
+                        {% if sushi.les_allergenes %}
+                            <ul class="list-group" style="background-color: #343a40; border-radius: 5px; padding: 10px;">
+                                {% for aller in sushi.les_allergenes %}
+                                    <li class="list-group-item" style="background-color: #495057; color: white; border: none; margin-bottom: 5px;">
+                                        {{ aller.nom_allergene }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="color: white; background-color:rgb(86, 94, 103); padding: 10px; border-radius: 5px;">Aucun allergène.</p>
+                        {% endif %}
+                    </div> 
                     <div class="text-center mt-3">
                         <p class="text-muted">Prix : <strong>{{ sushi.prix }}</strong> €</p>
                     </div>
@@ -196,6 +252,20 @@
                             Type : <strong>{{ dessert.type_plat }}</strong>
                         </p>
                     </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">Allergènes :</p>
+                        {% if dessert.les_allergenes %}
+                            <ul class="list-group" style="background-color: #343a40; border-radius: 5px; padding: 10px;">
+                                {% for aller in dessert.les_allergenes %}
+                                    <li class="list-group-item" style="background-color: #495057; color: white; border: none; margin-bottom: 5px;">
+                                        {{ aller.nom_allergene }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="color: white; background-color:rgb(86, 94, 103); padding: 10px; border-radius: 5px;">Aucun allergène.</p>
+                        {% endif %}
+                    </div> 
                     <div class="text-center mt-3">
                         <p class="text-muted">
                             Prix : <strong>{{ dessert.prix }}</strong> €
@@ -242,8 +312,27 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
+                                        <label for="platAllergenes_{{ p.nom_plat }}">Allergènes</label>
+                                        <div id="platAllergenes_{{ p.nom_plat }}">
+                                            {% for aller in allergenes %}
+                                                <div class="form-check">
+                                                    <input 
+                                                        class="form-check-input" 
+                                                        type="checkbox" 
+                                                        id="allergene_{{ aller.nom_allergene }}" 
+                                                        name="allergenes[]" 
+                                                        value="{{ aller.nom_allergene }}" 
+                                                        {% if p.les_allergenes and aller in p.les_allergenes %}checked{% endif %}>
+                                                    <label class="form-check-label" for="allergene_{{ aller.nom_allergene }}">
+                                                        {{ aller.nom_allergene }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>                                                                
+                                    <div class="form-group">
                                         <label for="platPrix_{{ p.nom_plat }}">Prix</label>
-                                        <input type="number" step="0.01" class="form-control" id="platPrix_{{ p.nom_plat }}" name="prix" value="{{ p.prix }}" required>
+                                        <input type="number" step="1" class="form-control" id="platPrix_{{ p.nom_plat }}" name="prix" value="{{ p.prix }}" required>
                                     </div>
                                 </div>
                                 <div class="modal-footer">

@@ -5,15 +5,18 @@ from project.models import Plats, get_sur_place_at, get_plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats
+from project.models import Commandes, User, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats, get_allergenes, get_allergenes_plat
 from functools import wraps
-from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField
+from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
+from wtforms.widgets import CheckboxInput, ListWidget
+from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from flask_wtf.file import FileAllowed
-from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
+from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, NumberRange
 from werkzeug.utils import secure_filename
 import os
 from project.app import mkpath
 import uuid
+from project.models import Allergenes
 
 
 def admin_required(f):
@@ -27,11 +30,47 @@ def admin_required(f):
     return decorated_function
 
 class PlatForm(FlaskForm):
-    nom = StringField("Nom du plat", validators=[DataRequired(), Length(max=32)])
-    prix = FloatField("Prix", validators=[DataRequired()])
-    type = StringField("Type de plat", validators=[DataRequired(), Length(max=32)])
-    img = FileField("Image", validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'])])
-    csrf_token = HiddenField()
+    nom = StringField(
+        "Nom du plat",
+        validators=[
+            DataRequired(message="Le nom du plat est requis."),
+            Length(max=32, message="Le nom du plat doit contenir au maximum 32 caractères.")
+        ]
+    )
+
+    prix = FloatField(
+        "Prix",
+        validators=[
+            DataRequired(message="Le prix est requis."),
+            NumberRange(min=0, message="Le prix doit être un nombre positif.")
+        ]
+    )
+
+    type = SelectField(
+        "Type de plat",
+        choices=[
+            ("Plat chaud", "Plat chaud"),
+            ("Plat froid", "Plat froid"),
+            ("Sushi", "Sushi"),
+            ("Dessert", "Dessert")
+        ],
+        validators=[DataRequired(message="Le type de plat est requis.")]
+    )
+
+    allergenes = QuerySelectMultipleField(
+        "Allergènes",
+        query_factory=lambda: get_allergenes(),
+        get_label="nom_allergene",
+        widget=ListWidget(prefix_label=False),
+        option_widget=CheckboxInput()
+    )
+
+    img = FileField(
+        "Image",
+        validators=[
+            FileAllowed(["jpg", "jpeg", "png", "gif"], message="Seules les images au format JPG, JPEG, PNG ou GIF sont autorisées.")
+        ]
+    )
 
 class FormuleForm(FlaskForm):
     libelle_formule = StringField("Nom de la formule", validators=[DataRequired(), Length(max=64)])
@@ -122,7 +161,7 @@ def reinitialiser_stock():
 @admin_required
 def creation_plat():
     form = PlatForm()
-    return render_template("creation_plat.html", form=form)
+    return render_template("creation_plat.html", form=form, allergenes=get_allergenes())
 
 
 @app.route("/creation/offre", methods=["GET"])
@@ -211,6 +250,7 @@ def edition_plat():
     plats_froids = get_plats_froids()
     sushis = get_sushis()
     desserts = get_desserts()
+    allergenes = get_allergenes()
     
     return render_template(
         "edition_plat.html",
@@ -219,14 +259,15 @@ def edition_plat():
         plats_froids=plats_froids,
         sushis=sushis,
         desserts=desserts,
+        allergenes=allergenes,
         type=type
         )
     
 @app.route("/update_plat/<string:id>", methods=["POST"])
 @admin_required
 def update_plat(id):
-    # Récupérer le plat depuis la base de données (exemple)
-    plat = Plats.query.get(id)
+    # Récupérer le plat depuis la base de données
+    plat = Plats.query.get_or_404(id)
 
     # Récupérer le fichier image
     if 'img' in request.files:
@@ -246,12 +287,22 @@ def update_plat(id):
     # Mettre à jour les autres champs du plat
     plat.nom_plat = request.form['nom_plat']
     plat.type_plat = request.form['type_plat']
-    plat.prix = request.form['prix']
+    plat.prix = float(request.form['prix'])
+
+    # Récupérer les allergènes cochés
+    allergenes_selectionnes = request.form.getlist('allergenes[]')
+
+    # Rechercher les objets `Allergenes` correspondants
+    allergenes = Allergenes.query.filter(Allergenes.nom_allergene.in_(allergenes_selectionnes)).all()
+
+    # Mettre à jour la relation Many-to-Many
+    plat.les_allergenes = allergenes
 
     # Enregistrer les modifications dans la base de données
     db.session.commit()
 
     return redirect(url_for('edition_plat'))
+
 
 @app.route("/delete_plat/<string:id>", methods=["POST"])
 @admin_required
@@ -279,6 +330,8 @@ def add_plat():
         prix = form.prix.data
         type_plat = form.type.data
         img = form.img.data
+        allergenes = form.allergenes.data
+        print(allergenes)
 
         # Validation des données
         if not nom_plat or not prix or not type_plat:
@@ -309,6 +362,7 @@ def add_plat():
             type_plat=type_plat,
             img=filename
         )
+        plat.add_allergene(allergenes)
         db.session.add(plat)
         db.session.commit()
 
