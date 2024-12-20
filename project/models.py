@@ -936,33 +936,14 @@ def get_plats_filtered_by_allergenes(selected_allergenes):
                     break
         return lst
 
-def get_plats_chauds_filtered_by_allergenes(selected_allergenes):
+def get_plats_filtered_by_type_and_allergenes(type_plat, selected_allergenes):
+    res = []
     plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
     for plats in plat_trie:
-        if plats.type_plat != "Plat chaud":
-            plat_trie.remove(plats)
-    return plat_trie
+        if plats.type_plat == type_plat:
+            res.append(plats)
+    return res
 
-def get_plats_froids_filtered_by_allergenes(selected_allergenes):
-    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
-    for plats in plat_trie:
-        if plats.type_plat != "Plat froid":
-            plat_trie.remove(plats)
-    return plat_trie
-
-def get_sushis_filtered_by_allergenes(selected_allergenes):
-    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
-    for plats in plat_trie:
-        if plats.type_plat != "Sushi":
-            plat_trie.remove(plats)
-    return plat_trie
-
-def get_desserts_filtered_by_allergenes(selected_allergenes):
-    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
-    for plats in plat_trie:
-        if plats.type_plat != "Dessert":
-            plat_trie.remove(plats)
-    return plat_trie
 
     
 

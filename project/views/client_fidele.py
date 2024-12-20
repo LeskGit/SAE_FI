@@ -87,7 +87,7 @@ def client_historique():
         
         if com.constituer_assoc:
             plats_names = ", ".join([assoc.plat.nom_plat for assoc in com.constituer_assoc])
-            total_price = sum([assoc.plat.prix * assoc.quantite_plat for assoc in com.constituer_assoc])
+            total_price = str(com.calculer_prix() + com.compute_reduction()) + " €"
         else:
             plats_names = "-"
             total_price = "-"

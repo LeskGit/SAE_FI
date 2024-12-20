@@ -11,7 +11,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import get_desserts, get_num_table_dispo, get_plats, get_formules, get_allergenes, get_desserts_filtered_by_allergenes, get_plats_chauds_filtered_by_allergenes, get_plats_froids_filtered_by_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, get_sushis_filtered_by_allergenes, Constituer, Commandes
+from project.models import get_desserts, get_num_table_dispo, get_plats, get_formules, get_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, Constituer, Commandes, get_plats_filtered_by_type_and_allergenes
 
 class CommanderForm(FlaskForm):
     nom_plat = HiddenField()
@@ -27,18 +27,18 @@ def commander():
         selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
         type = request.args.get('type', 'p')
         allergenes = get_allergenes()
-        plats = get_plats_filtered_by_allergenes(selected_allergenes)
-        plats_chauds = get_plats_chauds_filtered_by_allergenes(selected_allergenes)
-        plats_froids = get_plats_froids_filtered_by_allergenes(selected_allergenes)
-        sushi = get_sushis_filtered_by_allergenes(selected_allergenes)
+        plats = get_plats()
+        plats_chauds = get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
+        plats_froids = get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
+        sushis = get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
         formules = get_formules_filtered_by_allergenes(selected_allergenes)
-        desserts = get_desserts_filtered_by_allergenes(selected_allergenes)
+        desserts = get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
 
         return render_template("commander.html", 
                             plats=plats, 
                             plats_chauds=plats_chauds,
                             plats_froids=plats_froids,
-                            sushi=sushi,
+                            sushis=sushis,
                             formules=formules, 
                             desserts=desserts, 
                             type=type, 
@@ -77,11 +77,11 @@ def filter_allergenes():
     
     allergenes = get_allergenes()
     plats = get_plats_filtered_by_allergenes(selected_allergenes)
-    plats_chauds = get_plats_chauds_filtered_by_allergenes(selected_allergenes)
-    plats_froids = get_plats_froids_filtered_by_allergenes(selected_allergenes)
-    sushi = get_sushis_filtered_by_allergenes(selected_allergenes)
+    plats_chauds = get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
+    plats_froids = get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
+    sushis = get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
     formules = get_formules_filtered_by_allergenes(selected_allergenes)
-    desserts = get_desserts_filtered_by_allergenes(selected_allergenes)
+    desserts = get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
     
 
     commande = current_user.get_or_create_panier()
@@ -92,7 +92,7 @@ def filter_allergenes():
                            plats=plats, 
                             plats_chauds=plats_chauds,
                             plats_froids=plats_froids,
-                            sushi=sushi,
+                            sushis=sushis,
                            type=type,
                            allergenes=allergenes,
                            formules=formules, 
