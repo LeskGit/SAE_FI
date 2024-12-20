@@ -99,6 +99,18 @@ class Commandes(db.Model):
     def get_num_table_dispo(self):
         return 
 
+    
+class Allergenes(db.Model):
+    id_allergene = db.Column(db.Integer, primary_key = True)
+    nom_allergene = db.Column(db.String(64))
+    les_plats = db.relationship("Plats", secondary = "contenir_allergene", back_populates = "les_allergenes")
+    
+contenir_allergene = db.Table("contenir_allergene",
+    db.metadata,
+    db.Column("nom_plat", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
+    db.Column("id_allergene", db.Integer, db.ForeignKey("allergenes.id_allergene"), primary_key=True)
+)
+
 class Plats(db.Model):
     nom_plat = db.Column(db.String(64), primary_key = True)
     type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
@@ -110,9 +122,9 @@ class Plats(db.Model):
     prix_reduc = db.Column(db.Float)
     est_bento = db.Column(db.Boolean, default=False)
     img = db.Column(db.String(200))
-
+    les_allergenes = db.relationship("Allergenes", secondary = "contenir_allergene", back_populates = "les_plats")
     les_formules = db.relationship("Formule", secondary = contenir, back_populates="les_plats")
-
+    
     les_commandes = db.relationship("Commandes", secondary = 'constituer', back_populates = "les_plats", overlaps="constituer_assoc,commande")
     constituer_assoc = db.relationship("Constituer", back_populates="plat", overlaps="les_commandes,commande")
 
@@ -120,19 +132,17 @@ class Plats(db.Model):
         super().__init__(**kwargs)
         if self.stock_utilisable is not None:
             self.stock_reserve = int(self.stock_utilisable * 0.2)
+            
+    def add_allergene(self, lst_allergenes):
+        for allergene in lst_allergenes:
+            self.les_allergenes.append(allergene)
+        
+        
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
     
-    def get_all_plats(self):
-
-        """ retourne tous les plats
-
-
-        Returns:
-            List[self]: une liste de plats
-        """
-        return self.query.all() 
+    
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)
@@ -142,6 +152,8 @@ class Formule(db.Model):
 
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
+    
+    
 
 #--------
 
@@ -644,6 +656,22 @@ def execute_tests():
     
     db.session.add(usr)
     db.session.commit()
+    
+    #Allergenes
+    
+    allergene1 = Allergenes(id_allergene = 1, nom_allergene = 'allergene1')
+    allergene2 = Allergenes(id_allergene = 2, nom_allergene = 'allergene2')
+    allergene3 = Allergenes(id_allergene = 3, nom_allergene = 'allergene3')
+    allergene4 = Allergenes(id_allergene = 4, nom_allergene = 'allergene4')
+    allergene5 = Allergenes(id_allergene = 5, nom_allergene = 'allergene5')
+    allergene6 = Allergenes(id_allergene = 6, nom_allergene = 'allergene6')
+    allergene7 = Allergenes(id_allergene = 7, nom_allergene = 'allergene7')
+    allergene8 = Allergenes(id_allergene = 8, nom_allergene = 'allergene8')
+    allergene9 = Allergenes(id_allergene = 9, nom_allergene = 'allergene9')
+    allergene10 = Allergenes(id_allergene = 10, nom_allergene = 'allergene10')
+    
+    db.session.add_all([allergene1, allergene2, allergene3, allergene4, allergene5, allergene6, allergene7, allergene8, allergene9, allergene10])
+    db.session.commit()
 
     #5 Plats
     plat1 = Plats(nom_plat = 'plat1',
@@ -654,6 +682,7 @@ def execute_tests():
                 quantite_promo = 2,
                 prix_reduc = 10,
                 img = 'sushi.jpg')
+    
     plat2 = Plats(nom_plat = 'plat2',
                 type_plat = 'Plat froid',
                 stock_utilisable = 10,
@@ -662,6 +691,7 @@ def execute_tests():
                 quantite_promo = 0,
                 prix_reduc = 0,
                 img = 'sushi.jpg')
+    
     plat3 = Plats(nom_plat = 'plat3',
                 type_plat = 'Sushi',
                 stock_utilisable = 10,
@@ -670,6 +700,7 @@ def execute_tests():
                 quantite_promo = 0,
                 prix_reduc = 0,
                 img = 'sushi.jpg')
+    
     plat4 = Plats(nom_plat = 'plat4',
                 type_plat = 'Dessert',
                 stock_utilisable = 10,
@@ -678,18 +709,33 @@ def execute_tests():
                 quantite_promo = 0,
                 prix_reduc = 0,
                 img = 'sushi.jpg')
+    
     plat5 = Plats(nom_plat = 'plat5',
                 type_plat = 'Plat chaud',
                 stock_utilisable = 10,
-                quantite_defaut = 18,
+                quantite_defaut = 7,
                 prix = 10,
                 quantite_promo = 0,
                 prix_reduc = 0,
                 img = 'sushi.jpg')
     
+    
     db.session.add_all([plat1, plat2, plat3, plat4, plat5])
 
-
+    # Ajouter les allergènes aux plats
+    plat1.les_allergenes.append(allergene1)
+    plat1.les_allergenes.append(allergene2)
+    plat2.les_allergenes.append(allergene3)
+    plat2.les_allergenes.append(allergene4)
+    plat3.les_allergenes.append(allergene5)
+    plat3.les_allergenes.append(allergene6)
+    plat4.les_allergenes.append(allergene7)
+    plat4.les_allergenes.append(allergene8)
+    plat5.les_allergenes.append(allergene9)
+    plat5.les_allergenes.append(allergene10)
+    db.session.commit()
+    
+    
     #Formule
     formule1 = Formule(id_formule = 1,
                         libelle_formule = 'formule1',
@@ -872,3 +918,71 @@ def get_commandes_today() :
     #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
     return Commandes.query.all()
     
+def get_allergenes() :
+    return Allergenes.query.all()
+
+def get_allergenes_plat(nom_plat) :
+    return Plats.query.get(nom_plat).les_allergenes
+
+def get_plats_filtered_by_allergenes(selected_allergenes):
+    if len(selected_allergenes) == 0:
+        return get_plats()  
+    else:
+        lst = get_plats()
+        for plats in get_plats():
+            for allergene in plats.les_allergenes:
+                if allergene.id_allergene in selected_allergenes:
+                    lst.remove(plats)
+                    break
+        return lst
+
+def get_plats_chauds_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Plat chaud":
+            plat_trie.remove(plats)
+    return plat_trie
+
+def get_plats_froids_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Plat froid":
+            plat_trie.remove(plats)
+    return plat_trie
+
+def get_sushis_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Sushi":
+            plat_trie.remove(plats)
+    return plat_trie
+
+def get_desserts_filtered_by_allergenes(selected_allergenes):
+    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
+    for plats in plat_trie:
+        if plats.type_plat != "Dessert":
+            plat_trie.remove(plats)
+    return plat_trie
+
+    
+
+def get_formules_filtered_by_allergenes(selected_allergenes):
+    if len(selected_allergenes) == 0:
+        return get_formules()
+    else:
+        return filter_formules_by_allergenes(get_formules(), selected_allergenes)
+
+def filter_formules_by_allergenes(formules, selected_allergenes):
+    filtered_formules = []
+    for formule in formules:
+        if not contains_selected_allergenes(formule, selected_allergenes):
+            filtered_formules.append(formule)
+    return filtered_formules
+
+def contains_selected_allergenes(formule, selected_allergenes):
+    for plat in formule.les_plats:
+        if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
+            return True
+    return False
+
+
