@@ -77,7 +77,7 @@
                     <div class="modal fade" id="editModal{{ plat.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat.nom_plat }}" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form id="editForm{{ plat.nom_plat }}">
+                                <form id="editForm{{ plat.nom_plat }}" method="POST", action="{{ url_for('ajout_plat') }}", role="form">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="editModalLabel{{ plat.nom_plat }}">{{ plat.nom_plat }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -88,7 +88,9 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="quantity{{ plat.nom_plat }}">Quantité</label>
-                                            <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantity" min="1" value="1" max="{{plat.quantite_stock}}">
+                                            <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantite" min="1" value="1" max="{{plat.stock_utilisable * 0.8}}">
+                                            <input type="hidden" name="nom_plat" value="{{ plat.nom_plat }}">
+                                            <input type="hidden" name="num_com" value="{{ num_com }}">
                                         </div>
                                         <div class="form-group mt-3">
                                             <p>Prix unitaire : <span id="totalPrice{{ plat.id }}">{{ plat.prix }}</span>€</p>
@@ -196,7 +198,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="quantity{{ dessert.nom_plat }}">Quantité</label>
-                                            <input type="number" class="form-control" id="quantity{{ dessert.nom_plat }}" name="quantity" min="1" value="1" max="{{dessert.quantite_stock}}">
+                                            <input type="number" class="form-control" id="quantity{{ dessert.nom_plat }}" name="quantity" min="1" value="1" max="{{dessert.stock_utilisable * 0.8}}">
                                         </div>
                                         <div class="form-group mt-3">
                                             <p>Prix unitaire : <span id="totalPrice{{ dessert.id }}">{{ dessert.prix }}</span>€</p>
