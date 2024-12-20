@@ -15,21 +15,19 @@
         <!-- Main content area -->
         <div class="w-50">
             <h2 class="mb-4">Profil</h2>
-            <form method="POST" action="{{ url_for ('client_profil') }}">
+            <form method="POST" action="{{ url_for('client_profil') }}">
                 {{ form.hidden_tag() }}
 
-                <!--Numéro téléphone-->
+                <!--Numéro de téléphone (non modifiable)-->
                 <div class="mb-3">
                     <label for="phone_number" class="form-label">
                         {{ form.phone_number.label }} <span class="text-danger">*</span>
                     </label>
-                    {{ form.phone_number(size=50, class_="form-control",
-                                class="form-control w-100",
-                                disabled=(True if not edit else False),
-                                placeholder="Entrez votre numéro de téléphone") }}
+                    {{ form.phone_number(size=50,
+                        class_="form-control w-100",
+                        readonly=True,
+                        placeholder="Entrez votre numéro de téléphone") }}   
                 </div>
-
-                <!--Erreur si numéro déja dans BD ou si ce n'est pas que des chiffres-->
                 {% if form.phone_number.errors %}
                     <ul class="list-group">
                         {% for e in form.phone_number.errors %}
@@ -43,10 +41,9 @@
                     <label for="name" class="form-label">
                         {{ form.name.label }} <span class="text-danger">*</span>
                     </label>
-                    {{ form.name(size=50, class_="form-control",
-                                class="form-control w-100",
-                                disabled=(True if not edit else False),
-                                placeholder="Entrez votre nom") }}
+                    {{ form.name(size=50, class_="form-control w-100",
+                                 disabled=(True if not edit else False),
+                                 placeholder="Entrez votre nom") }}
                 </div>
                 {% if form.name.errors %}
                     <ul class="list-group">
@@ -61,10 +58,9 @@
                     <label for="first_name" class="form-label">
                         {{ form.first_name.label }} <span class="text-danger">*</span>
                     </label>
-                    {{ form.first_name(size=50, class_="form-control",
-                                class="form-control w-100",
-                                disabled=(True if not edit else False),
-                                placeholder="Entrez votre prénom") }}
+                    {{ form.first_name(size=50, class_="form-control w-100",
+                                       disabled=(True if not edit else False),
+                                       placeholder="Entrez votre prénom") }}
                 </div>
                 {% if form.first_name.errors %}
                     <ul class="list-group">
@@ -79,13 +75,10 @@
                     <label for="email" class="form-label">
                         {{ form.email.label }} <span class="text-danger">*</span>
                     </label>
-                    {{ form.email(size=50, class_="form-control",
-                                class="form-control w-100",
-                                disabled=(True if not edit else False),
-                                placeholder="Entrez votre email") }}
+                    {{ form.email(size=50, class_="form-control w-100",
+                                  disabled=(True if not edit else False),
+                                  placeholder="Entrez votre email") }}
                 </div>
-
-                <!--Erreur Email invalide-->
                 {% if form.email.errors %}
                     <ul class="list-group">
                         {% for e in form.email.errors %}
@@ -94,29 +87,28 @@
                     </ul>
                 {% endif %}
 
-                <!--Addresse-->
+                <!--Adresse-->
                 <div class="mb-3">
                     <label for="address" class="form-label">
                         {{ form.address.label }} <span class="text-danger">*</span>
                     </label>
-                    {{ form.address(size=50, class_="form-control",
-                                class="form-control w-100",
-                                disabled=(True if not edit else False),
-                                placeholder="Entrez votre adresse postale") }}
+                    {{ form.address(size=50, class_="form-control w-100",
+                                    disabled=(True if not edit else False),
+                                    placeholder="Entrez votre adresse postale") }}
                 </div>
                 {% if form.address.errors %}
-                <ul class="list-group">
-                    {% for e in form.address.errors %}
-                        <li class="list-group-item list-group-item-danger">{{ e }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+                    <ul class="list-group">
+                        {% for e in form.address.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
 
                 <div class="d-flex">
                     <div class="mb-3 ms-auto">
                         {% if edit %}
                             <a href="{{ url_for('client_profil') }}" class="btn btn_color">Annuler</a>
-                            <input class="btn btn_color" type="submit" value="Enregistrer">
+                            <input class="btn btn_color" type="submit" name="save_profile" value="Enregistrer">
                         {% else %}
                             <a href="{{ url_for('client_profil', edit=True) }}" class="btn btn_color">Modifier</a>
                         {% endif %}
@@ -124,22 +116,59 @@
                 </div>
             </form>
 
-            <h2 class="mb-4">Mot de passe</h2>
-            <form>    
+            <!-- Formulaire de changement de mot de passe -->
+            <h2 class="mb-4">Changer mon mot de passe</h2>
+            <form method="POST" action="{{ url_for('client_profil') }}">
+                {{ pw_form.hidden_tag() }}
+
                 <div class="mb-3">
-                    <label for="motDePasse" class="form-label">Mot de passe <span class="text-danger">*</span></label>
-                    <input type="password" class="form-control w-100" id="motDePasse" placeholder="Entrez votre mot de passe">
+                    <label for="old_password" class="form-label">
+                        {{ pw_form.old_password.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pw_form.old_password(class_="form-control w-100", placeholder="Entrez votre ancien mot de passe") }}
                 </div>
+                {% if pw_form.old_password.errors %}
+                    <ul class="list-group">
+                        {% for e in pw_form.old_password.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
                 <div class="mb-3">
-                    <label for="ConfmotDePasse" class="form-label">Confirmer votre mot de passe <span class="text-danger">*</span></label>
-                    <input type="password" class="form-control w-100" id="ConfmotDePasse" placeholder="Confirmer votre mot de passe">
+                    <label for="new_password" class="form-label">
+                        {{ pw_form.new_password.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pw_form.new_password(class_="form-control w-100", placeholder="Entrez votre nouveau mot de passe") }}
+                </div>
+                {% if pw_form.new_password.errors %}
+                    <ul class="list-group">
+                        {% for e in pw_form.new_password.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">
+                        {{ pw_form.confirm_password.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pw_form.confirm_password(class_="form-control w-100", placeholder="Confirmez votre nouveau mot de passe") }}
+                </div>
+                {% if pw_form.confirm_password.errors %}
+                    <ul class="list-group">
+                        {% for e in pw_form.confirm_password.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="d-flex">
+                    <div class="mb-3 ms-auto">
+                        {{ pw_form.change_password(class_="btn btn_color") }}
+                    </div>
                 </div>
             </form>
-            <div class="d-flex">
-                <div class="mb-3 ms-auto">
-                    <input class="btn btn_color" type="submit" value="Enregistrer">
-                </div>
-            </div>
         </div>
     </div>
 </div>
