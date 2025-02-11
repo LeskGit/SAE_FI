@@ -140,11 +140,13 @@ class Plats(db.Model):
     def add_allergene(self, lst_allergenes):
         for allergene in lst_allergenes:
             self.les_allergenes.append(allergene)
-        
-        
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
+    
+    @classmethod
+    def get_plats(cls):
+        return cls.query.all()
     
     
 
@@ -874,8 +876,6 @@ def execute_tests():
 
     db.session.commit()
 
-def get_plats():
-    return Plats.query.all()
 
 def get_formules():
     return Formule.query.all()
@@ -928,10 +928,10 @@ def get_allergenes_plat(nom_plat) :
 
 def get_plats_filtered_by_allergenes(selected_allergenes):
     if len(selected_allergenes) == 0:
-        return get_plats()  
+        return Plats.get_plats()  
     else:
-        lst = get_plats()
-        for plats in get_plats():
+        lst = Plats.get_plats()
+        for plats in Plats.get_plats():
             for allergene in plats.les_allergenes:
                 if allergene.id_allergene in selected_allergenes:
                     lst.remove(plats)

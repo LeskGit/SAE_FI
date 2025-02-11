@@ -1,7 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Formule, Plats, get_plats
-from project.models import Plats, get_plats
+from project.models import Formule, Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -168,8 +167,8 @@ def creation_plat():
 @admin_required
 def creation_offre():
     form = FormuleForm()
-    form.plats.choices = [(plat.nom_plat, plat.nom_plat) for plat in get_plats()]
-    return render_template("creation_offre.html", form=form, plats=get_plats())
+    form.plats.choices = [(plat.nom_plat, plat.nom_plat) for plat in Plats.get_plats()]
+    return render_template("creation_offre.html", form=form, plats=Plats.get_plats())
 
 @app.route("/add_offre", methods=["POST"])
 @admin_required
@@ -245,7 +244,7 @@ def delete_offre(id):
 @admin_required
 def edition_plat():
     type = request.args.get('type', 'a')
-    plats = get_plats()
+    plats = Plats.get_plats()
     plats_chauds = get_plats_chauds()
     plats_froids = get_plats_froids()
     sushis = get_sushis()
