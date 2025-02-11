@@ -59,7 +59,7 @@ class RegisterForm (FlaskForm):
             raise ValidationError("Cet e-mail est déjà utilisé.")
 
     def validate_phone_number(self, field):
-        if User.check_user_num(num_tel_u=field.data):
+        if User.get_user(num_tel=field.data):
             raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
 
     def get_authentificated_user(self):

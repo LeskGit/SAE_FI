@@ -10,7 +10,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, Allergenes, Constituer, Commandes
+from project.models import Plats, Allergenes, Constituer, Commandes, Formule
 
 class CommanderForm(FlaskForm):
     nom_plat = HiddenField()
@@ -30,7 +30,7 @@ def commander():
         plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
         plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
         sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-        formules = Plats.get_formules_filtered_by_allergenes(selected_allergenes)
+        formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
         desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
 
         return render_template("commander.html", 
@@ -79,7 +79,7 @@ def filter_allergenes():
     plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
     plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
     sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-    formules = Plats.get_formules_filtered_by_allergenes(selected_allergenes)
+    formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
     desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
     
 

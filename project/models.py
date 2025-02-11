@@ -44,19 +44,24 @@ class User(db.Model, UserMixin):
     
     @classmethod
     def get_blackliste(cls) :
+        """getter de la blackliste
+
+        Returns:
+            list: liste des personnes blacklistés
+        """
         return cls.query.filter_by(blackliste = True).all()
     
     @classmethod
     def get_user(cls, num_tel) :
+        """getter en fonction du num de téléphone
+        """
         return cls.query.get(num_tel)
     
     @classmethod
     def check_user_email(cls, email_u) :
+        """getter en fonction de l'email
+        """
         return cls.query.filter_by(email=email_u).first()
-    
-    @classmethod
-    def check_user_num(cls, num_tel_u) :
-        return cls.query.filter_by(num_tel=num_tel_u).first()
 
 @login_manager.user_loader
 def load_user(num_tel):
@@ -80,6 +85,8 @@ class Constituer(db.Model):
 
     @classmethod
     def get_constituer(cls, nom_plat, num_com) :
+        """getter de constituer en fonction d'un nom de plat et d'un numéro de commande
+        """
         return cls.query.get((nom_plat, num_com))
 
 class Commandes(db.Model):
@@ -106,9 +113,8 @@ class Commandes(db.Model):
         return self.prix_total
 
     def compute_reduction(self):
-        """
-        Calcule la réduction de la commande :
-        Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
+        """Calcule la réduction de la commande :
+            Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
         """
         self.prix_avec_reduc = 0
         for constituer in self.constituer_assoc:
@@ -134,21 +140,41 @@ class Commandes(db.Model):
     
     @classmethod
     def get_sur_place_at(cls, date=datetime.today().date()):
+        """Retourne les tables disponibles à la date donnée
+
+        Args:
+            date (datetime, optional): la date à vérifier. Par défaut à datetime.today().date().
+
+        Returns:
+            list: la liste des tables disponibles à la date donnée
+        """
         return cls.query.filter(db.func.date(cls.date) == date, cls.sur_place.is_(True)).all()
     
     @classmethod
     def get_commandes_today(cls) :
+        """retourne les commandes d'aujourd'hui
+        """
         #today = datetime.today().date()
         #today = datetime(2024, 11, 6, 12)
         #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
-        return Commandes.query.all()
+        return cls.query.all()
     
     @classmethod
     def get_historique(cls, num_tel) :
+        """retourne l'historique de l'User en fonction de son numéro de téléphone
+
+        Args:
+            num_tel (str): le numéro de téléphone
+
+        Returns:
+            list: la liste des commandes de l'User
+        """
         return cls.query.filter_by(num_tel=num_tel).filter(cls.etat != "Panier").order_by(cls.num_commande.desc()).all()
 
     @classmethod
     def get_commande(cls, num_com) :
+        """getter en fonction du numéro de commande
+        """
         return cls.query.get(num_com)
     
 class Allergenes(db.Model):
@@ -158,6 +184,8 @@ class Allergenes(db.Model):
 
     @classmethod
     def get_allergenes(cls) :
+        """getter de tous les allergènes
+        """
         return cls.query.all()
     
 contenir_allergene = db.Table("contenir_allergene",
@@ -197,29 +225,50 @@ class Plats(db.Model):
     
     @classmethod
     def get_plats(cls):
+        """getter de tous les plats
+        """
         return cls.query.all()
     
     @classmethod
     def get_desserts(cls):
+        """getter de tous les desserts
+        """     
         return cls.query.filter_by(type_plat = "Dessert").all()
 
     @classmethod
     def get_plats_chauds(cls):
+        """getter de tous les plats chauds
+        """
         return cls.query.filter_by(type_plat = "Plat chaud").all()
 
     @classmethod
     def get_plats_froids(cls):
+        """getter de tous les plats froids
+        """
         return cls.query.filter_by(type_plat = "Plat froid").all()
 
     @classmethod
     def get_sushis(cls):
+        """getter de tous les sushis
+        """
         return cls.query.filter_by(type_plat = "Sushi").all()
     
     @classmethod
     def get_allergenes_plat(cls, nom_plat) :
+        """getter des allerènes en fonction d'un nom de plat
+        """
         return cls.query.get(nom_plat).les_allergenes
 
     def contains_selected_allergenes(formule, selected_allergenes):
+        """Fonction vérifiant si un ou plusieurs allergènes est/sont dans une formule
+
+        Args:
+            formule (Formule): la formule
+            selected_allergenes (List(Allergene)): la liste des allergènes à vérifier
+
+        Returns:
+            boolean: Vrai si au moins un allergène est dans la formule
+        """
         for plat in formule.les_plats:
             if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
                 return True
@@ -227,6 +276,8 @@ class Plats(db.Model):
 
     @classmethod
     def get_plats_filtered_by_allergenes(cls, selected_allergenes):
+        """getter des plats en fonction d'une liste d'allergènes
+        """
         if len(selected_allergenes) == 0:
             return cls.get_plats()  
         else:
@@ -240,6 +291,8 @@ class Plats(db.Model):
 
     @classmethod
     def get_plats_filtered_by_type_and_allergenes(cls, type_plat, selected_allergenes):
+        """getter des plats en fonction de leur type et d'une liste d'allergènes
+        """
         res = []
         plat_trie = cls.get_plats_filtered_by_allergenes(selected_allergenes)
         for plats in plat_trie:
@@ -248,14 +301,16 @@ class Plats(db.Model):
         return res
 
     @classmethod
-    def get_formules_filtered_by_allergenes(cls, selected_allergenes):
-        if len(selected_allergenes) == 0:
-            return Formule.get_formules()
-        else:
-            return cls.filter_formules_by_allergenes(Formule.get_formules(), selected_allergenes)
-
-    @classmethod
     def filter_formules_by_allergenes(cls, formules, selected_allergenes):
+        """Fonction permettant de récupérer les formules filtrées par une liste d'allergènes
+
+        Args:
+            formules (List(Formule)): la liste de formules
+            selected_allergenes (List(Allergene)): la liste des allergènes
+
+        Returns:
+            List(Formule): la liste des formules filtrées
+        """
         filtered_formules = []
         for formule in formules:
             if not cls.contains_selected_allergenes(formule, selected_allergenes):
@@ -273,7 +328,18 @@ class Formule(db.Model):
     
     @classmethod
     def get_formules(cls):
+        """getter des formules
+        """
         return cls.query.all()
+    
+    @classmethod
+    def get_formules_filtered_by_allergenes(cls, selected_allergenes):
+        """getter des formules en fonction d'une liste d'allergènes
+        """
+        if len(selected_allergenes) == 0:
+            return cls.get_formules()
+        else:
+            return Plats.filter_formules_by_allergenes(cls.get_formules(), selected_allergenes)
 
 #--------
 
