@@ -110,6 +110,13 @@ class Commandes(db.Model):
     @classmethod
     def get_sur_place_at(cls, date=datetime.today().date()):
         return cls.query.filter(db.func.date(cls.date) == date, cls.sur_place.is_(True)).all()
+    
+    @classmethod
+    def get_commandes_today(cls) :
+        #today = datetime.today().date()
+        #today = datetime(2024, 11, 6, 12)
+        #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
+        return Commandes.query.all()
 
     
 class Allergenes(db.Model):
@@ -916,11 +923,6 @@ def get_num_table_dispo(commande_date:datetime):
     
     return -1
 
-def get_commandes_today() :
-    #today = datetime.today().date()
-    today = datetime(2024, 11, 6, 12)
-    #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
-    return Commandes.query.all()
     
 def get_allergenes() :
     return Allergenes.query.all()
