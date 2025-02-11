@@ -116,6 +116,7 @@ class Commandes(db.Model):
                 self.prix_avec_reduc -= constituer.plat.prix_reduc
         return self.prix_avec_reduc
     
+    @classmethod
     def get_num_table_dispo(cls, commande_date:datetime):
         """Renvoie le numéro de la première table disponible
         """
