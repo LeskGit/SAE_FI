@@ -21,7 +21,7 @@ class LoginForm (FlaskForm):
         Returns:
             User: L'utilisateur si le mot de passe est correct, None sinon
         """
-        user = User.query.get(self.phone_number.data)
+        user = User.get_user(self.phone_number.data)
         if user is None:
             return None
         m = sha256()
@@ -69,7 +69,7 @@ class RegisterForm (FlaskForm):
         Returns:
             User: L'utilisateur si le mot de passe est correct, None sinon
         """
-        user = User.query.get(self.phone_number.data)
+        user = User.get_user(self.phone_number.data)
         if user is None:
             return None
         m = sha256()
