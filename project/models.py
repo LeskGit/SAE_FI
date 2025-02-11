@@ -249,9 +249,9 @@ class Plats(db.Model):
     @classmethod
     def get_formules_filtered_by_allergenes(cls, selected_allergenes):
         if len(selected_allergenes) == 0:
-            return get_formules()
+            return Formule.get_formules()
         else:
-            return cls.filter_formules_by_allergenes(get_formules(), selected_allergenes)
+            return cls.filter_formules_by_allergenes(Formule.get_formules(), selected_allergenes)
 
     @classmethod
     def filter_formules_by_allergenes(cls, formules, selected_allergenes):
@@ -270,7 +270,9 @@ class Formule(db.Model):
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
     
-    
+    @classmethod
+    def get_formules(cls):
+        return cls.query.all()
 
 #--------
 
@@ -986,7 +988,3 @@ def execute_tests():
         print("Erreur:", e)
 
     db.session.commit()
-
-
-def get_formules():
-    return Formule.query.all()
