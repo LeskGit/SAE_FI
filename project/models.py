@@ -163,6 +163,18 @@ class Plats(db.Model):
     def get_plats(cls):
         return cls.query.all()
     
+    def get_desserts(cls):
+        return cls.query.filter_by(type_plat = "Dessert").all()
+
+    def get_plats_chauds(cls):
+        return cls.query.filter_by(type_plat = "Plat chaud").all()
+
+    def get_plats_froids(cls):
+        return cls.query.filter_by(type_plat = "Plat froid").all()
+
+    def get_sushis(cls):
+        return cls.query.filter_by(type_plat = "Sushi").all()
+    
     
 
 class Formule(db.Model):
@@ -894,19 +906,6 @@ def execute_tests():
 
 def get_formules():
     return Formule.query.all()
-
-def get_desserts():
-    return  Plats.query.filter_by(type_plat = "Dessert").all()
-
-def get_plats_chauds():
-    return  Plats.query.filter_by(type_plat = "Plat chaud").all()
-
-def get_plats_froids():
-    return  Plats.query.filter_by(type_plat = "Plat froid").all()
-
-def get_sushis():
-    return  Plats.query.filter_by(type_plat = "Sushi").all()
-
  
 def get_num_table_dispo(commande_date:datetime):
     """Renvoie le numéro de la première table disponible

@@ -11,7 +11,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, get_desserts, get_num_table_dispo, get_formules, get_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, Constituer, Commandes, get_plats_filtered_by_type_and_allergenes
+from project.models import Plats, get_num_table_dispo, get_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, Constituer, Commandes, get_plats_filtered_by_type_and_allergenes
 
 class CommanderForm(FlaskForm):
     nom_plat = HiddenField()

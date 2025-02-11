@@ -4,7 +4,7 @@ from project.models import Formule, Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats, get_allergenes, get_allergenes_plat
+from project.models import Commandes, User, Plats, get_allergenes, get_allergenes_plat
 from functools import wraps
 from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
 from wtforms.widgets import CheckboxInput, ListWidget
@@ -107,10 +107,10 @@ def suivi_commande():
 @app.route("/suivi/stock")
 @admin_required
 def suivi_stock() :
-    plats_chauds=get_plats_chauds()
-    plats_froids=get_plats_froids()
-    sushis=get_sushis()
-    desserts=get_desserts()
+    plats_chauds=Plats.get_plats_chauds()
+    plats_froids=Plats.get_plats_froids()
+    sushis=Plats.get_sushis()
+    desserts=Plats.get_desserts()
     return render_template("suivi_stock.html",plats_froids=plats_froids, plats_chauds=plats_chauds, sushis=sushis, desserts=desserts )
 
 @app.route("/modifier_stock", methods=["POST"])
@@ -245,10 +245,10 @@ def delete_offre(id):
 def edition_plat():
     type = request.args.get('type', 'a')
     plats = Plats.get_plats()
-    plats_chauds = get_plats_chauds()
-    plats_froids = get_plats_froids()
-    sushis = get_sushis()
-    desserts = get_desserts()
+    plats_chauds = Plats.get_plats_chauds()
+    plats_froids = Plats.get_plats_froids()
+    sushis = Plats.get_sushis()
+    desserts = Plats.get_desserts()
     allergenes = get_allergenes()
     
     return render_template(
