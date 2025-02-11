@@ -109,7 +109,7 @@ def register():
     f = RegisterForm()
     if f.validate_on_submit():
         u = f.create_user()
-        if User.query.get(u.get_id()) :
+        if User.get_user(u.get_id()) :
             return render_template("inscription.html", form = f)
         else :
             db.session.add(u)                  #
