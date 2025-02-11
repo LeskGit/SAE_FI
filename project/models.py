@@ -191,19 +191,68 @@ class Plats(db.Model):
     def get_plats(cls):
         return cls.query.all()
     
+    @classmethod
     def get_desserts(cls):
         return cls.query.filter_by(type_plat = "Dessert").all()
 
+    @classmethod
     def get_plats_chauds(cls):
         return cls.query.filter_by(type_plat = "Plat chaud").all()
 
+    @classmethod
     def get_plats_froids(cls):
         return cls.query.filter_by(type_plat = "Plat froid").all()
 
+    @classmethod
     def get_sushis(cls):
         return cls.query.filter_by(type_plat = "Sushi").all()
     
-    
+    @classmethod
+    def get_allergenes_plat(cls, nom_plat) :
+        return cls.query.get(nom_plat).les_allergenes
+
+    def contains_selected_allergenes(formule, selected_allergenes):
+        for plat in formule.les_plats:
+            if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
+                return True
+        return False
+
+    @classmethod
+    def get_plats_filtered_by_allergenes(cls, selected_allergenes):
+        if len(selected_allergenes) == 0:
+            return cls.get_plats()  
+        else:
+            lst = cls.get_plats()
+            for plats in cls.get_plats():
+                for allergene in plats.les_allergenes:
+                    if allergene.id_allergene in selected_allergenes:
+                        lst.remove(plats)
+                        break
+            return lst
+
+    @classmethod
+    def get_plats_filtered_by_type_and_allergenes(cls, type_plat, selected_allergenes):
+        res = []
+        plat_trie = cls.get_plats_filtered_by_allergenes(selected_allergenes)
+        for plats in plat_trie:
+            if plats.type_plat == type_plat:
+                res.append(plats)
+        return res
+
+    @classmethod
+    def get_formules_filtered_by_allergenes(cls, selected_allergenes):
+        if len(selected_allergenes) == 0:
+            return get_formules()
+        else:
+            return cls.filter_formules_by_allergenes(get_formules(), selected_allergenes)
+
+    @classmethod
+    def filter_formules_by_allergenes(cls, formules, selected_allergenes):
+        filtered_formules = []
+        for formule in formules:
+            if not cls.contains_selected_allergenes(formule, selected_allergenes):
+                filtered_formules.append(formule)
+        return filtered_formules
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)
@@ -934,51 +983,3 @@ def execute_tests():
 
 def get_formules():
     return Formule.query.all()
-
-
-def get_allergenes_plat(nom_plat) :
-    return Plats.query.get(nom_plat).les_allergenes
-
-def get_plats_filtered_by_allergenes(selected_allergenes):
-    if len(selected_allergenes) == 0:
-        return Plats.get_plats()  
-    else:
-        lst = Plats.get_plats()
-        for plats in Plats.get_plats():
-            for allergene in plats.les_allergenes:
-                if allergene.id_allergene in selected_allergenes:
-                    lst.remove(plats)
-                    break
-        return lst
-
-def get_plats_filtered_by_type_and_allergenes(type_plat, selected_allergenes):
-    res = []
-    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
-    for plats in plat_trie:
-        if plats.type_plat == type_plat:
-            res.append(plats)
-    return res
-
-
-    
-
-def get_formules_filtered_by_allergenes(selected_allergenes):
-    if len(selected_allergenes) == 0:
-        return get_formules()
-    else:
-        return filter_formules_by_allergenes(get_formules(), selected_allergenes)
-
-def filter_formules_by_allergenes(formules, selected_allergenes):
-    filtered_formules = []
-    for formule in formules:
-        if not contains_selected_allergenes(formule, selected_allergenes):
-            filtered_formules.append(formule)
-    return filtered_formules
-
-def contains_selected_allergenes(formule, selected_allergenes):
-    for plat in formule.les_plats:
-        if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
-            return True
-    return False
-
-
