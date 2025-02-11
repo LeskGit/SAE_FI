@@ -4,7 +4,7 @@ from project.models import Formule, Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, Plats, get_allergenes, get_allergenes_plat
+from project.models import Commandes, User, Plats, Allergenes
 from functools import wraps
 from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
 from wtforms.widgets import CheckboxInput, ListWidget
@@ -15,7 +15,6 @@ from werkzeug.utils import secure_filename
 import os
 from project.app import mkpath
 import uuid
-from project.models import Allergenes
 
 
 def admin_required(f):
@@ -58,7 +57,7 @@ class PlatForm(FlaskForm):
 
     allergenes = QuerySelectMultipleField(
         "Allergènes",
-        query_factory=lambda: get_allergenes(),
+        query_factory=lambda: Allergenes.get_allergenes(),
         get_label="nom_allergene",
         widget=ListWidget(prefix_label=False),
         option_widget=CheckboxInput()
@@ -160,7 +159,7 @@ def reinitialiser_stock():
 @admin_required
 def creation_plat():
     form = PlatForm()
-    return render_template("creation_plat.html", form=form, allergenes=get_allergenes())
+    return render_template("creation_plat.html", form=form, allergenes=Allergenes.get_allergenes())
 
 
 @app.route("/creation/offre", methods=["GET"])
@@ -249,7 +248,7 @@ def edition_plat():
     plats_froids = Plats.get_plats_froids()
     sushis = Plats.get_sushis()
     desserts = Plats.get_desserts()
-    allergenes = get_allergenes()
+    allergenes = Allergenes.get_allergenes()
     
     return render_template(
         "edition_plat.html",

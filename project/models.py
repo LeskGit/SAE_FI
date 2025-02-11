@@ -123,6 +123,10 @@ class Allergenes(db.Model):
     id_allergene = db.Column(db.Integer, primary_key = True)
     nom_allergene = db.Column(db.String(64))
     les_plats = db.relationship("Plats", secondary = "contenir_allergene", back_populates = "les_allergenes")
+
+    @classmethod
+    def get_allergenes(cls) :
+        return cls.query.all()
     
 contenir_allergene = db.Table("contenir_allergene",
     db.metadata,
@@ -922,9 +926,6 @@ def get_num_table_dispo(commande_date:datetime):
     
     return -1
 
-    
-def get_allergenes() :
-    return Allergenes.query.all()
 
 def get_allergenes_plat(nom_plat) :
     return Plats.query.get(nom_plat).les_allergenes

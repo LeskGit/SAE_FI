@@ -3,7 +3,6 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from project import app, db
 from flask import flash, render_template, url_for, redirect, request, make_response
-#from .models import
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
 from wtforms import BooleanField, SubmitField, StringField
@@ -11,7 +10,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, get_num_table_dispo, get_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, Constituer, Commandes, get_plats_filtered_by_type_and_allergenes
+from project.models import Plats, Allergenes, get_num_table_dispo, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, Constituer, Commandes, get_plats_filtered_by_type_and_allergenes
 
 class CommanderForm(FlaskForm):
     nom_plat = HiddenField()
@@ -26,7 +25,7 @@ def commander():
         form = CommanderForm()
         selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
         type = request.args.get('type', 'p')
-        allergenes = get_allergenes()
+        allergenes = Allergenes.get_allergenes()
         plats = Plats.get_plats()
         plats_chauds = get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
         plats_froids = get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
@@ -75,7 +74,7 @@ def filter_allergenes():
             
     type = request.args.get('type', 'p')
     
-    allergenes = get_allergenes()
+    allergenes = Allergenes.get_allergenes()
     plats = get_plats_filtered_by_allergenes(selected_allergenes)
     plats_chauds = get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
     plats_froids = get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
