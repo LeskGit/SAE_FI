@@ -125,6 +125,10 @@ class Commandes(db.Model):
         #today = datetime(2024, 11, 6, 12)
         #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
         return Commandes.query.all()
+    
+    @classmethod
+    def get_historique(cls, num_tel) :
+        return cls.query.filter_by(num_tel=num_tel).filter(cls.etat != "Panier").order_by(cls.num_commande.desc()).all()
 
     
 class Allergenes(db.Model):
