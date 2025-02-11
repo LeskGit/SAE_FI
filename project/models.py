@@ -78,6 +78,10 @@ class Constituer(db.Model):
     plat = db.relationship("Plats", back_populates="constituer_assoc", overlaps="les_commandes,commande")
     commande = db.relationship("Commandes", back_populates="constituer_assoc", overlaps="les_plats,plat")
 
+    @classmethod
+    def get_constituer(cls, nom_plat, num_com) :
+        return cls.query.get((nom_plat, num_com))
+
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
     num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
@@ -142,6 +146,9 @@ class Commandes(db.Model):
     def get_historique(cls, num_tel) :
         return cls.query.filter_by(num_tel=num_tel).filter(cls.etat != "Panier").order_by(cls.num_commande.desc()).all()
 
+    @classmethod
+    def get_commande(cls, num_com) :
+        return cls.query.get(num_com)
     
 class Allergenes(db.Model):
     id_allergene = db.Column(db.Integer, primary_key = True)

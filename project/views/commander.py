@@ -116,8 +116,8 @@ def ajout_plat() :
         f = CommanderForm()
         if f.num_com.data :
             try:
-                commande = Commandes.query.get(f.num_com.data)
-                constituer = Constituer.query.get((f.nom_plat.data, f.num_com.data))
+                commande = Commandes.get_commande(f.num_com.data)
+                constituer = Constituer.get_constituer(f.nom_plat.data, f.num_com.data)
                 if constituer:
                     constituer.quantite_plat += f.quantite.data
                 else:
