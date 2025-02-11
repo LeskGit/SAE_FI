@@ -41,6 +41,14 @@ class User(db.Model, UserMixin):
             db.session.add(panier)
             db.session.commit()
         return panier
+    
+    @classmethod
+    def get_blackliste(cls) :
+        return cls.query.filter_by(blackliste = True).all()
+    
+    @classmethod
+    def get_user(cls, num_tel) :
+        return cls.query.get(num_tel)
 
 @login_manager.user_loader
 def load_user(num_tel):
@@ -907,12 +915,6 @@ def get_num_table_dispo(commande_date:datetime):
             return num_table
     
     return -1
-
-def get_blackliste() :
-    return User.query.filter_by(blackliste = True).all()
-
-def get_user(num_tel) :
-    return User.query.get(num_tel)
 
 def get_commandes_today() :
     #today = datetime.today().date()

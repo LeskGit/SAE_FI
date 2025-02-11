@@ -4,7 +4,7 @@ from project.models import Formule, Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats, get_allergenes, get_allergenes_plat
+from project.models import Commandes, User, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats, get_allergenes, get_allergenes_plat
 from functools import wraps
 from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
 from wtforms.widgets import CheckboxInput, ListWidget
@@ -88,12 +88,12 @@ def admin():
         dico_tables[table.num_table] = True
 
     # Blacklist
-    liste_noire = get_blackliste()
+    liste_noire = User.get_blackliste()
     return render_template("admin_traiteur.html", tables = dico_tables, blacklist = liste_noire)
 
 @app.route("/admin/blacklist", methods = ["GET", "POST"])
 def blackliste_supprimer() :
-    user = get_user(request.args.get('id_client'))
+    user = User.get_user(request.args.get('id_client'))
     user.blackliste =  False
     db.session.commit()
     return admin()
