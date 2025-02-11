@@ -1,7 +1,7 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
 from project.models import Formule, Plats, get_plats
-from project.models import Plats, get_sur_place_at, get_plats
+from project.models import Plats, get_plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -83,7 +83,7 @@ class FormuleForm(FlaskForm):
 @admin_required
 def admin():
     # Tables disponibles aujourd'hui
-    commandes_sur_place = get_sur_place_at()
+    commandes_sur_place = Commandes.get_sur_place_at()
     dico_tables = {i: False for i in range(1, 13)}
     for table in commandes_sur_place :
         dico_tables[table.num_table] = True

@@ -98,6 +98,10 @@ class Commandes(db.Model):
     
     def get_num_table_dispo(self):
         return 
+    
+    @classmethod
+    def get_sur_place_at(cls, date=datetime.today().date()):
+        return cls.query.filter(db.func.date(cls.date) == date, cls.sur_place.is_(True)).all()
 
     
 class Allergenes(db.Model):
@@ -888,13 +892,11 @@ def get_plats_froids():
 def get_sushis():
     return  Plats.query.filter_by(type_plat = "Sushi").all()
 
-def get_sur_place_at(date=datetime.today().date()):
-    return Commandes.query.filter(db.func.date(Commandes.date) == date, Commandes.sur_place.is_(True)).all()
  
 def get_num_table_dispo(commande_date:datetime):
     """Renvoie le numéro de la première table disponible
     """
-    commandes_sur_place = get_sur_place_at(commande_date.date())
+    commandes_sur_place = Commandes.get_sur_place_at(commande_date.date())
 
     dico_tables = {i: False for i in range(1, 13)}
     for table in commandes_sur_place:
