@@ -49,6 +49,14 @@ class User(db.Model, UserMixin):
     @classmethod
     def get_user(cls, num_tel) :
         return cls.query.get(num_tel)
+    
+    @classmethod
+    def check_user_email(cls, email_u) :
+        return cls.query.filter_by(email=email_u).first()
+    
+    @classmethod
+    def check_user_num(cls, num_tel_u) :
+        return cls.query.filter_by(num_tel=num_tel_u).first()
 
 @login_manager.user_loader
 def load_user(num_tel):

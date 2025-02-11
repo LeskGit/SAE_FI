@@ -55,11 +55,11 @@ class RegisterForm (FlaskForm):
     #recaptcha = RecaptchaField() 
 
     def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
+        if User.check_user_email(email_u=field.data):
             raise ValidationError("Cet e-mail est déjà utilisé.")
 
     def validate_phone_number(self, field):
-        if User.query.filter_by(num_tel=field.data).first():
+        if User.check_user_num(num_tel_u=field.data):
             raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
 
     def get_authentificated_user(self):
