@@ -112,8 +112,20 @@ class Commandes(db.Model):
                 self.prix_avec_reduc -= constituer.plat.prix_reduc
         return self.prix_avec_reduc
     
-    def get_num_table_dispo(self):
-        return 
+    def get_num_table_dispo(cls, commande_date:datetime):
+        """Renvoie le numéro de la première table disponible
+        """
+        commandes_sur_place = cls.get_sur_place_at(commande_date.date())
+
+        dico_tables = {i: False for i in range(1, 13)}
+        for table in commandes_sur_place:
+            dico_tables[table.num_table] = True
+        
+        for num_table, occupe in dico_tables.items():
+            if not occupe:
+                return num_table
+        
+        return -1
     
     @classmethod
     def get_sur_place_at(cls, date=datetime.today().date()):
@@ -922,21 +934,6 @@ def execute_tests():
 
 def get_formules():
     return Formule.query.all()
- 
-def get_num_table_dispo(commande_date:datetime):
-    """Renvoie le numéro de la première table disponible
-    """
-    commandes_sur_place = Commandes.get_sur_place_at(commande_date.date())
-
-    dico_tables = {i: False for i in range(1, 13)}
-    for table in commandes_sur_place:
-        dico_tables[table.num_table] = True
-    
-    for num_table, occupe in dico_tables.items():
-        if not occupe:
-            return num_table
-    
-    return -1
 
 
 def get_allergenes_plat(nom_plat) :

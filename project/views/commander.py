@@ -10,7 +10,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, Allergenes, get_num_table_dispo, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, Constituer, Commandes, get_plats_filtered_by_type_and_allergenes
+from project.models import Plats, Allergenes, Constituer, Commandes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, get_plats_filtered_by_type_and_allergenes
 
 class CommanderForm(FlaskForm):
     nom_plat = HiddenField()
@@ -144,7 +144,7 @@ def panier():
     if panier.date is None:
         sur_place_disponible = False
     else:
-        sur_place_disponible = True if get_num_table_dispo(panier.date) != -1 else False
+        sur_place_disponible = True if Commandes.get_num_table_dispo(panier.date) != -1 else False
     return render_template("panier.html", panier=panier, sur_place_disponible=sur_place_disponible)
 
 @app.route('/modifier_quantite')
@@ -200,7 +200,7 @@ def modifier_type():
 
     if panier is not None:
         if sur_place == "1":
-            numero_table = get_num_table_dispo(panier.date)
+            numero_table = Commandes.get_num_table_dispo(panier.date)
             if numero_table != -1:
                 if panier.date is not None and panier.date.time() > datetime.strptime("14:00", "%H:%M").time():
                     panier.date = datetime.combine(panier.date, datetime.strptime("13:50", "%H:%M").time())
