@@ -36,7 +36,7 @@ class LoginUnsafeForm (FlaskForm):
                                                                   Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
 
     def create_user(self):
-        return User(num_tel=self.phone_number.data)
+        return User(num_tel=self.phone_number.data, fake=True)
 
     def get_authentificated_user(self):
         """permet de savoir si le mot de passe de 
@@ -45,10 +45,15 @@ class LoginUnsafeForm (FlaskForm):
         Returns:
             User: L'utilisateur si le mot de passe est correct, None sinon
         """
-        user = User.query.get(self.phone_number.data)
+        user = user = User.get_user(self.phone_number.data)
         if user is None:
-            return self.create_user()
-        return user
+            user_created = self.create_user()
+            db.session.add(user_created)
+            db.session.commit()
+            return user_created
+        if user.fake:
+            return user
+        return None
 
 class RegisterForm (FlaskForm):
     phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
@@ -80,34 +85,20 @@ class RegisterForm (FlaskForm):
             raise ValidationError("Cet e-mail est déjà utilisé.")
 
     def validate_phone_number(self, field):
-        if User.get_user(num_tel=field.data):
+        user = User.get_user(num_tel=field.data)
+        if user is not None and not user.fake:
             raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
-
-    def get_authentificated_user(self):
-        """permet de savoir si le mot de passe de 
-        l'utilisateur est bon
-
-        Returns:
-            User: L'utilisateur si le mot de passe est correct, None sinon
-        """
-        user = User.get_user(self.phone_number.data)
-        if user is None:
-            return None
-        m = sha256()
-        m.update(self.password.data.encode())
-        passwd = m.hexdigest()
-        return user if passwd == user.mdp else None
     
     def create_user(self) :
         passwd = self.password.data
         m = sha256()
         m.update(passwd.encode())
         return User(num_tel=self.phone_number.data,
-                 mdp=m.hexdigest(),
-                 nom = self.name.data,
-                 prenom = self.first_name.data,
-                 adresse = self.address.data,
-                 email = self.email.data)
+                mdp=m.hexdigest(),
+                nom = self.name.data,
+                prenom = self.first_name.data,
+                adresse = self.address.data,
+                email = self.email.data)
 
 @app.route("/connexion", methods = ("GET", "POST", ))
 def login():
@@ -126,8 +117,11 @@ def login_unsafe():
     f = LoginUnsafeForm()
     if f.validate_on_submit():
         the_user = f.get_authentificated_user()
-        session['user'] = the_user.get_id()
-        return redirect(url_for("commander"))
+        if the_user:
+            session['user'] = the_user.get_id()
+            return redirect(url_for("commander"))
+        else:
+           return render_template("connexion_insecure.html", form = f, error = 'existant')
     return render_template("connexion_insecure.html", form = f) 
 
 @app.route("/deconnexion")
@@ -141,13 +135,23 @@ def register():
     f = RegisterForm()
     if f.validate_on_submit():
         u = f.create_user()
-        if User.get_user(u.get_id()) :
-            return render_template("inscription.html", form = f)
-        else :
-            db.session.add(u)                  #
-            db.session.commit()                # à enlever une fois le captcha mis en place
-            login_user(u)                      #
-            return redirect(url_for("home"))   #
+        check_user = User.get_user(u.num_tel)
+        if check_user is None:
+            db.session.add(u)
+            db.session.commit()
+        elif check_user.fake:
+            # Si l'utilisateur existe déjà, on le met à jour avec les nouvelles informations
+            check_user.mdp = u.mdp
+            check_user.nom = u.nom
+            check_user.prenom = u.prenom
+            check_user.adresse = u.adresse
+            check_user.email = u.email
+            check_user.fake = False
+
+            db.session.commit()
+
+        login_user(u)
+        return redirect(url_for("home"))
 
         # à ajouter une fois le captcha mis en place
         """try :
