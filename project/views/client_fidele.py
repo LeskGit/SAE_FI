@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Commandes
+from project.models import Commandes, User
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -49,6 +49,11 @@ def client_profil():
 
     if request.method == 'POST':
         if 'save_profile' in request.form and f.validate():
+            tel = User.get_user(f.phone_number.data)
+            if tel and tel.num_tel != current_user.num_tel:
+                flash("Numéro de téléphone déjà utilisé", "danger")
+                return redirect(url_for("client_profil"))
+            current_user.num_tel = f.phone_number.data
             current_user.nom = f.name.data
             current_user.prenom = f.first_name.data
             current_user.adresse = f.address.data
@@ -73,7 +78,7 @@ def client_profil():
 @app.route("/client/historique")
 @login_required
 def client_historique():
-    commandes = (Commandes.get_historique(num_tel=current_user.num_tel))
+    commandes = (Commandes.get_historique(id_client=current_user.id_client))
     
     historique = []
     now = datetime.now()

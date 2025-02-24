@@ -61,21 +61,6 @@ class RegisterForm (FlaskForm):
     def validate_phone_number(self, field):
         if User.get_user(num_tel=field.data):
             raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
-
-    def get_authentificated_user(self):
-        """permet de savoir si le mot de passe de 
-        l'utilisateur est bon
-
-        Returns:
-            User: L'utilisateur si le mot de passe est correct, None sinon
-        """
-        user = User.get_user(self.phone_number.data)
-        if user is None:
-            return None
-        m = sha256()
-        m.update(self.password.data.encode())
-        passwd = m.hexdigest()
-        return user if passwd == user.mdp else None
     
     def create_user(self) :
         passwd = self.password.data
@@ -96,7 +81,7 @@ def login():
         if the_user:
             login_user(the_user)
             return redirect(url_for("home"))
-        return render_template("connexion.html", form = f, error = 'Mot de passe incorrect.')
+        return render_template("connexion.html", form = f, error = "incorrect_password")
     return render_template("connexion.html", form = f)
 
 @app.route("/deconnexion")
