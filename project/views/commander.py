@@ -20,7 +20,9 @@ class CommanderForm(FlaskForm):
 
 @app.route("/commander", methods=["GET", "POST"])
 def commander():
-    if current_user:
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    else:
         commande = current_user.get_or_create_panier()
         num_commande = commande.num_commande
         form = CommanderForm()
@@ -53,7 +55,7 @@ def commander():
 @app.route("/filter_allergenes", methods=["GET", "POST"])
 def filter_allergenes():
 
-    if not current_user:
+    if not current_user.is_authenticated:
         return redirect(url_for('commander'))
     
     # Récupérer la liste des allergènes sélectionnés
