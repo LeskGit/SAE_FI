@@ -42,6 +42,11 @@ class User(db.Model, UserMixin):
             db.session.commit()
         return panier
     
+    def get_nb_items_panier(self):
+        panier = self.get_panier()
+        if panier is not None:
+            return len(panier.constituer_assoc)
+        return 0
     @classmethod
     def get_blackliste(cls) :
         """getter de la blackliste
@@ -88,6 +93,12 @@ class Constituer(db.Model):
         """getter de constituer en fonction d'un nom de plat et d'un numéro de commande
         """
         return cls.query.get((nom_plat, num_com))
+    
+    @classmethod
+    def get_constituer_commande(cls, num_com) :
+        """getter de constituer en fonction d'un numéro de commande
+        """
+        return cls.query.filter_by(num_commande=num_com).all()
 
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
