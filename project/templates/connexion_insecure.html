@@ -31,6 +31,13 @@
                 </ul>
             {% endif %}
 
+            <!--Erreur si mdp ne correspond pas-->
+            {% if error == "existant" %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>Erreur !</strong> Le numéro de téléphone appartient déjà à un compte.
+                </div>
+            {% endif %}
+
             <!--Les boutons-->
             <div class="form-group">
                 <!--Bouton Se connecter-->
