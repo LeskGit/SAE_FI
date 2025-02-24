@@ -1,0 +1,17 @@
+
+.contact-form{
+    border-color: #383838;
+}
+
+
+@media (max-width: 1065px) {
+
+    .contact-map {
+        width: 100%;
+        margin: 5em auto !important;
+    }
+
+    .form-container {
+        width: 100%;
+    }
+}
