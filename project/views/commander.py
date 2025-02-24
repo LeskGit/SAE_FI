@@ -48,7 +48,8 @@ def commander():
     selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
     type = request.args.get('type', 'p')
     allergenes = Allergenes.get_allergenes()
-    plats = Plats.get_plats()
+    query_plats = request.args.get('query')
+    plats = Plats.query.filter(Plats.nom_plat.like(f"%{query_plats}%")).all() if query_plats is not None else Plats.get_plats()
     plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
     plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
     sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
