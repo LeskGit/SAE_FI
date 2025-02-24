@@ -10,7 +10,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, Allergenes, Constituer, Commandes, Formule
+from project.models import Plats, Allergenes, Constituer, Commandes, Formule, User
 
 class CommanderForm(FlaskForm):
     nom_plat = HiddenField()
@@ -19,44 +19,43 @@ class CommanderForm(FlaskForm):
 
 @app.route("/commander", methods=["GET", "POST"])
 def commander():
-    print("commander", session.get('user'))
     if not current_user.is_authenticated and session.get('user') is None:
         return redirect(url_for('login_unsafe'))
     elif not current_user.is_authenticated and session.get('user') is not None:
         user_id = session.get('user')
-        user = User.query.get(user_id)
-        print(user_id)
-        return user_id
-    else:
+        user = User.get_user(user_id)
+        commande = user.get_or_create_panier()
+    elif current_user.is_authenticated:
         commande = current_user.get_or_create_panier()
-        num_commande = commande.num_commande
-        form = CommanderForm()
-        selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
-        type = request.args.get('type', 'p')
-        allergenes = Allergenes.get_allergenes()
-        plats = Plats.get_plats()
-        plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
-        plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
-        sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-        formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
-        desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
 
-        return render_template("commander.html", 
-                            plats=plats, 
-                            plats_chauds=plats_chauds,
-                            plats_froids=plats_froids,
-                            sushis=sushis,
-                            formules=formules, 
-                            desserts=desserts, 
-                            type=type, 
-                            nb_plats=len(plats), 
-                            nb_formules=len(formules), 
-                            nb_desserts=len(desserts), 
-                            allergenes=allergenes, 
-                            selected_allergenes=selected_allergenes,
-                            form=form,
-                            num_com = num_commande)
-    
+    num_commande = commande.num_commande
+    form = CommanderForm()
+    selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
+    type = request.args.get('type', 'p')
+    allergenes = Allergenes.get_allergenes()
+    plats = Plats.get_plats()
+    plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
+    plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
+    sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
+    formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
+    desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
+
+    return render_template("commander.html", 
+                        plats=plats, 
+                        plats_chauds=plats_chauds,
+                        plats_froids=plats_froids,
+                        sushis=sushis,
+                        formules=formules, 
+                        desserts=desserts, 
+                        type=type, 
+                        nb_plats=len(plats), 
+                        nb_formules=len(formules), 
+                        nb_desserts=len(desserts), 
+                        allergenes=allergenes, 
+                        selected_allergenes=selected_allergenes,
+                        form=form,
+                        num_com = num_commande)
+
 @app.route("/filter_allergenes", methods=["GET", "POST"])
 def filter_allergenes():
 
