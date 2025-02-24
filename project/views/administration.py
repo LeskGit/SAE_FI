@@ -243,7 +243,8 @@ def delete_offre(id):
 @admin_required
 def edition_plat():
     type = request.args.get('type', 'a')
-    plats = Plats.get_plats()
+    query_plats = request.args.get('query')
+    plats = Plats.query.filter(Plats.nom_plat.like(f"%{query_plats}%")).all() if query_plats is not None else Plats.get_plats()
     plats_chauds = Plats.get_plats_chauds()
     plats_froids = Plats.get_plats_froids()
     sushis = Plats.get_sushis()
