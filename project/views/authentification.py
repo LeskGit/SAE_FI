@@ -21,7 +21,7 @@ class LoginForm (FlaskForm):
         Returns:
             User: L'utilisateur si le mot de passe est correct, None sinon
         """
-        user = User.query.get(self.phone_number.data)
+        user = User.get_user(self.phone_number.data)
         if user is None:
             return None
         m = sha256()
@@ -76,11 +76,11 @@ class RegisterForm (FlaskForm):
     #recaptcha = RecaptchaField() 
 
     def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
+        if User.check_user_email(email_u=field.data):
             raise ValidationError("Cet e-mail est déjà utilisé.")
 
     def validate_phone_number(self, field):
-        if User.query.filter_by(num_tel=field.data).first():
+        if User.get_user(num_tel=field.data):
             raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
 
     def get_authentificated_user(self):
@@ -90,7 +90,7 @@ class RegisterForm (FlaskForm):
         Returns:
             User: L'utilisateur si le mot de passe est correct, None sinon
         """
-        user = User.query.get(self.phone_number.data)
+        user = User.get_user(self.phone_number.data)
         if user is None:
             return None
         m = sha256()
@@ -141,7 +141,7 @@ def register():
     f = RegisterForm()
     if f.validate_on_submit():
         u = f.create_user()
-        if User.query.get(u.get_id()) :
+        if User.get_user(u.get_id()) :
             return render_template("inscription.html", form = f)
         else :
             db.session.add(u)                  #
