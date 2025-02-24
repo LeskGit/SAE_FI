@@ -19,6 +19,7 @@ class User(db.Model, UserMixin):
     blackliste = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default = False)
     points_fidelite = db.Column(db.Integer, default=0)
+    fake = db.Column(db.Boolean, default=False)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
 
     @validates("email")
