@@ -5,6 +5,12 @@ from flask_login import UserMixin
 import re
 from datetime import date, datetime, timedelta
 from hashlib import sha256
+from enum import Enum
+
+class UserType(Enum):
+    USER = 1
+    GUEST = 2
+    UNKNOW = 3
 
 class User(db.Model, UserMixin):
     num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), primary_key = True)
