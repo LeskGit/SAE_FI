@@ -41,6 +41,27 @@ class User(db.Model, UserMixin):
             db.session.add(panier)
             db.session.commit()
         return panier
+    
+    @classmethod
+    def get_blackliste(cls) :
+        """getter de la blackliste
+
+        Returns:
+            list: liste des personnes blacklistés
+        """
+        return cls.query.filter_by(blackliste = True).all()
+    
+    @classmethod
+    def get_user(cls, num_tel) :
+        """getter en fonction du num de téléphone
+        """
+        return cls.query.get(num_tel)
+    
+    @classmethod
+    def check_user_email(cls, email_u) :
+        """getter en fonction de l'email
+        """
+        return cls.query.filter_by(email=email_u).first()
 
 @login_manager.user_loader
 def load_user(num_tel):
@@ -61,6 +82,12 @@ class Constituer(db.Model):
     quantite_plat = db.Column(db.Integer, default=1)
     plat = db.relationship("Plats", back_populates="constituer_assoc", overlaps="les_commandes,commande")
     commande = db.relationship("Commandes", back_populates="constituer_assoc", overlaps="les_plats,plat")
+
+    @classmethod
+    def get_constituer(cls, nom_plat, num_com) :
+        """getter de constituer en fonction d'un nom de plat et d'un numéro de commande
+        """
+        return cls.query.get((nom_plat, num_com))
 
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -86,9 +113,8 @@ class Commandes(db.Model):
         return self.prix_total
 
     def compute_reduction(self):
-        """
-        Calcule la réduction de la commande :
-        Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
+        """Calcule la réduction de la commande :
+            Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
         """
         self.prix_avec_reduc = 0
         for constituer in self.constituer_assoc:
@@ -96,14 +122,71 @@ class Commandes(db.Model):
                 self.prix_avec_reduc -= constituer.plat.prix_reduc
         return self.prix_avec_reduc
     
-    def get_num_table_dispo(self):
-        return 
+    @classmethod
+    def get_num_table_dispo(cls, commande_date:datetime):
+        """Renvoie le numéro de la première table disponible
+        """
+        commandes_sur_place = cls.get_sur_place_at(commande_date.date())
 
+        dico_tables = {i: False for i in range(1, 13)}
+        for table in commandes_sur_place:
+            dico_tables[table.num_table] = True
+        
+        for num_table, occupe in dico_tables.items():
+            if not occupe:
+                return num_table
+        
+        return -1
+    
+    @classmethod
+    def get_sur_place_at(cls, date=datetime.today().date()):
+        """Retourne les tables disponibles à la date donnée
+
+        Args:
+            date (datetime, optional): la date à vérifier. Par défaut à datetime.today().date().
+
+        Returns:
+            list: la liste des tables disponibles à la date donnée
+        """
+        return cls.query.filter(db.func.date(cls.date) == date, cls.sur_place.is_(True)).all()
+    
+    @classmethod
+    def get_commandes_today(cls) :
+        """retourne les commandes d'aujourd'hui
+        """
+        #today = datetime.today().date()
+        #today = datetime(2024, 11, 6, 12)
+        #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
+        return cls.query.all()
+    
+    @classmethod
+    def get_historique(cls, num_tel) :
+        """retourne l'historique de l'User en fonction de son numéro de téléphone
+
+        Args:
+            num_tel (str): le numéro de téléphone
+
+        Returns:
+            list: la liste des commandes de l'User
+        """
+        return cls.query.filter_by(num_tel=num_tel).filter(cls.etat != "Panier").order_by(cls.num_commande.desc()).all()
+
+    @classmethod
+    def get_commande(cls, num_com) :
+        """getter en fonction du numéro de commande
+        """
+        return cls.query.get(num_com)
     
 class Allergenes(db.Model):
     id_allergene = db.Column(db.Integer, primary_key = True)
     nom_allergene = db.Column(db.String(64))
     les_plats = db.relationship("Plats", secondary = "contenir_allergene", back_populates = "les_allergenes")
+
+    @classmethod
+    def get_allergenes(cls) :
+        """getter de tous les allergènes
+        """
+        return cls.query.all()
     
 contenir_allergene = db.Table("contenir_allergene",
     db.metadata,
@@ -136,13 +219,103 @@ class Plats(db.Model):
     def add_allergene(self, lst_allergenes):
         for allergene in lst_allergenes:
             self.les_allergenes.append(allergene)
-        
-        
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
     
+    @classmethod
+    def get_plats(cls):
+        """getter de tous les plats
+        """
+        return cls.query.all()
     
+    @classmethod
+    def get_desserts(cls):
+        """getter de tous les desserts
+        """     
+        return cls.query.filter_by(type_plat = "Dessert").all()
+
+    @classmethod
+    def get_plats_chauds(cls):
+        """getter de tous les plats chauds
+        """
+        return cls.query.filter_by(type_plat = "Plat chaud").all()
+
+    @classmethod
+    def get_plats_froids(cls):
+        """getter de tous les plats froids
+        """
+        return cls.query.filter_by(type_plat = "Plat froid").all()
+
+    @classmethod
+    def get_sushis(cls):
+        """getter de tous les sushis
+        """
+        return cls.query.filter_by(type_plat = "Sushi").all()
+    
+    @classmethod
+    def get_allergenes_plat(cls, nom_plat) :
+        """getter des allerènes en fonction d'un nom de plat
+        """
+        return cls.query.get(nom_plat).les_allergenes
+
+    def contains_selected_allergenes(formule, selected_allergenes):
+        """Fonction vérifiant si un ou plusieurs allergènes est/sont dans une formule
+
+        Args:
+            formule (Formule): la formule
+            selected_allergenes (List(Allergene)): la liste des allergènes à vérifier
+
+        Returns:
+            boolean: Vrai si au moins un allergène est dans la formule
+        """
+        for plat in formule.les_plats:
+            if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
+                return True
+        return False
+
+    @classmethod
+    def get_plats_filtered_by_allergenes(cls, selected_allergenes):
+        """getter des plats en fonction d'une liste d'allergènes
+        """
+        if len(selected_allergenes) == 0:
+            return cls.get_plats()  
+        else:
+            lst = cls.get_plats()
+            for plats in cls.get_plats():
+                for allergene in plats.les_allergenes:
+                    if allergene.id_allergene in selected_allergenes:
+                        lst.remove(plats)
+                        break
+            return lst
+
+    @classmethod
+    def get_plats_filtered_by_type_and_allergenes(cls, type_plat, selected_allergenes):
+        """getter des plats en fonction de leur type et d'une liste d'allergènes
+        """
+        res = []
+        plat_trie = cls.get_plats_filtered_by_allergenes(selected_allergenes)
+        for plats in plat_trie:
+            if plats.type_plat == type_plat:
+                res.append(plats)
+        return res
+
+    @classmethod
+    def filter_formules_by_allergenes(cls, formules, selected_allergenes):
+        """Fonction permettant de récupérer les formules filtrées par une liste d'allergènes
+
+        Args:
+            formules (List(Formule)): la liste de formules
+            selected_allergenes (List(Allergene)): la liste des allergènes
+
+        Returns:
+            List(Formule): la liste des formules filtrées
+        """
+        filtered_formules = []
+        for formule in formules:
+            if not cls.contains_selected_allergenes(formule, selected_allergenes):
+                filtered_formules.append(formule)
+        return filtered_formules
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)
@@ -153,7 +326,20 @@ class Formule(db.Model):
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
     
+    @classmethod
+    def get_formules(cls):
+        """getter des formules
+        """
+        return cls.query.all()
     
+    @classmethod
+    def get_formules_filtered_by_allergenes(cls, selected_allergenes):
+        """getter des formules en fonction d'une liste d'allergènes
+        """
+        if len(selected_allergenes) == 0:
+            return cls.get_formules()
+        else:
+            return Plats.filter_formules_by_allergenes(cls.get_formules(), selected_allergenes)
 
 #--------
 
@@ -869,101 +1055,3 @@ def execute_tests():
         print("Erreur:", e)
 
     db.session.commit()
-
-def get_plats():
-    return Plats.query.all()
-
-def get_formules():
-    return Formule.query.all()
-
-def get_desserts():
-    return  Plats.query.filter_by(type_plat = "Dessert").all()
-
-def get_plats_chauds():
-    return  Plats.query.filter_by(type_plat = "Plat chaud").all()
-
-def get_plats_froids():
-    return  Plats.query.filter_by(type_plat = "Plat froid").all()
-
-def get_sushis():
-    return  Plats.query.filter_by(type_plat = "Sushi").all()
-
-def get_sur_place_at(date=datetime.today().date()):
-    return Commandes.query.filter(db.func.date(Commandes.date) == date, Commandes.sur_place.is_(True)).all()
- 
-def get_num_table_dispo(commande_date:datetime):
-    """Renvoie le numéro de la première table disponible
-    """
-    commandes_sur_place = get_sur_place_at(commande_date.date())
-
-    dico_tables = {i: False for i in range(1, 13)}
-    for table in commandes_sur_place:
-        dico_tables[table.num_table] = True
-    
-    for num_table, occupe in dico_tables.items():
-        if not occupe:
-            return num_table
-    
-    return -1
-
-def get_blackliste() :
-    return User.query.filter_by(blackliste = True).all()
-
-def get_user(num_tel) :
-    return User.query.get(num_tel)
-
-def get_commandes_today() :
-    #today = datetime.today().date()
-    today = datetime(2024, 11, 6, 12)
-    #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
-    return Commandes.query.all()
-    
-def get_allergenes() :
-    return Allergenes.query.all()
-
-def get_allergenes_plat(nom_plat) :
-    return Plats.query.get(nom_plat).les_allergenes
-
-def get_plats_filtered_by_allergenes(selected_allergenes):
-    if len(selected_allergenes) == 0:
-        return get_plats()  
-    else:
-        lst = get_plats()
-        for plats in get_plats():
-            for allergene in plats.les_allergenes:
-                if allergene.id_allergene in selected_allergenes:
-                    lst.remove(plats)
-                    break
-        return lst
-
-def get_plats_filtered_by_type_and_allergenes(type_plat, selected_allergenes):
-    res = []
-    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
-    for plats in plat_trie:
-        if plats.type_plat == type_plat:
-            res.append(plats)
-    return res
-
-
-    
-
-def get_formules_filtered_by_allergenes(selected_allergenes):
-    if len(selected_allergenes) == 0:
-        return get_formules()
-    else:
-        return filter_formules_by_allergenes(get_formules(), selected_allergenes)
-
-def filter_formules_by_allergenes(formules, selected_allergenes):
-    filtered_formules = []
-    for formule in formules:
-        if not contains_selected_allergenes(formule, selected_allergenes):
-            filtered_formules.append(formule)
-    return filtered_formules
-
-def contains_selected_allergenes(formule, selected_allergenes):
-    for plat in formule.les_plats:
-        if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
-            return True
-    return False
-
-

@@ -3,7 +3,6 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from project import app, db
 from flask import flash, render_template, url_for, redirect, request, make_response
-#from .models import
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
 from wtforms import BooleanField, SubmitField, StringField
@@ -11,7 +10,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import get_desserts, get_num_table_dispo, get_plats, get_formules, get_allergenes, get_formules_filtered_by_allergenes, get_plats_filtered_by_allergenes, Constituer, Commandes, get_plats_filtered_by_type_and_allergenes
+from project.models import Plats, Allergenes, Constituer, Commandes, Formule
 
 class CommanderForm(FlaskForm):
     nom_plat = HiddenField()
@@ -26,13 +25,13 @@ def commander():
         form = CommanderForm()
         selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
         type = request.args.get('type', 'p')
-        allergenes = get_allergenes()
-        plats = get_plats()
-        plats_chauds = get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
-        plats_froids = get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
-        sushis = get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-        formules = get_formules_filtered_by_allergenes(selected_allergenes)
-        desserts = get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
+        allergenes = Allergenes.get_allergenes()
+        plats = Plats.get_plats()
+        plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
+        plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
+        sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
+        formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
+        desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
 
         return render_template("commander.html", 
                             plats=plats, 
@@ -75,13 +74,13 @@ def filter_allergenes():
             
     type = request.args.get('type', 'p')
     
-    allergenes = get_allergenes()
-    plats = get_plats_filtered_by_allergenes(selected_allergenes)
-    plats_chauds = get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
-    plats_froids = get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
-    sushis = get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-    formules = get_formules_filtered_by_allergenes(selected_allergenes)
-    desserts = get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
+    allergenes = Allergenes.get_allergenes()
+    plats = Plats.get_plats_filtered_by_allergenes(selected_allergenes)
+    plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
+    plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
+    sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
+    formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
+    desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
     
 
     commande = current_user.get_or_create_panier()
@@ -117,8 +116,8 @@ def ajout_plat() :
         f = CommanderForm()
         if f.num_com.data :
             try:
-                commande = Commandes.query.get(f.num_com.data)
-                constituer = Constituer.query.get((f.nom_plat.data, f.num_com.data))
+                commande = Commandes.get_commande(f.num_com.data)
+                constituer = Constituer.get_constituer(f.nom_plat.data, f.num_com.data)
                 if constituer:
                     constituer.quantite_plat += f.quantite.data
                 else:
@@ -145,7 +144,7 @@ def panier():
     if panier.date is None:
         sur_place_disponible = False
     else:
-        sur_place_disponible = True if get_num_table_dispo(panier.date) != -1 else False
+        sur_place_disponible = True if Commandes.get_num_table_dispo(panier.date) != -1 else False
     return render_template("panier.html", panier=panier, sur_place_disponible=sur_place_disponible)
 
 @app.route('/modifier_quantite')
@@ -201,7 +200,7 @@ def modifier_type():
 
     if panier is not None:
         if sur_place == "1":
-            numero_table = get_num_table_dispo(panier.date)
+            numero_table = Commandes.get_num_table_dispo(panier.date)
             if numero_table != -1:
                 if panier.date is not None and panier.date.time() > datetime.strptime("14:00", "%H:%M").time():
                     panier.date = datetime.combine(panier.date, datetime.strptime("13:50", "%H:%M").time())

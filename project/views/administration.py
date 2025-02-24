@@ -1,11 +1,10 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Formule, Plats, get_plats
-from project.models import Plats, get_sur_place_at, get_plats
+from project.models import Formule, Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, get_blackliste, get_user, get_commandes_today, get_desserts, get_plats_chauds, get_plats_froids, get_sushis, Plats, get_allergenes, get_allergenes_plat
+from project.models import Commandes, User, Plats, Allergenes
 from functools import wraps
 from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
 from wtforms.widgets import CheckboxInput, ListWidget
@@ -16,7 +15,6 @@ from werkzeug.utils import secure_filename
 import os
 from project.app import mkpath
 import uuid
-from project.models import Allergenes
 
 
 def admin_required(f):
@@ -59,7 +57,7 @@ class PlatForm(FlaskForm):
 
     allergenes = QuerySelectMultipleField(
         "Allergènes",
-        query_factory=lambda: get_allergenes(),
+        query_factory=lambda: Allergenes.get_allergenes(),
         get_label="nom_allergene",
         widget=ListWidget(prefix_label=False),
         option_widget=CheckboxInput()
@@ -83,18 +81,18 @@ class FormuleForm(FlaskForm):
 @admin_required
 def admin():
     # Tables disponibles aujourd'hui
-    commandes_sur_place = get_sur_place_at()
+    commandes_sur_place = Commandes.get_sur_place_at()
     dico_tables = {i: False for i in range(1, 13)}
     for table in commandes_sur_place :
         dico_tables[table.num_table] = True
 
     # Blacklist
-    liste_noire = get_blackliste()
+    liste_noire = User.get_blackliste()
     return render_template("admin_traiteur.html", tables = dico_tables, blacklist = liste_noire)
 
 @app.route("/admin/blacklist", methods = ["GET", "POST"])
 def blackliste_supprimer() :
-    user = get_user(request.args.get('id_client'))
+    user = User.get_user(request.args.get('id_client'))
     user.blackliste =  False
     db.session.commit()
     return admin()
@@ -102,16 +100,16 @@ def blackliste_supprimer() :
 @app.route("/suivi/commande")
 @admin_required
 def suivi_commande():
-    commandes = get_commandes_today()
+    commandes = Commandes.get_commandes_today()
     return render_template("suivi_commandes.html", les_commandes=commandes)
 
 @app.route("/suivi/stock")
 @admin_required
 def suivi_stock() :
-    plats_chauds=get_plats_chauds()
-    plats_froids=get_plats_froids()
-    sushis=get_sushis()
-    desserts=get_desserts()
+    plats_chauds=Plats.get_plats_chauds()
+    plats_froids=Plats.get_plats_froids()
+    sushis=Plats.get_sushis()
+    desserts=Plats.get_desserts()
     return render_template("suivi_stock.html",plats_froids=plats_froids, plats_chauds=plats_chauds, sushis=sushis, desserts=desserts )
 
 @app.route("/modifier_stock", methods=["POST"])
@@ -161,15 +159,15 @@ def reinitialiser_stock():
 @admin_required
 def creation_plat():
     form = PlatForm()
-    return render_template("creation_plat.html", form=form, allergenes=get_allergenes())
+    return render_template("creation_plat.html", form=form, allergenes=Allergenes.get_allergenes())
 
 
 @app.route("/creation/offre", methods=["GET"])
 @admin_required
 def creation_offre():
     form = FormuleForm()
-    form.plats.choices = [(plat.nom_plat, plat.nom_plat) for plat in get_plats()]
-    return render_template("creation_offre.html", form=form, plats=get_plats())
+    form.plats.choices = [(plat.nom_plat, plat.nom_plat) for plat in Plats.get_plats()]
+    return render_template("creation_offre.html", form=form, plats=Plats.get_plats())
 
 @app.route("/add_offre", methods=["POST"])
 @admin_required
@@ -245,12 +243,12 @@ def delete_offre(id):
 @admin_required
 def edition_plat():
     type = request.args.get('type', 'a')
-    plats = get_plats()
-    plats_chauds = get_plats_chauds()
-    plats_froids = get_plats_froids()
-    sushis = get_sushis()
-    desserts = get_desserts()
-    allergenes = get_allergenes()
+    plats = Plats.get_plats()
+    plats_chauds = Plats.get_plats_chauds()
+    plats_froids = Plats.get_plats_froids()
+    sushis = Plats.get_sushis()
+    desserts = Plats.get_desserts()
+    allergenes = Allergenes.get_allergenes()
     
     return render_template(
         "edition_plat.html",

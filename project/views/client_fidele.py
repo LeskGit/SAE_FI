@@ -73,7 +73,7 @@ def client_profil():
 @app.route("/client/historique")
 @login_required
 def client_historique():
-    commandes = (Commandes.query.filter_by(num_tel=current_user.num_tel).filter(Commandes.etat != "Panier").order_by(Commandes.num_commande.desc()).all())
+    commandes = (Commandes.get_historique(num_tel=current_user.num_tel))
     
     historique = []
     now = datetime.now()
