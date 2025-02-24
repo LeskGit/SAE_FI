@@ -1,9 +1,9 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
 
 
 /* Assure que le carousel couvre toute la page */
