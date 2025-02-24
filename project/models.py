@@ -56,7 +56,7 @@ class User(db.Model, UserMixin):
     def get_user(cls, num_tel) :
         """getter en fonction du num de téléphone
         """
-        return cls.query.get(num_tel)
+        return cls.query.filter_by(num_tel=num_tel).first()
     
     @classmethod
     def check_user_email(cls, email_u) :
@@ -85,10 +85,10 @@ class Constituer(db.Model):
     commande = db.relationship("Commandes", back_populates="constituer_assoc", overlaps="les_plats,plat")
 
     @classmethod
-    def get_constituer(cls, nom_plat, num_com) :
+    def get_constituer(cls, id_plat, num_com) :
         """getter de constituer en fonction d'un nom de plat et d'un numéro de commande
         """
-        return cls.query.get((nom_plat, num_com))
+        return cls.query.get((id_plat, num_com))
 
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -161,7 +161,7 @@ class Commandes(db.Model):
         return cls.query.all()
     
     @classmethod
-    def get_historique(cls, num_tel) :
+    def get_historique(cls, id_client) :
         """retourne l'historique de l'User en fonction de son numéro de téléphone
 
         Args:
@@ -170,7 +170,7 @@ class Commandes(db.Model):
         Returns:
             list: la liste des commandes de l'User
         """
-        return cls.query.filter_by(num_tel=num_tel).filter(cls.etat != "Panier").order_by(cls.num_commande.desc()).all()
+        return cls.query.filter_by(id_client=id_client).filter(cls.etat != "Panier").order_by(cls.num_commande.desc()).all()
 
     @classmethod
     def get_commande(cls, num_com) :
@@ -179,7 +179,7 @@ class Commandes(db.Model):
         return cls.query.get(num_com)
     
 class Allergenes(db.Model):
-    id_allergene = db.Column(db.Integer, primary_key = True)
+    id_allergene = db.Column(db.Integer, primary_key = True, autoincrement=True)
     nom_allergene = db.Column(db.String(64), unique = True)
     les_plats = db.relationship("Plats", secondary = "contenir_allergene", back_populates = "les_allergenes")
 
