@@ -1,3 +1,11 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
 /* Assure que le carousel couvre toute la page */
 #carousel {
     height: 100%;
@@ -80,7 +88,6 @@
 
 /* Style du texte de la section de présentation */
 .contact-section {
-  padding: 40px;
   color: #E84D0E;
   font-size: 1.2rem;
   
@@ -161,6 +168,16 @@
   max-width: 1px; /* Réduit la largeur de la colonne de séparation */
 }
 
+.offres-container {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.offres-container > div {
+    max-width: 33%;
+}
 
 
 
@@ -240,4 +257,27 @@ ul li {
 
 .text-overlay {
   -webkit-text-stroke: 1px black;
+}
+
+.sous-section-offre {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+
+
+@media screen and (max-width: 767px) {
+
+    .offres-container {
+      flex-direction: column;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .plat-container {
+      flex-direction: column;
+      margin: 0 auto;
+    }
+
 }
