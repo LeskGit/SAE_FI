@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_bootstrap import Bootstrap5
 from flask_login import LoginManager
+from flask_mail import Mail
 import project.auth as auth
 
 def mkpath(p):
@@ -22,6 +23,15 @@ app.config['SECRET_KEY'] = '599ad302-c28b-49ae-9144-83c6f2eb081a'
 app.config['RECAPTCHA_PUBLIC_KEY'] = 'da0c592c-89e2-4d82-ac17-620b2c1d6226'  # à modifier en mettant un repcatcha Google une fois le serveur mis en place
 app.config['RECAPTCHA_PRIVATE_KEY'] = app.config['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{auth.nom}:{auth.mdp}@{auth.db}/DB{auth.nom}'
+
+app.config['MAIL_SERVER'] = 'a@a.com' # à changer en l'adresse mail de la traiteuse
+app.config['MAIL_PORT'] = 2525
+app.config['MAIL_USERNAME'] = ''
+app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
 
 db = SQLAlchemy(app)
 
