@@ -194,7 +194,7 @@
                 </div>
 
                 <!-- Modal spécifique au plat froid -->
-                <div class="modal fade">
+                <div class="modal fade" id="editModal{{ plat_froid.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat_froid.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form id="editForm{{ plat_froid.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
@@ -252,7 +252,7 @@
                 </div>
 
                 <!-- Modal spécifique au sushi -->
-                <div class="modal fade">
+                <div class="modal fade" id="editModalSushi{{ sushi.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabelSushi{{ sushi.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form id="editFormSushi{{ sushi.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">

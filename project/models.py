@@ -43,6 +43,11 @@ class User(db.Model, UserMixin):
             db.session.commit()
         return panier
     
+    def get_nb_items_panier(self):
+        panier = self.get_panier()
+        if panier is not None:
+            return len(panier.constituer_assoc)
+        return 0
     @classmethod
     def get_blackliste(cls) :
         """getter de la blackliste
