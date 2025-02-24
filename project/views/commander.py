@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from project import app, db
-from flask import flash, render_template, url_for, redirect, request, make_response
+from flask import flash, render_template, url_for, redirect, request, make_response, session
 #from .models import
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
@@ -20,8 +20,14 @@ class CommanderForm(FlaskForm):
 
 @app.route("/commander", methods=["GET", "POST"])
 def commander():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
+    print("commander", session.get('user'))
+    if not current_user.is_authenticated and session.get('user') is None:
+        return redirect(url_for('login_unsafe'))
+    elif not current_user.is_authenticated and session.get('user') is not None:
+        user_id = session.get('user')
+        user = User.query.get(user_id)
+        print(user_id)
+        return user_id
     else:
         commande = current_user.get_or_create_panier()
         num_commande = commande.num_commande

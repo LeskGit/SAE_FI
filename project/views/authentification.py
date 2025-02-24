@@ -1,5 +1,5 @@
 from project import app, db
-from flask import render_template, url_for, redirect, request
+from flask import render_template, url_for, redirect, request, session
 from flask_wtf import FlaskForm, RecaptchaField
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -28,6 +28,27 @@ class LoginForm (FlaskForm):
         m.update(self.password.data.encode())
         passwd = m.hexdigest()
         return user if passwd == user.mdp else None
+    
+
+class LoginUnsafeForm (FlaskForm):
+    phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
+                                                                  Length(min=10, max=10, message = 'Longueur incorrecte.'), 
+                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
+
+    def create_user(self):
+        return User(num_tel=self.phone_number.data)
+
+    def get_authentificated_user(self):
+        """permet de savoir si le mot de passe de 
+        l'utilisateur est bon
+
+        Returns:
+            User: L'utilisateur si le mot de passe est correct, None sinon
+        """
+        user = User.query.get(self.phone_number.data)
+        if user is None:
+            return self.create_user()
+        return user
 
 class RegisterForm (FlaskForm):
     phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
@@ -94,13 +115,24 @@ def login():
     if f.validate_on_submit():
         the_user = f.get_authentificated_user()
         if the_user:
+            session.pop('user', None)
             login_user(the_user)
             return redirect(url_for("home"))
         return render_template("connexion.html", form = f, error = 'Mot de passe incorrect.')
     return render_template("connexion.html", form = f)
 
+@app.route("/connexion_insecure", methods = ("GET", "POST", ))
+def login_unsafe():
+    f = LoginUnsafeForm()
+    if f.validate_on_submit():
+        the_user = f.get_authentificated_user()
+        session['user'] = the_user.get_id()
+        return redirect(url_for("commander"))
+    return render_template("connexion_insecure.html", form = f) 
+
 @app.route("/deconnexion")
 def logout():
+    session.pop('user', None)
     logout_user()
     return redirect(url_for("home"))
 
