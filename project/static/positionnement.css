@@ -3,7 +3,24 @@
     padding: 0;
     box-sizing: border-box;
   }
+html, body {
+    height: 100%;
+    margin: 0; 
+    padding: 0;
+}
 
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    bottom: 0;
+}
   html, body {
     overflow-x: hidden;
     width: 100%;
@@ -36,9 +53,9 @@
     background-position: center;
     color: black;
     padding: 20px 0;
-    position: relative;
+    /*position: relative;
     bottom: 0;
-    width: 100%;
+    width: 100%; */
 }
 
 .bar {
