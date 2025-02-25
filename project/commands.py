@@ -1,7 +1,25 @@
-import click
-from .app import app, db
-from project.models import User
+"""
+Modules importés:
+    - hashlib: Pour utiliser la fonction de hachage SHA256.
+    - click: Pour créer des commandes CLI avec Flask.
+    - project.models: Pour importer les modèles de la base de données.
+    - .app: Pour importer l'application Flask et la base de données depuis le module app.
+    - .models: Pour importer TriggerManager et execute_tests depuis le module models.
+
+Imports:
+    - sha256: Fonction de hachage pour sécuriser les mots de passe.
+    - click: Module pour créer des commandes CLI personnalisées avec Flask.
+    - User: Modèle représentant un utilisateur dans la base de données.
+    - app: Instance de l'application Flask.
+    - db: Instance de la base de données SQLAlchemy associée à l'application Flask.
+    - TriggerManager: Classe pour gérer les triggers dans l'application.
+    - execute_tests: Fonction pour exécuter des tests.
+"""
 from hashlib import sha256
+import click
+from project.models import User
+from .app import app, db
+from .models import TriggerManager, execute_tests
 
 
 @app.cli.command()
@@ -12,7 +30,6 @@ def syncdb():
 
     db.create_all()
 
-    from .models import TriggerManager, execute_tests
     TriggerManager()
 
     create_admin()
@@ -28,6 +45,8 @@ def dropdb():
 
 
 def create_admin():
+    """crée un admin
+    """
     password = "admin"
     m = sha256()
     m.update(password.encode())
@@ -55,8 +74,6 @@ def create_admin():
 @click.argument("password")
 def newuser(username, password):
     """Adds a new user. """
-    from .models import User
-    from hashlib import sha256
     m = sha256()
     m.update(password.encode())
     u = User(username=username, password=m.hexdigest())
@@ -69,8 +86,6 @@ def newuser(username, password):
 @click.argument("password")
 def newpassword(username, password):
     """ Change the actual user password. """
-    from .models import User
-    from hashlib import sha256
     m = sha256()
     m.update(password.encode())
     u = User.query.get(username)
