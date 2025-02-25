@@ -37,6 +37,9 @@ class User(db.Model, UserMixin):
     
     def get_id(self):
         return self.id_client
+    
+    def get_num_tel(self):
+        return self.num_tel
 
     def get_panier(self):
         panier = Commandes.query.filter_by(id_client = self.id_client, etat = "Panier").first()
