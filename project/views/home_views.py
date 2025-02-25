@@ -41,7 +41,7 @@ def envoie_email() :
 
         msg = Message(subject=objet, 
                       sender=email, 
-                      recipients=['oumami.officiel@protonmail.com'] # à changer en l'adresse mail de la traiteuse
+                      recipients=['oumami.test@gmail.com'] # à changer en l'adresse mail de la traiteuse
                       )
         msg.body=f"Email: {email}\nMessage: {message}"
 
