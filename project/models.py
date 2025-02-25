@@ -347,6 +347,12 @@ class Formule(db.Model):
             return cls.get_formules()
         else:
             return Plats.filter_formules_by_allergenes(cls.get_formules(), selected_allergenes)
+  
+    @classmethod
+    def get_stock_utilisable(cls):
+        """getter du stock utilisable du plat avec le moins de quantité
+        """
+        return min([plat.stock_utilisable for plat in Plats.query.join(contenir).filter(contenir.c.id_formule == cls.id_formule).all()])
 
 #--------
 
