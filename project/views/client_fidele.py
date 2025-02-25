@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 
 from project.views.commander import CommanderForm, get_current_user, get_plats_type
 
+MIN_MAX_MODIF = 15000
+
 class PersoForm(FlaskForm):
     phone_number = StringField("Téléphone", validators=[DataRequired(), 
                                                                Length(min=10, max=10, message = 'Longueur incorrecte.'),
@@ -102,7 +104,7 @@ def client_historique():
         can_modify = False
         if com.etat != "Payée":
             elapsed = now - com.date_creation
-            if elapsed < timedelta(minutes=15000):
+            if elapsed < timedelta(minutes=MIN_MAX_MODIF):
                 can_modify = True
 
         historique.append({
@@ -123,15 +125,29 @@ def client_historique():
 def client_fidelite():
     return render_template("fidelite_client.html")
 
-@app.route("/client/modif")
+@app.route("/client/modif/<int:id_commande>")
 @login_required
-def client_modif():
+def client_modif(id_commande):
     user = get_current_user()
     if user is None:
         return redirect(url_for('login'))
     
-    commande = user.get_or_create_panier()
-    num_commande = commande.num_commande
+    commande = Commandes.get_commande(id_commande)
+    if commande is None:
+        flash("Commande introuvable", "danger")
+        return redirect(url_for('client_historique'))
+    if commande.id_client != user.id_client:
+        flash("Vous n'êtes pas autorisé à modifier cette commande", "danger")
+        return redirect(url_for('client_historique'))
+
+    now = datetime.now()
+    if commande.etat != "Payée":
+        elapsed = now - commande.date_creation
+        if elapsed >= timedelta(minutes=MIN_MAX_MODIF):
+            flash("Vous ne pouvez plus modifier cette commande", "danger")
+            return redirect(url_for('client_historique'))
+
+    num_commande = id_commande
     form = CommanderForm()
     
     type = request.args.get('type', 'p')
