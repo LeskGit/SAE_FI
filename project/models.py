@@ -868,7 +868,6 @@ class TriggerManager:
         """  
 
 def execute_tests():
-
     password = "password"
     m = sha256()
     m.update(password.encode())
