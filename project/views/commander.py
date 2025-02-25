@@ -32,7 +32,7 @@ def get_type_user():
     return callback_type_user(lambda: UserType.USER, lambda: UserType.GUEST, lambda: UserType.UNKNOW)
 
 class CommanderForm(FlaskForm):
-    nom_plat = HiddenField()
+    id_plat = HiddenField()
     num_com = HiddenField()
     quantite = IntegerField(validators=[DataRequired()])
 
@@ -139,11 +139,11 @@ def ajout_plat() :
     if f.num_com.data :
         try:
             commande = Commandes.get_commande(f.num_com.data)
-            constituer = Constituer.get_constituer(f.nom_plat.data, f.num_com.data)
+            constituer = Constituer.get_constituer(f.id_plat.data, f.num_com.data)
             if constituer:
                 constituer.quantite_plat += f.quantite.data
             else:
-                constituer = Constituer(nom_plat = f.nom_plat.data, num_commande = f.num_com.data, quantite_plat = f.quantite.data)
+                constituer = Constituer(id_plat = f.id_plat.data, num_commande = f.num_com.data, quantite_plat = f.quantite.data)
                 commande.constituer_assoc.append(constituer)
             db.session.add(constituer)
             db.session.commit()
@@ -179,7 +179,7 @@ def modifier_quantite():
         panier = user.get_panier()
         if panier is not None:
             for constituer in panier.constituer_assoc:
-                if constituer.nom_plat == nom_plat:
+                if constituer.plat.nom_plat == nom_plat:
                     if action == 'increment':
                         if constituer.quantite_plat +1 <= int(constituer.plat.stock_utilisable * 0.8):
                             constituer.quantite_plat += 1
@@ -248,7 +248,7 @@ def supprimer_plat():
     user = get_current_user()
     if user is not None:
         for constituer in user.get_panier().constituer_assoc:
-            if constituer.nom_plat == nom_plat:
+            if constituer.plat.nom_plat == nom_plat:
                 db.session.delete(constituer)
 
         db.session.commit()

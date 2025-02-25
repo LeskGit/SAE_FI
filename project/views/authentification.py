@@ -109,7 +109,7 @@ def login():
             session.pop('user', None)
             login_user(the_user)
             return redirect(url_for("home"))
-        return render_template("connexion.html", form = f, error = 'Mot de passe incorrect.')
+        return render_template("connexion.html", form = f, error = "incorrect_password")
     return render_template("connexion.html", form = f)
 
 @app.route("/connexion_insecure", methods = ("GET", "POST", ))
