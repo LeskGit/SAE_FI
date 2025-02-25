@@ -1,14 +1,27 @@
-import os.path
+"""
+Ce module configure l'application Flask, la base de données SQLAlchemy, 
+le gestionnaire de sessions et le système de gestion des téléchargements.
+"""
 
+import os.path
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_bootstrap import Bootstrap5
 from flask_login import LoginManager
-import project.auth as auth
-
+from project import auth
 
 def mkpath(p):
+    """
+    Renvoie un chemin normalisé en joignant le chemin du fichier courant avec le chemin spécifié.
+
+    Args:
+        p (str): Le chemin à joindre.
+
+    Returns:
+        str: Le chemin normalisé.
+    """
     return os.path.normpath(os.path.join(os.path.dirname(__file__), p))
+
 
 
 app = Flask(__name__)
