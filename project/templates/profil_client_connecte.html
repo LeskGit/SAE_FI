@@ -29,7 +29,7 @@
                     </label>
                     {{ form.phone_number(size=50,
                         class_="form-control w-100",
-                        readonly=True,
+                        disabled=(True if not edit else False),
                         placeholder="Entrez votre numéro de téléphone") }}   
                 </div>
                 {% if form.phone_number.errors %}

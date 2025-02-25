@@ -243,7 +243,8 @@ def delete_offre(id):
 @admin_required
 def edition_plat():
     type = request.args.get('type', 'a')
-    plats = Plats.get_plats()
+    query_plats = request.args.get('query')
+    plats = Plats.query.filter(Plats.nom_plat.like(f"%{query_plats}%")).all() if query_plats is not None else Plats.get_plats()
     plats_chauds = Plats.get_plats_chauds()
     plats_froids = Plats.get_plats_froids()
     sushis = Plats.get_sushis()
@@ -310,9 +311,16 @@ def delete_plat(id):
     if not plat:
         return f"Erreur : Le plat '{id}' n'existe pas.", 404
 
+    
     # Supprimer le plat
-    db.session.delete(plat)
-    db.session.commit()
+    try:
+        db.session.delete(plat)
+        db.session.commit()
+        flash(f"Le plat '{id}' a été supprimé avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur : Le plat est déjà dans une commande", "danger")
+
 
     # Retourner la liste mise à jour des plats
     return redirect(url_for('edition_plat'))

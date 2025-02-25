@@ -49,8 +49,6 @@
     font-family: Open;
 }
 
-
-
 /* Ajustement de l'image dans le bouton */
 .img_nav {
     width: 32px;
@@ -102,4 +100,20 @@
     .navbar .d-md-block {
         display: none !important;
     }
+.img_nav {
+    position: static;
+}
+}
+
+.notif{
+    border-radius: 20px;
+    background-color: #E84D0E;
+    width: 20px;
+    height: 20px;
+    justify-content: center;
+    position: absolute;
+    right: 60px;
+    top: 23px;
+    color: white;
+    
 }

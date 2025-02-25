@@ -59,21 +59,35 @@
     
                     <div class="nav-item nav-link text-center">
                         <a href="{{ url_for('panier') }}"><img src="{{ url_for('static', filename='img/logo_panier.png') }}" class="img_nav" alt="Logo panier"/></a>
-                        <a data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                        {% if current_user.is_authenticated %}
+                    {% if current_user.get_nb_items_panier() != 0 %}
+                        <div class="notif">{{ current_user.get_nb_items_panier() }}</div>
+                    {% endif %}
+                {% endif %}
+                <a data-bs-toggle="dropdown" href="#" aria-expanded="false">
                             <img src="{% if current_user.is_authenticated %} {{ url_for('static', filename='img/logo_profil.png') }} {% else %} {{ url_for('static', filename='img/logo_login.png') }} {% endif %}" class="img_nav rounded-circle" alt="Logo profil">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2 rounded">
-                            {% if current_user.is_authenticated %}
-                                <li><a class="dropdown-item py-2" href="{{ url_for('client_profil') }}">Mon profil</a></li>
-                                {% if current_user.is_admin %}
-                                    <li><a class="dropdown-item py-2" href="{{ url_for('admin') }}">Page Admin</a></li>
+                            {% if session.get('user') %}
+                        <li><a class="dropdown-item py-2">{{ session.get('user') }}</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('register') }}">S'inscrire</a></li>
+                        <li><a class="dropdown-item py-2 text-logout" href="{{ url_for('logout') }}">Se déconnecter</a></li>
+                    {% else %}
+
+                        {% if current_user.is_authenticated %}
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('client_profil') }}">Mon profil</a></li>
+                                    {% if current_user.is_admin %}
+                                        <li><a class="dropdown-item py-2" href="{{ url_for('admin') }}">Page Admin</a></li>
+                                    {% endif %}
+                                    <li><a class="dropdown-item py-2 text-logout" href="{{ url_for('logout') }}">Se déconnecter</a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('login') }}">Se connecter</a></li>
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('register') }}">S'inscrire</a></li>
                                 {% endif %}
-                                <li><a class="dropdown-item py-2 text-logout" href="{{ url_for('logout') }}">Se déconnecter</a></li>
-                            {% else %}
-                                <li><a class="dropdown-item py-2" href="{{ url_for('login') }}">Se connecter</a></li>
-                                <li><a class="dropdown-item py-2" href="{{ url_for('register') }}">S'inscrire</a></li>
                             {% endif %}
-                        </ul>
+
+
+                </ul>
                     </div>
                 </div>
             </div>

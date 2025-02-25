@@ -46,14 +46,14 @@
                 </li>
 
                 <!-- Formulaire de recherche aligné à droite -->
-                <form class="d-flex ms-auto" role="search">
+                <form class="d-flex ms-auto" action="{{ url_for('edition_plat') }}" role="search">
                     <div class="input-group">
                         <span class="input-group-text bg-light">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
                             </svg>
                         </span>
-                        <input type="text" class="form-control" placeholder="Rechercher">
+                        <input type="text" name="query" class="form-control" placeholder="Rechercher" value="{{ request.args.get('query') if request.args.get('query') else '' }}">
                         <span class="input-group-text bg-light">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
@@ -286,7 +286,7 @@
                 <div class="modal fade" id="editModal_{{ p.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel_{{ p.nom_plat }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form method="POST" enctype="multipart/form-data" action="{{ url_for('update_plat', id=p.nom_plat) }}">
+                            <form method="POST" enctype="multipart/form-data" action="{{ url_for('update_plat', id=p.id_plat) }}">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editModalLabel_{{ p.nom_plat }}">Modifier le plat</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
