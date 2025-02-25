@@ -147,8 +147,8 @@ def register():
             check_user.adresse = u.adresse
             check_user.email = u.email
             check_user.fake = False
-
             db.session.commit()
+            session.pop('user', None)
 
         login_user(u)
         return redirect(url_for("home"))
