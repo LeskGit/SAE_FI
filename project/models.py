@@ -5,6 +5,12 @@ from flask_login import UserMixin
 import re
 from datetime import date, datetime, timedelta
 from hashlib import sha256
+from enum import Enum
+
+class UserType(Enum):
+    USER = 1
+    GUEST = 2
+    UNKNOW = 3
 
 class User(db.Model, UserMixin):
     id_client = db.Column(db.Integer, primary_key = True, autoincrement=True)
@@ -20,6 +26,7 @@ class User(db.Model, UserMixin):
     blackliste = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default = False)
     points_fidelite = db.Column(db.Integer, default=0)
+    fake = db.Column(db.Boolean, default=False)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
 
     @validates("email")
@@ -30,6 +37,9 @@ class User(db.Model, UserMixin):
     
     def get_id(self):
         return self.id_client
+    
+    def get_num_tel(self):
+        return self.num_tel
 
     def get_panier(self):
         panier = Commandes.query.filter_by(id_client = self.id_client, etat = "Panier").first()
