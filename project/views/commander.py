@@ -77,6 +77,7 @@ def commander():
                         list_plats=les_plats,
                         list_allergenes=allergenes,
                         selected_allergenes=selected_allergenes,
+                        type=type,
                         form=form,
                         num_com = num_commande)
 
@@ -117,6 +118,7 @@ def filter_allergenes():
                         list_plats=les_plats,
                         list_allergenes=allergenes,
                         selected_allergenes=selected_allergenes,
+                        type=type,
                         form=form,
                         num_com = num_commande))
     
