@@ -41,8 +41,6 @@
             <form class="form-horizontal" method="POST" action="{{ url_for('envoie_email') }}">
                 {{ form.hidden_tag() }}
 
-                {{ form.email(size=50, class_="form-control contact-form my-3", placeholder="Email") }}
-
                 {{ form.objet(size=50, class_="form-control contact-form my-3", placeholder="Objet") }}
                 
                 {{ form.message(class_="form-control contact-form my-3", style='height: 20em; resize:none;', placeholder="Votre message") }}
