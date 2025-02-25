@@ -11,7 +11,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, Allergenes, Constituer, Commandes, Formule, User, UserType
+from project.models import ConstituerFormule, Plats, Allergenes, Constituer, Commandes, Formule, User, UserType
 
 def get_current_user():
     if current_user.is_authenticated:
@@ -154,6 +154,34 @@ def ajout_plat() :
 
     return redirect(url_for('commander'))
 
+@app.route("/commander_formule", methods=["POST"])
+def ajout_formule():
+    if current_user.is_authenticated:
+        form = CommanderForm()
+        if form.num_com.data:
+            try:
+                commande = Commandes.get_commande(form.num_com.data)
+                constituer_formule = ConstituerFormule.get_constituer(form.id_plat.data, form.num_com.data)
+                
+                if constituer_formule:
+                    constituer_formule.quantite_formule += form.quantite.data
+                else:
+                    constituer_formule = ConstituerFormule(
+                        id_formule=form.id_plat.data, 
+                        num_commande=form.num_com.data, 
+                        quantite_formule=form.quantite.data
+                    )
+                    commande.constituer_formule_assoc.append(constituer_formule)
+
+                db.session.add(constituer_formule)
+                db.session.commit()
+            except Exception as e:
+                flash("Erreur : " + str(e), "danger")
+                return redirect(url_for('commander'))
+
+    return redirect(url_for('commander'))
+
+
 @app.route("/panier")
 def panier():
     user = get_current_user()
@@ -186,6 +214,27 @@ def modifier_quantite():
                             constituer.quantite_plat += 1
                     elif action == 'decrement' and constituer.quantite_plat > 1:
                             constituer.quantite_plat -= 1
+                    break
+
+        db.session.commit()
+
+    return redirect(url_for('panier'))
+
+@app.route('/modifier_quantite_formule')
+def modifier_quantite_formule():
+    action = request.args.get('action')
+    libelle_formule = request.args.get('libelle_formule')
+    user = get_current_user()
+    if user is not None:
+        panier = user.get_panier()
+        if panier is not None:
+            for constituer in panier.constituer_formule_assoc:
+                if constituer.formule.libelle_formule == libelle_formule:
+                    if action == 'increment':
+                        if constituer.quantite_formule +1 <= int(constituer.formule.get_stock_utilisable() * 0.8):
+                            constituer.quantite_formule += 1
+                    elif action == 'decrement' and constituer.quantite_formule > 1:
+                        constituer.quantite_formule -= 1
                     break
 
         db.session.commit()
@@ -250,6 +299,18 @@ def supprimer_plat():
     if user is not None:
         for constituer in user.get_panier().constituer_assoc:
             if constituer.plat.nom_plat == nom_plat:
+                db.session.delete(constituer)
+
+        db.session.commit()
+    return redirect(url_for('panier'))
+
+@app.route('/supprimer_formule')
+def supprimer_formule():
+    libelle_formule = request.args.get('libelle_formule')
+    user = get_current_user()
+    if user is not None:
+        for constituer in user.get_panier().constituer_formule_assoc:
+            if constituer.formule.libelle_formule == libelle_formule:
                 db.session.delete(constituer)
 
         db.session.commit()
