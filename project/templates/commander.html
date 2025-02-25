@@ -11,7 +11,7 @@
 <h1 class="text-center my-3">Commander</h1>
 <hr class="w-25 mx-auto bg-dark bar">
 <div class="row me-0 mt-3">
-    <div class="col-md-3">
+    <div class="offcanvas offcanvas-start col-md-3 form-allergene all-tel" tabindex="-1" id="offcanvasAllergenes" aria-labelledby="offcanvasAllergenesLabel">
         <form method="POST" action="{{ url_for('filter_allergenes') }}">
             <div class="bg-light p-3 rounded">
                 <h5>Liste des allergènes</h5>
@@ -29,9 +29,29 @@
         </form>
     </div>
 
-    <div class="col-md-9">
+    <div class="col-md-3 form-allergene all-desktop">
+        <form method="POST" action="{{ url_for('filter_allergenes') }}">
+            <div class="bg-light p-3 rounded">
+                <h5>Liste des allergènes</h5>
+                <ul class="list-group">
+                    {% for allergene in allergenes %}
+                    <li class="list-group-item d-flex align-items-center">
+                        <span class="badge bg-primary rounded-circle me-3">A</span>
+                        <span class="flex-grow-1">{{ allergene.nom_allergene }}</span>
+                        <input type="checkbox" name="allergenes" class="form-check-input ms-auto" value="{{ allergene.id_allergene }}" {% if allergene.id_allergene in selected_allergenes %}checked{% endif %}>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <input type="submit" class="btn btn-orange shadow mt-3" value="Filtrer">   
+            </div>
+        </form>
+    </div>
+    
+    
+    <div class="col-md-9 main-container">
+        <a class="my-3 affiche-all" data-bs-toggle="offcanvas" href="#offcanvasAllergenes" aria-controls="offcanvasAllergenes">Voir allèrgenes</a>   
         <!-- Catégories -->
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs d-flex">
             <li class="nav-item">
                 <a class="nav-link {% if type == 'p' %}active{% endif %}" href="?type=p"><h4>Tous les plats</h4></a>
             </li>
@@ -49,7 +69,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if type == 'f' %}active{% endif %}" href="?type=f"><h4>Formules</h4></a>
-            </li>
+            </li>  
         </ul>
 
         <!-- Formulaire de recherche aligné à droite -->
@@ -66,11 +86,11 @@
 
         {% if type=="p" %}
         <!-- Grille des plats -->
-        <div class="row g-3 rounded me-0" style="height: 500px; overflow-y: auto;">
+        <div class="row g-3 rounded me-0 plat-container">
             <h2>{{nb_plats}} plats disponibles</h2>
             {% for plat in plats %}
             <div class="col-md-4">
-                <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.nom_plat }}">
+                <div class="card" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.nom_plat }}">
                     <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
                     <div class="card-body text-center">
                         <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
@@ -124,11 +144,11 @@
 
         {% if type=="pc" %}
         <!-- Grille des plats chauds -->
-        <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
+        <div class="row g-3 rounded plat-container">
             <h2>{{nb_plats_chauds}} plats chauds disponibles</h2>
             {% for plat_chaud in plats_chauds %}
             <div class="col-md-4">
-                <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat_chaud.nom_plat }}">
+                <div class="card" data-bs-toggle="modal" data-bs-target="#editModal{{ plat_chaud.nom_plat }}">
                     <img src="{{ url_for('static', filename='img/product/' ~ plat_chaud.img) }}" class="card-img-top" alt="{{ plat_chaud.nom_plat }}">
                     <div class="card-body text-center">
                         <p>{{ plat_chaud.nom_plat }} <br> {{ plat_chaud.prix }}€</p>
