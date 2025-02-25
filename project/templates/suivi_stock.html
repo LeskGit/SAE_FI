@@ -22,19 +22,19 @@
         
         <div class="d-flex justify-content-around mb-4">
             <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
-                <input type="hidden" name="category" value="plats_chauds">
+                <input type="hidden" name="category" value="Plat chaud">
                 <button type="submit" class="btn btn-dark">Réinitialiser Plats chauds</button>
             </form>
             <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
-                <input type="hidden" name="category" value="plats_froids">
+                <input type="hidden" name="category" value="Plat froid">
                 <button type="submit" class="btn btn-dark">Réinitialiser Plats froids</button>
             </form>
             <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
-                <input type="hidden" name="category" value="sushis">
+                <input type="hidden" name="category" value="Sushi">
                 <button type="submit" class="btn btn-dark">Réinitialiser Sushis</button>
             </form>
             <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
-                <input type="hidden" name="category" value="desserts">
+                <input type="hidden" name="category" value="Dessert">
                 <button type="submit" class="btn btn-dark">Réinitialiser Desserts</button>
             </form>
         </div>
