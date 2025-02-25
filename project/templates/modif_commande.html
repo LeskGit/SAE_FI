@@ -3,19 +3,21 @@
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='commander.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modif_commander.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style_calendar.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="top-info"></div>
-<h1 class="text-center my-3">Modifier une commande</h1>
+<h1 class="text-center my-3">Commande</h1>
 <hr class="w-25 mx-auto bg-dark bar">
 <h1 class="text-center my-3">Numéro #{{ num_com }}</h1>
 
 <div class="row me-0 mt-3">
 
     <!-- Liste des plats -->
-    <div class="col-md-9 main-container">
+    <div class="col-md-8 main-container">
         <a class="my-3 affiche-all" data-bs-toggle="offcanvas" href="#offcanvasAllergenes" aria-controls="offcanvasAllergenes">Voir allèrgenes</a>   
         <!-- Catégories -->
         <ul class="nav nav-tabs d-flex">
@@ -53,6 +55,50 @@
                 {% include "modal_plat.html" %}
             </div>
             {% endfor %}
+        </div>
+    </div>
+
+    <div class="text-center col-md-4 recap-container">
+            <div class="background_recap shadow p-3 py-4">
+            <h3 class="text-center my-3 fw-bold">Mes Articles</h3>
+            <hr class="w-25 mx-auto bg-dark bar"/>
+            <div class="container-fluid col-11">
+
+                {% if panier is not none %}
+                    {% for constituer in commande.constituer_assoc %}
+                        <div class="container d-flex bg-light rounded my-3">
+                            <div class="container col-2">
+                                <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="img-fluid img_article m-2" style="width: 80px; height: 80px" alt="produit1">
+                            </div>
+                            <div class="container my-auto">
+                                <h4 class="mb-0"> {{ constituer.plat.nom_plat }}</h4>
+                            </div>
+                            <div class="container d-flex">
+                                <div class="my-auto d-flex justify-content-center align-items-center">
+                                    <!-- Lien pour diminuer la quantité -->
+                                    <a href="{{ url_for('modifier_quantite', action='decrement', nom_plat=constituer.plat.nom_plat) }}" 
+                                       class="btn btn-outline-danger btn-sm mx-auto">-</a>
+                                    
+                                    <span class="mx-2">{{ constituer.quantite_plat }}</span>
+                                    
+                                    <!-- Lien pour augmenter la quantité -->
+                                    <a href="{{ url_for('modifier_quantite', action='increment', nom_plat=constituer.plat.nom_plat) }}" 
+                                       class="btn btn-outline-danger btn-sm mx-auto">+</a>
+                                </div>
+                                
+                                <!-- Récupère la quantité du plat commandé -->
+                                <p class="my-auto mx-2"> {{ constituer.plat.prix * constituer.quantite_plat }}€</p>
+
+                                <a href="{{ url_for('supprimer_plat', nom_plat=constituer.plat.nom_plat) }}" class="text-danger text-center my-auto mx-auto" title="Supprimer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-trash3 col-4 text-center my-auto bin" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

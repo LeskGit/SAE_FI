@@ -158,4 +158,5 @@ def client_modif(id_commande):
     return render_template("modif_commande.html", 
                         list_plats=les_plats,
                         form=form,
+                        commande=commande,
                         num_com = num_commande)
