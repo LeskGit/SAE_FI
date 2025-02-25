@@ -45,7 +45,7 @@
                             <td>{{ item.heure_str }}</td>
                             <td>
                                 {% if item.can_modify %}
-                                    <a href="{{ url_for('client_modif', num_commande=item.num_commande) }}" class="btn btn_color">Modifier</a>
+                                    <a href="{{ url_for('client_modif', id_commande=item.num_commande) }}" class="btn btn_color">Modifier</a>
                                 {% else %}
                                     -
                                 {% endif %}
