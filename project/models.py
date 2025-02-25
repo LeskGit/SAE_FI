@@ -5,9 +5,16 @@ from flask_login import UserMixin
 import re
 from datetime import date, datetime, timedelta
 from hashlib import sha256
+from enum import Enum
+
+class UserType(Enum):
+    USER = 1
+    GUEST = 2
+    UNKNOW = 3
 
 class User(db.Model, UserMixin):
-    num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), primary_key = True)
+    id_client = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    num_tel = db.Column(db.String(10), CheckConstraint("LENGTH(num_tel) = 10 AND num_tel REGEXP '^[0-9]+$'"), unique=True)
     nom = db.Column(db.String(32))
     prenom = db.Column(db.String(32))
     mdp = db.Column(db.String(64))
@@ -19,6 +26,7 @@ class User(db.Model, UserMixin):
     blackliste = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default = False)
     points_fidelite = db.Column(db.Integer, default=0)
+    fake = db.Column(db.Boolean, default=False)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
 
     @validates("email")
@@ -28,43 +36,78 @@ class User(db.Model, UserMixin):
         return address
     
     def get_id(self):
+        return self.id_client
+    
+    def get_num_tel(self):
         return self.num_tel
 
     def get_panier(self):
-        panier = Commandes.query.filter_by(num_tel = self.num_tel, etat = "Panier").first()
+        panier = Commandes.query.filter_by(id_client = self.id_client, etat = "Panier").first()
         return panier
     
     def get_or_create_panier(self):
         panier = self.get_panier()
         if panier is None:
-            panier = Commandes(num_tel=self.num_tel, etat="Panier")
+            panier = Commandes(id_client = self.id_client, etat="Panier")
             db.session.add(panier)
             db.session.commit()
         return panier
+    
+    def get_nb_items_panier(self):
+        panier = self.get_panier()
+        if panier is not None:
+            return len(panier.constituer_assoc)
+        return 0
+    @classmethod
+    def get_blackliste(cls) :
+        """getter de la blackliste
+
+        Returns:
+            list: liste des personnes blacklistés
+        """
+        return cls.query.filter_by(blackliste = True).all()
+    
+    @classmethod
+    def get_user(cls, num_tel) :
+        """getter en fonction du num de téléphone
+        """
+        return cls.query.filter_by(num_tel=num_tel).first()
+    
+    @classmethod
+    def check_user_email(cls, email_u) :
+        """getter en fonction de l'email
+        """
+        return cls.query.filter_by(email=email_u).first()
 
 @login_manager.user_loader
 def load_user(num_tel):
     return User.query.get(num_tel)
 
-CONTENIR_NOM_PLAT = "plats.nom_plat"
+CONTENIR_ID_PLAT = "plats.id_plat"
 
 contenir = db.Table("contenir",
     db.metadata,
-    db.Column("nom", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
+    db.Column("id_plat", db.Integer, db.ForeignKey(CONTENIR_ID_PLAT), primary_key=True),
     db.Column("id_formule", db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
 )
 
 class Constituer(db.Model):
     __tablename__ = "constituer"
-    nom_plat = db.Column(db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True)
+    id_plat = db.Column(db.Integer, db.ForeignKey(CONTENIR_ID_PLAT), primary_key=True)
     num_commande = db.Column(db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
     quantite_plat = db.Column(db.Integer, default=1)
     plat = db.relationship("Plats", back_populates="constituer_assoc", overlaps="les_commandes,commande")
     commande = db.relationship("Commandes", back_populates="constituer_assoc", overlaps="les_plats,plat")
 
+    @classmethod
+    def get_constituer(cls, id_plat, num_com) :
+        """getter de constituer en fonction d'un nom de plat et d'un numéro de commande
+        """
+        return cls.query.get((id_plat, num_com))
+
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    num_tel = db.Column(db.String(10), db.ForeignKey("user.num_tel"))
+    id_client = db.Column(db.Integer, db.ForeignKey("user.id_client"))
     date = db.Column(db.DateTime)
     date_creation = db.Column(db.DateTime, default = db.func.current_timestamp())
     sur_place = db.Column(db.Boolean, default = False)
@@ -86,9 +129,8 @@ class Commandes(db.Model):
         return self.prix_total
 
     def compute_reduction(self):
-        """
-        Calcule la réduction de la commande :
-        Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
+        """Calcule la réduction de la commande :
+            Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
         """
         self.prix_avec_reduc = 0
         for constituer in self.constituer_assoc:
@@ -96,23 +138,81 @@ class Commandes(db.Model):
                 self.prix_avec_reduc -= constituer.plat.prix_reduc
         return self.prix_avec_reduc
     
-    def get_num_table_dispo(self):
-        return 
+    @classmethod
+    def get_num_table_dispo(cls, commande_date:datetime):
+        """Renvoie le numéro de la première table disponible
+        """
+        commandes_sur_place = cls.get_sur_place_at(commande_date.date())
 
+        dico_tables = {i: False for i in range(1, 13)}
+        for table in commandes_sur_place:
+            dico_tables[table.num_table] = True
+        
+        for num_table, occupe in dico_tables.items():
+            if not occupe:
+                return num_table
+        
+        return -1
+    
+    @classmethod
+    def get_sur_place_at(cls, date=datetime.today().date()):
+        """Retourne les tables disponibles à la date donnée
+
+        Args:
+            date (datetime, optional): la date à vérifier. Par défaut à datetime.today().date().
+
+        Returns:
+            list: la liste des tables disponibles à la date donnée
+        """
+        return cls.query.filter(db.func.date(cls.date) == date, cls.sur_place.is_(True)).all()
+    
+    @classmethod
+    def get_commandes_today(cls) :
+        """retourne les commandes d'aujourd'hui
+        """
+        #today = datetime.today().date()
+        #today = datetime(2024, 11, 6, 12)
+        #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
+        return cls.query.all()
+    
+    @classmethod
+    def get_historique(cls, id_client) :
+        """retourne l'historique de l'User en fonction de son numéro de téléphone
+
+        Args:
+            num_tel (str): le numéro de téléphone
+
+        Returns:
+            list: la liste des commandes de l'User
+        """
+        return cls.query.filter_by(id_client=id_client).filter(cls.etat != "Panier").order_by(cls.num_commande.desc()).all()
+
+    @classmethod
+    def get_commande(cls, num_com) :
+        """getter en fonction du numéro de commande
+        """
+        return cls.query.get(num_com)
     
 class Allergenes(db.Model):
-    id_allergene = db.Column(db.Integer, primary_key = True)
-    nom_allergene = db.Column(db.String(64))
+    id_allergene = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    nom_allergene = db.Column(db.String(64), unique = True)
     les_plats = db.relationship("Plats", secondary = "contenir_allergene", back_populates = "les_allergenes")
+
+    @classmethod
+    def get_allergenes(cls) :
+        """getter de tous les allergènes
+        """
+        return cls.query.order_by(cls.id_allergene).all()
     
 contenir_allergene = db.Table("contenir_allergene",
     db.metadata,
-    db.Column("nom_plat", db.String(64), db.ForeignKey(CONTENIR_NOM_PLAT), primary_key=True),
+    db.Column("id_plat", db.Integer, db.ForeignKey(CONTENIR_ID_PLAT), primary_key=True),
     db.Column("id_allergene", db.Integer, db.ForeignKey("allergenes.id_allergene"), primary_key=True)
 )
 
 class Plats(db.Model):
-    nom_plat = db.Column(db.String(64), primary_key = True)
+    id_plat = db.Column(db.Integer, primary_key = True, autoincrement=True)
+    nom_plat = db.Column(db.String(64), unique = True)
     type_plat = db.Column(db.Enum("Plat chaud", "Plat froid", "Sushi", "Dessert"))
     stock_utilisable = db.Column(db.Integer)
     stock_reserve = db.Column(db.Integer)
@@ -136,13 +236,103 @@ class Plats(db.Model):
     def add_allergene(self, lst_allergenes):
         for allergene in lst_allergenes:
             self.les_allergenes.append(allergene)
-        
-        
 
     def __repr__(self):
         return f"{self.nom_plat} ({self.type_plat}) : {self.prix}"
     
+    @classmethod
+    def get_plats(cls):
+        """getter de tous les plats
+        """
+        return cls.query.all()
     
+    @classmethod
+    def get_desserts(cls):
+        """getter de tous les desserts
+        """     
+        return cls.query.filter_by(type_plat = "Dessert").all()
+
+    @classmethod
+    def get_plats_chauds(cls):
+        """getter de tous les plats chauds
+        """
+        return cls.query.filter_by(type_plat = "Plat chaud").all()
+
+    @classmethod
+    def get_plats_froids(cls):
+        """getter de tous les plats froids
+        """
+        return cls.query.filter_by(type_plat = "Plat froid").all()
+
+    @classmethod
+    def get_sushis(cls):
+        """getter de tous les sushis
+        """
+        return cls.query.filter_by(type_plat = "Sushi").all()
+    
+    @classmethod
+    def get_allergenes_plat(cls, nom_plat) :
+        """getter des allerènes en fonction d'un nom de plat
+        """
+        return cls.query.get(nom_plat).les_allergenes
+
+    def contains_selected_allergenes(formule, selected_allergenes):
+        """Fonction vérifiant si un ou plusieurs allergènes est/sont dans une formule
+
+        Args:
+            formule (Formule): la formule
+            selected_allergenes (List(Allergene)): la liste des allergènes à vérifier
+
+        Returns:
+            boolean: Vrai si au moins un allergène est dans la formule
+        """
+        for plat in formule.les_plats:
+            if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
+                return True
+        return False
+
+    @classmethod
+    def get_plats_filtered_by_allergenes(cls, selected_allergenes):
+        """getter des plats en fonction d'une liste d'allergènes
+        """
+        if len(selected_allergenes) == 0:
+            return cls.get_plats()  
+        else:
+            lst = cls.get_plats()
+            for plats in cls.get_plats():
+                for allergene in plats.les_allergenes:
+                    if allergene.id_allergene in selected_allergenes:
+                        lst.remove(plats)
+                        break
+            return lst
+
+    @classmethod
+    def get_plats_filtered_by_type_and_allergenes(cls, type_plat, selected_allergenes):
+        """getter des plats en fonction de leur type et d'une liste d'allergènes
+        """
+        res = []
+        plat_trie = cls.get_plats_filtered_by_allergenes(selected_allergenes)
+        for plats in plat_trie:
+            if plats.type_plat == type_plat:
+                res.append(plats)
+        return res
+
+    @classmethod
+    def filter_formules_by_allergenes(cls, formules, selected_allergenes):
+        """Fonction permettant de récupérer les formules filtrées par une liste d'allergènes
+
+        Args:
+            formules (List(Formule)): la liste de formules
+            selected_allergenes (List(Allergene)): la liste des allergènes
+
+        Returns:
+            List(Formule): la liste des formules filtrées
+        """
+        filtered_formules = []
+        for formule in formules:
+            if not cls.contains_selected_allergenes(formule, selected_allergenes):
+                filtered_formules.append(formule)
+        return filtered_formules
 
 class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key = True)
@@ -153,7 +343,20 @@ class Formule(db.Model):
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
     
+    @classmethod
+    def get_formules(cls):
+        """getter des formules
+        """
+        return cls.query.all()
     
+    @classmethod
+    def get_formules_filtered_by_allergenes(cls, selected_allergenes):
+        """getter des formules en fonction d'une liste d'allergènes
+        """
+        if len(selected_allergenes) == 0:
+            return cls.get_formules()
+        else:
+            return Plats.filter_formules_by_allergenes(cls.get_formules(), selected_allergenes)
 
 #--------
 
@@ -339,7 +542,7 @@ class TriggerManager:
         return """
         CREATE TRIGGER commande_blacklisted_insert BEFORE INSERT ON commandes FOR EACH ROW
         BEGIN
-            IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
+            IF (SELECT blackliste FROM user WHERE id_client = NEW.id_client) = 1 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Vous êtes blackliste';
             END IF;
@@ -353,7 +556,7 @@ class TriggerManager:
         return """
         CREATE TRIGGER commande_blacklisted_update BEFORE UPDATE ON commandes FOR EACH ROW
         BEGIN
-            IF (SELECT blackliste FROM user WHERE num_tel = NEW.num_tel) = 1 THEN
+            IF (SELECT blackliste FROM user WHERE id_client = NEW.id_client) = 1 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Vous êtes blackliste';
             END IF;
@@ -373,12 +576,12 @@ class TriggerManager:
 
             SELECT max((TIMESTAMPDIFF(HOUR, current, date))) INTO temps 
             FROM commandes NATURAL JOIN user
-            WHERE num_tel = NEW.num_tel AND etat = 'Non payée';
+            WHERE id_client = NEW.id_client AND etat = 'Non payée';
 
             IF temps >= 24 THEN
                 UPDATE user
                 SET blackliste = True
-                WHERE num_tel = NEW.num_tel;
+                WHERE id_client = NEW.id_client;
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Vous êtes blacklisté et ne pouvez plus commander';
             END IF;
@@ -398,12 +601,12 @@ class TriggerManager:
 
             SELECT max((TIMESTAMPDIFF(HOUR, current, date))) INTO temps 
             FROM commandes NATURAL JOIN user
-            WHERE num_tel = NEW.num_tel AND etat = 'Non payée';
+            WHERE id_client = NEW.id_client AND etat = 'Non payée';
 
             IF temps >= 24 THEN
                 UPDATE user
                 SET blackliste = True
-                WHERE num_tel = NEW.num_tel;
+                WHERE id_client = NEW.id_client;
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Vous êtes blacklisté et ne pouvez plus commander';
             END IF;
@@ -423,7 +626,7 @@ class TriggerManager:
 
             SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
-            WHERE nom_plat = NEW.nom_plat;
+            WHERE id_plat = NEW.id_plat;
 
             IF stocks_u - NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
@@ -444,7 +647,7 @@ class TriggerManager:
 
             SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
-            WHERE nom_plat = NEW.nom_plat;
+            WHERE id_plat = NEW.id_plat;
 
             IF NEW.stock_utilisable < NEW.stock_reserve THEN
                 SIGNAL SQLSTATE '45000'
@@ -466,7 +669,7 @@ class TriggerManager:
 
             SELECT stock_utilisable, stock_reserve into stocks_u, stocks_r
             FROM plats
-            WHERE nom_plat = NEW.nom_plat;
+            WHERE id_plat = NEW.id_plat;
 
             IF stocks_u - NEW.quantite_plat < stocks_r THEN
                 SIGNAL SQLSTATE '45000'
@@ -535,9 +738,9 @@ class TriggerManager:
         BEGIN
             DECLARE nombre int;
             DECLARE type VARCHAR(62);
-            DECLARE n VARCHAR(62);
+            DECLARE n int;
 
-            SELECT count(nom) into nombre
+            SELECT count(id_plat) into nombre
             FROM contenir
             WHERE id_formule = NEW.id_formule;
 
@@ -548,12 +751,12 @@ class TriggerManager:
 
             SELECT type_plat into type
             FROM plats
-            WHERE nom_plat = NEW.nom;
+            WHERE id_plat = NEW.id_plat;
 
-            SELECT nom into n
+            SELECT id_plat into n
             FROM contenir
-            WHERE nom in (
-            SELECT nom_plat
+            WHERE id_plat in (
+            SELECT id_plat
             FROM plats
             WHERE type_plat = type) and id_formule = NEW.id_formule;
 
@@ -576,10 +779,10 @@ class TriggerManager:
 
             SELECT COUNT(*) INTO cnt
             FROM contenir c
-            JOIN plats p ON c.nom = p.nom_plat
+            JOIN plats p ON c.id_plat = p.id_plat
             WHERE c.id_formule = NEW.id_formule
-            AND p.type_plat = (SELECT type_plat FROM plats WHERE nom_plat = NEW.nom)
-            AND c.nom != OLD.nom;
+            AND p.type_plat = (SELECT type_plat FROM plats WHERE id_plat = NEW.id_plat)
+            AND c.id_plat != OLD.id_plat;
 
             IF cnt > 0 THEN
                 SIGNAL SQLSTATE '45000'
@@ -599,7 +802,7 @@ class TriggerManager:
 
             IF NEW.etat = "Panier" THEN
                 SELECT etat into id FROM commandes
-                WHERE num_tel = NEW.num_tel and
+                WHERE id_client = NEW.id_client and
                 etat = "Panier";
 
                 IF id IS NOT NULL THEN
@@ -743,98 +946,98 @@ def execute_tests():
     
     db.session.add(formule1)
 
-    com1 = Commandes(num_tel = '0123456759',
+    com1 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 6),
                         sur_place = True,
                         num_table = 1,
                         etat = "Payée")
 
-    com2 = Commandes(num_tel = '0123456759',
+    com2 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 2,
                         etat = "Payée")
 
-    com3 = Commandes(num_tel = '0123456759',
+    com3 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 3,
                         etat = "Payée")
 
-    com4 = Commandes(num_tel = '0123456759',
+    com4 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 4,
                         etat = "Payée")
 
-    com5 = Commandes(num_tel = '0123456759',
+    com5 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 5,
                         etat = "Payée")
 
-    com6 = Commandes(num_tel = '0123456759',
+    com6 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 6,
                         etat = "Payée")
 
-    com7 = Commandes(num_tel = '0123456759',
+    com7 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = False,
                         num_table = None,
                         etat = "Payée")
 
-    com8 = Commandes(num_tel = '0123456759',
+    com8 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 8,
                         etat = "Payée")
 
-    com9 = Commandes(num_tel = '0123456759',
+    com9 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 9,
                         etat = "Payée")
 
-    com10 = Commandes(num_tel = '0123456759',
+    com10 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 10,
                         etat = "Payée")
 
-    com11 = Commandes(num_tel = '0123456759',
+    com11 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 6, 12),
                         date_creation = datetime(2024, 11, 1),
                         sur_place = True,
                         num_table = 11,
                         etat = "Payée")
 
-    com12 = Commandes(num_tel = '0123456759',
+    com12 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 5, 12),
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
                         etat = "Payée")
 
-    com13 = Commandes(num_tel = '0123456759',
+    com13 = Commandes(id_client = 1,
                         date = datetime(2024, 11, 6, 13),
                         date_creation = datetime(2024, 11, 4, 10),
                         sur_place = True,
                         num_table = 12,
                         etat = "Non Payée")
     
-    com13 = Commandes(num_tel = '0123456759',
+    com13 = Commandes(id_client = 1,
                         date = datetime(2024, 12, 18, 13),
                         date_creation = datetime(2024, 12, 18, 10, 5),
                         sur_place = False,
@@ -849,9 +1052,9 @@ def execute_tests():
     try:
         # Ajouter des plats à Constituer pour la commande
         constituer_assoc = [
-            Constituer(nom_plat='plat1', num_commande=commande.num_commande, quantite_plat=2),
-            Constituer(nom_plat='plat2', num_commande=commande.num_commande, quantite_plat=3),
-            Constituer(nom_plat='plat3', num_commande=commande.num_commande, quantite_plat=1)
+            Constituer(id_plat=1, num_commande=commande.num_commande, quantite_plat=2),
+            Constituer(id_plat=2, num_commande=commande.num_commande, quantite_plat=3),
+            Constituer(id_plat=3, num_commande=commande.num_commande, quantite_plat=1)
         ]
         db.session.add_all(constituer_assoc)
         db.session.commit()
@@ -869,101 +1072,3 @@ def execute_tests():
         print("Erreur:", e)
 
     db.session.commit()
-
-def get_plats():
-    return Plats.query.all()
-
-def get_formules():
-    return Formule.query.all()
-
-def get_desserts():
-    return  Plats.query.filter_by(type_plat = "Dessert").all()
-
-def get_plats_chauds():
-    return  Plats.query.filter_by(type_plat = "Plat chaud").all()
-
-def get_plats_froids():
-    return  Plats.query.filter_by(type_plat = "Plat froid").all()
-
-def get_sushis():
-    return  Plats.query.filter_by(type_plat = "Sushi").all()
-
-def get_sur_place_at(date=datetime.today().date()):
-    return Commandes.query.filter(db.func.date(Commandes.date) == date, Commandes.sur_place.is_(True)).all()
- 
-def get_num_table_dispo(commande_date:datetime):
-    """Renvoie le numéro de la première table disponible
-    """
-    commandes_sur_place = get_sur_place_at(commande_date.date())
-
-    dico_tables = {i: False for i in range(1, 13)}
-    for table in commandes_sur_place:
-        dico_tables[table.num_table] = True
-    
-    for num_table, occupe in dico_tables.items():
-        if not occupe:
-            return num_table
-    
-    return -1
-
-def get_blackliste() :
-    return User.query.filter_by(blackliste = True).all()
-
-def get_user(num_tel) :
-    return User.query.get(num_tel)
-
-def get_commandes_today() :
-    #today = datetime.today().date()
-    today = datetime(2024, 11, 6, 12)
-    #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
-    return Commandes.query.all()
-    
-def get_allergenes() :
-    return Allergenes.query.all()
-
-def get_allergenes_plat(nom_plat) :
-    return Plats.query.get(nom_plat).les_allergenes
-
-def get_plats_filtered_by_allergenes(selected_allergenes):
-    if len(selected_allergenes) == 0:
-        return get_plats()  
-    else:
-        lst = get_plats()
-        for plats in get_plats():
-            for allergene in plats.les_allergenes:
-                if allergene.id_allergene in selected_allergenes:
-                    lst.remove(plats)
-                    break
-        return lst
-
-def get_plats_filtered_by_type_and_allergenes(type_plat, selected_allergenes):
-    res = []
-    plat_trie = get_plats_filtered_by_allergenes(selected_allergenes)
-    for plats in plat_trie:
-        if plats.type_plat == type_plat:
-            res.append(plats)
-    return res
-
-
-    
-
-def get_formules_filtered_by_allergenes(selected_allergenes):
-    if len(selected_allergenes) == 0:
-        return get_formules()
-    else:
-        return filter_formules_by_allergenes(get_formules(), selected_allergenes)
-
-def filter_formules_by_allergenes(formules, selected_allergenes):
-    filtered_formules = []
-    for formule in formules:
-        if not contains_selected_allergenes(formule, selected_allergenes):
-            filtered_formules.append(formule)
-    return filtered_formules
-
-def contains_selected_allergenes(formule, selected_allergenes):
-    for plat in formule.les_plats:
-        if any(allergene.id_allergene in selected_allergenes for allergene in plat.les_allergenes):
-            return True
-    return False
-
-

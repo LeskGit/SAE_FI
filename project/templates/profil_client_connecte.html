@@ -10,11 +10,15 @@
     <!-- Sidebar -->
     {% from "macro_client_aside.html" import sidebar_client with context %}
     {{ sidebar_client() }}
-
+    
     <div class="p-5 rounded shadow w-100 main_profil">
         <!-- Main content area -->
-        <div class="w-50">
-            <h2 class="mb-4">Profil</h2>
+        <div class="form-container">
+            <div class="d-flex justify-content-start align-items-center mb-4">
+            {% from "macro_client_aside.html" import mobile_navbar with context %}
+                {{ mobile_navbar() }}
+                <h2 class="mt-2 mx-3">Profil</h2>
+            </div>
             <form method="POST" action="{{ url_for('client_profil') }}">
                 {{ form.hidden_tag() }}
 
@@ -25,7 +29,7 @@
                     </label>
                     {{ form.phone_number(size=50,
                         class_="form-control w-100",
-                        readonly=True,
+                        disabled=(True if not edit else False),
                         placeholder="Entrez votre numéro de téléphone") }}   
                 </div>
                 {% if form.phone_number.errors %}
