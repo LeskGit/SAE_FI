@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='commander.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="top-info"></div>
+<h1 class="text-center my-3">Modifier une commande</h1>
+<hr class="w-25 mx-auto bg-dark bar">
+<h1 class="text-center my-3">Numéro #{{ num_com }}</h1>
+
+<div class="row me-0 mt-3">
+
+    <!-- Liste des plats -->
+    <div class="col-md-9 main-container">
+        <a class="my-3 affiche-all" data-bs-toggle="offcanvas" href="#offcanvasAllergenes" aria-controls="offcanvasAllergenes">Voir allèrgenes</a>   
+        <!-- Catégories -->
+        <ul class="nav nav-tabs d-flex">
+            {% for key, value in {'p': 'Tous les plats', 'pc': 'Plats chauds', 'pf': 'Plats froids', 's': 'Sushis', 'd': 'Desserts', 'f': 'Formules'}.items() %}
+            <li class="nav-item">
+                <a class="nav-link {% if type == key %}active{% endif %}" href="?type={{ key }}"><h4>{{ value }}</h4></a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Formulaire de recherche -->
+        <form class="d-flex ms-auto" action="{{ url_for('commander') }}" role="search">
+            <div class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Rechercher" value="{{ request.args.get('query', '') }}">
+                <span class="input-group-text bg-light">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                </span>
+            </div>
+        </form>
+
+        <!-- Grille des plats -->
+        <div class="row g-3 rounded me-0 plat-container">
+            <h2>{{ list_plats|length }} plats disponibles</h2>
+            {% for plat in list_plats %}
+            <div class="col-md-4">
+                <div class="card" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.id_plat }}">
+                    <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
+                    <div class="card-body text-center">
+                        <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
+                    </div>
+                </div>
+
+                {% include "modal_plat.html" %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

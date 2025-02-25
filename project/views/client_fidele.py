@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Commandes, User
+from project.models import Allergenes, Commandes, User
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -8,6 +8,8 @@ from project.views.authentification import RegisterForm
 from wtforms import StringField, PasswordField, EmailField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from datetime import datetime, timedelta
+
+from project.views.commander import CommanderForm, get_current_user, get_plats_type
 
 class PersoForm(FlaskForm):
     phone_number = StringField("Téléphone", validators=[DataRequired(), 
@@ -100,7 +102,7 @@ def client_historique():
         can_modify = False
         if com.etat != "Payée":
             elapsed = now - com.date_creation
-            if elapsed < timedelta(minutes=15):
+            if elapsed < timedelta(minutes=15000):
                 can_modify = True
 
         historique.append({
@@ -124,4 +126,20 @@ def client_fidelite():
 @app.route("/client/modif")
 @login_required
 def client_modif():
-    return render_template("modif_commande.html")
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('login'))
+    
+    commande = user.get_or_create_panier()
+    num_commande = commande.num_commande
+    form = CommanderForm()
+    
+    type = request.args.get('type', 'p')
+    query_plats = request.args.get('query', "")
+    
+    les_plats = get_plats_type(type, [], query_plats, False)
+
+    return render_template("modif_commande.html", 
+                        list_plats=les_plats,
+                        form=form,
+                        num_com = num_commande)
