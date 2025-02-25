@@ -18,7 +18,7 @@
             <div class="bg-light p-3 rounded">
                 <h5>Liste des allergènes</h5>
                 <ul class="list-group">
-                    {% for allergene in allergenes %}
+                    {% for allergene in list_allergenes %}
                     <li class="list-group-item d-flex align-items-center">
                         <span class="badge bg-primary rounded-circle me-3">A</span>
                         <span class="flex-grow-1">{{ allergene.nom_allergene }}</span>
