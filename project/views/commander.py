@@ -36,6 +36,25 @@ class CommanderForm(FlaskForm):
     num_com = HiddenField()
     quantite = IntegerField(validators=[DataRequired()])
 
+
+def get_plats_type(type, selected_allergenes, query_plats, search_allergenes):
+    match type:
+        case "pc":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
+        case "pf":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
+        case "s":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
+        case "f":
+            return Formule.get_formules_filtered_by_allergenes(selected_allergenes)
+        case "d":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
+    
+    if search_allergenes:
+        return Plats.get_plats_filtered_by_allergenes(selected_allergenes)
+    return Plats.query.filter(Plats.nom_plat.like(f"%{query_plats}%")).all() if query_plats is not None else Plats.get_plats()
+        
+
 @app.route("/commander", methods=["GET", "POST"])
 def commander():
     user = get_current_user()
@@ -45,29 +64,18 @@ def commander():
     commande = user.get_or_create_panier()
     num_commande = commande.num_commande
     form = CommanderForm()
-    selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
-    type = request.args.get('type', 'p')
+
     allergenes = Allergenes.get_allergenes()
-    query_plats = request.args.get('query')
-    plats = Plats.query.filter(Plats.nom_plat.like(f"%{query_plats}%")).all() if query_plats is not None else Plats.get_plats()
-    plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
-    plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
-    sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-    formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
-    desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
+    
+    type = request.args.get('type', 'p')
+    selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
+    query_plats = request.args.get('query', "")
+    
+    les_plats = get_plats_type(type, selected_allergenes, query_plats, False)
 
     return render_template("commander.html", 
-                        plats=plats, 
-                        plats_chauds=plats_chauds,
-                        plats_froids=plats_froids,
-                        sushis=sushis,
-                        formules=formules, 
-                        desserts=desserts, 
-                        type=type, 
-                        nb_plats=len(plats), 
-                        nb_formules=len(formules), 
-                        nb_desserts=len(desserts), 
-                        allergenes=allergenes, 
+                        list_plats=les_plats,
+                        list_allergenes=allergenes,
                         selected_allergenes=selected_allergenes,
                         form=form,
                         num_com = num_commande)
@@ -92,38 +100,25 @@ def filter_allergenes():
             for i in range(len(selected_allergenes)):
                 if(selected_allergenes[i] != ""):
                     selected_allergenes[i] = int(selected_allergenes[i])
-            print(selected_allergenes)
         else:
             selected_allergenes = []
-            
-    type = request.args.get('type', 'p')
-    
-    allergenes = Allergenes.get_allergenes()
-    plats = Plats.get_plats_filtered_by_allergenes(selected_allergenes)
-    plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
-    plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
-    sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-    formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
-    desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
-    
-
     commande = user.get_or_create_panier()
     num_commande = commande.num_commande
     form = CommanderForm()
 
+    allergenes = Allergenes.get_allergenes()
+
+    type = request.args.get('type', 'p')
+    query_plats = request.args.get('query', "")
+    
+    les_plats = get_plats_type(type, selected_allergenes, query_plats, True)
+
     resp = make_response(render_template("commander.html", 
-                           plats=plats, 
-                            plats_chauds=plats_chauds,
-                            plats_froids=plats_froids,
-                            sushis=sushis,
-                           type=type,
-                           allergenes=allergenes,
-                           formules=formules, 
-                           desserts=desserts, 
-                           selected_allergenes=selected_allergenes,
-                           form=form,
-                           num_com = num_commande
-                           ))
+                        list_plats=les_plats,
+                        list_allergenes=allergenes,
+                        selected_allergenes=selected_allergenes,
+                        form=form,
+                        num_com = num_commande))
     
     if request.method == "POST":
         string_allergenes = ""
@@ -188,7 +183,11 @@ def modifier_quantite():
                             constituer.quantite_plat -= 1
                     break
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except sqlalchemy.exc.OperationalError as e:
+            db.session.rollback()
+            flash("Erreur : " + str(e.orig.args[1]), "danger")
 
     return redirect(url_for('panier'))
 
