@@ -24,10 +24,10 @@ app.config['RECAPTCHA_PUBLIC_KEY'] = 'da0c592c-89e2-4d82-ac17-620b2c1d6226'  # Ã
 app.config['RECAPTCHA_PRIVATE_KEY'] = app.config['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{auth.nom}:{auth.mdp}@{auth.db}/DB{auth.nom}'
 
-app.config['MAIL_SERVER'] = 'a@a.com' # Ã  changer en l'adresse mail de la traiteuse
-app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = ''
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_SERVER'] = 'smtp.protonmail.ch'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'oumami.serveur@protonmail.com'
+app.config['MAIL_PASSWORD'] = 'OUmami01!02040406'
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
