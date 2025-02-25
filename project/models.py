@@ -1,11 +1,13 @@
-from sqlalchemy import CheckConstraint, text
-from sqlalchemy.orm import validates
-from .app import db, login_manager
-from flask_login import UserMixin
 import re
 from datetime import date, datetime, timedelta
 from hashlib import sha256
 from enum import Enum
+
+from flask_login import UserMixin
+from sqlalchemy import CheckConstraint, text
+from sqlalchemy.orm import validates
+
+from .app import db, login_manager
 
 
 class UserType(Enum):
@@ -161,7 +163,8 @@ class Commandes(db.Model):
 
     def compute_reduction(self):
         """Calcule la réduction de la commande :
-            Applique le prix - prix_reduc pour chaque plat en promotion (constituer.quantite_plat > quantite_promo)
+            Applique le prix - prix_reduc pour chaque plat 
+            en promotion (constituer.quantite_plat > quantite_promo)
         """
         self.prix_avec_reduc = 0
         for constituer in self.constituer_assoc:
@@ -351,14 +354,13 @@ class Plats(db.Model):
         """
         if len(selected_allergenes) == 0:
             return cls.get_plats()
-        else:
-            lst = cls.get_plats()
-            for plats in cls.get_plats():
-                for allergene in plats.les_allergenes:
-                    if allergene.id_allergene in selected_allergenes:
-                        lst.remove(plats)
-                        break
-            return lst
+        lst = cls.get_plats()
+        for plats in cls.get_plats():
+            for allergene in plats.les_allergenes:
+                if allergene.id_allergene in selected_allergenes:
+                    lst.remove(plats)
+                    break
+        return lst
 
     @classmethod
     def get_plats_filtered_by_type_and_allergenes(cls, type_plat,
@@ -414,9 +416,8 @@ class Formule(db.Model):
         """
         if len(selected_allergenes) == 0:
             return cls.get_formules()
-        else:
-            return Plats.filter_formules_by_allergenes(cls.get_formules(),
-                                                       selected_allergenes)
+        return Plats.filter_formules_by_allergenes(cls.get_formules(),
+                                                    selected_allergenes)
 
 
 #--------
