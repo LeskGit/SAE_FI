@@ -83,10 +83,10 @@
 <section class="offres-section" >
     <h2 class="offres-title">Découvrez nos offres</h2>
     <hr class="offres-divider">
-    <div class="container">
-        <div class="row text-center flex-nowrap">
+    <div class="d-flex justify-content-center"> 
+        <div class="offres-container mx-auto">
             <!-- Colonne Réception -->
-            <div class="col-md-4">
+            <div class="sous-section-offre">
                 <h3 class="offres-subtitle text-orange">Réception</h3>
                 <p class="offres-subdetail">(à partir de 30 personnes)</p>
                 <p>Oumami se déplace chez vous pour vos cocktails, mariages, baptêmes, repas d'affaires, etc.</p>
@@ -97,7 +97,7 @@
                 <div class="separator"></div>
             </div>
             <!-- Colonne Bento -->
-            <div class="col-md-4">
+            <div class="sous-section-offre">
                 <h3 class="offres-subtitle text-orange">Bentô</h3>
                 <p class="offres-subdetail">(plateau repas)</p>
                 <p>Oumami livre chez vous pour vos réunions, pique-niques, manifestations sportives et culturelles, etc.</p>
@@ -108,8 +108,8 @@
                 <div class="separator"></div>
             </div>
             <!-- Colonne Plats à emporter -->
-            <div class="col-md-4">
-                <h3 class="offres-subtitle text-orange">Plats à emporter</h3><br><br>
+            <div class="sous-section-offre">
+                <h3 class="offres-subtitle text-orange">Plats à emporter</h3>
                 <p>Oumami vous propose des plats divers suggérés par notre chef.</p>
             </div>
         </div>
@@ -120,9 +120,9 @@
     <h2 class="plats-title">Découvrez nos plats</h2>
     <hr class="plats-divider">
     
-    <div class="container">
+    <div class="d-flex justify-content-center">
 
-        <div class="row justify-content-center">
+        <div class="row justify-content-center plat-container">
             <div class="col-md-3">
                 <h3 class="text-orange">PLATS CHAUDS</h3>
                 <ul>
@@ -201,13 +201,9 @@
                         </svg>
                         <p class="mb-0 ms-2">Télécharger le menu</p>
                     </a>                   
-                <div>
-                
             </div>
         </div>
-        
     </div>
-
 </section>
 
 <section class="full-width-image">
@@ -217,9 +213,8 @@
     </div>
 </section>
 
-<div class="container">
+<div class="d-flex justify-content-center align-items-center">
     <section class="horaire-section">
-        <img src="{{ url_for('static', filename='img/horaires230829.jpg') }}">
         <p>Le magasin est ouvert du mardi au samedi de  11h30 à 14h (la vente à emporter et la restauration sur place) <br> et de 17h à 20h (la vente à emporter uniquement).</p>
 
     </section>

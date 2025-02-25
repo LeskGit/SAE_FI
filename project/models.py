@@ -202,7 +202,7 @@ class Allergenes(db.Model):
     def get_allergenes(cls) :
         """getter de tous les allergènes
         """
-        return cls.query.all()
+        return cls.query.order_by(cls.id_allergene).all()
     
 contenir_allergene = db.Table("contenir_allergene",
     db.metadata,

@@ -31,6 +31,9 @@
     {% from "macro_client_aside.html" import sidebar_client with context %}
     {{ sidebar_client() }}
 
+    {% from "macro_client_aside.html" import mobile_navbar with context %}
+    {{ mobile_navbar() }}
+
     <div class="p-5 rounded shadow w-100 main_profil">
         <!-- Titre de la page -->
         <h2 class="mb-4"><strong>Mes Points de Fidélité</strong></h2>
