@@ -160,3 +160,15 @@ def client_modif(id_commande):
                         form=form,
                         commande=commande,
                         num_com = num_commande)
+
+@app.route('/echanger_points', methods=['POST'])
+@login_required
+def echanger_points():
+    threshold = int(request.form['palier_threshold'])
+    if current_user.points_fidelite >= threshold:
+        current_user.points_fidelite -= threshold
+        db.session.commit()
+        flash(f"Vous avez échangé {threshold} points pour l'offre correspondante !", "success")
+    else:
+        flash("Vous n'avez pas assez de points pour cette offre...", "danger")
+    return redirect(url_for('client_fidelite'))
