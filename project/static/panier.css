@@ -45,6 +45,11 @@
     max-height: 30em;
 }
 
+.nom-plat {
+    margin: 0 0.5em;
+}
+
+
 
 @media (max-width: 1100px) {
 
@@ -109,8 +114,15 @@
         min-width: 0.5em;
     }
 
-    .plat-container h4 {
-        font-size: 1em;
+ 
+
+    .nom-plat {
+        font-size: 0.8em;
+        margin: 0 2em;
+    }
+
+    .content-container a, .content-container span, .content-container p, .content-container button {
+        margin: 0px 5px !important;
     }
 }
 
@@ -119,5 +131,20 @@
 
     .prix-plat, span {
         margin: 2px 2px !important;
+    }
+
+    .content-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .link-container {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .content-container a, .content-container span, .content-container p, .content-container button {
+        margin: 0px 1px !important;
     }
 }
