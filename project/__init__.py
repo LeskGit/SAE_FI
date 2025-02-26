@@ -1,3 +1,7 @@
+"""
+Ce module initialise les différentes vues et commandes 
+de l'application ainsi que la base de données.
+"""
 from .app import app, db
 import project.views.administration
 import project.views.authentification
