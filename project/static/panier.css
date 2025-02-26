@@ -40,6 +40,11 @@
     margin: 0.8em auto;  
 }
 
+.articles-container {
+    overflow-y: auto;
+    max-height: 30em;
+}
+
 
 @media (max-width: 1100px) {
 
