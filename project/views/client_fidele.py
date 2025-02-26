@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.model.class_model import Commandes, User
+from project.model.class_model import Allergenes, Commandes, User, Reduction, Plats, can_modify_commande
 from flask_wtf import FlaskForm
 from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
@@ -8,7 +8,8 @@ from project.views.authentification import RegisterForm
 from wtforms import StringField, PasswordField, EmailField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from datetime import datetime, timedelta
-
+from project.app import MIN_MAX_MODIF
+from project.views.commander import CommanderForm, get_current_user, get_plats_type
 
 class PersoForm(FlaskForm):
     phone_number = StringField(
@@ -98,7 +99,7 @@ def client_profil():
                            pw_form=pw_form)
 
 
-@app.route("/client/historique")
+@app.route("/client/historique", methods=["GET", "POST"])
 @login_required
 def client_historique():
     commandes = (Commandes.get_historique(id_client=current_user.id_client))
@@ -112,20 +113,24 @@ def client_historique():
         else:
             statut_label = "EN COURS"
             statut_class = "status-encours"
+        
+        # Récupération des plats commandés avec quantité
+        plats_list = [f"{assoc.plat.nom_plat} (x{assoc.quantite_plat})" for assoc in com.constituer_assoc] if com.constituer_assoc else []
 
-        if com.constituer_assoc:
-            plats_names = ", ".join(
-                [assoc.plat.nom_plat for assoc in com.constituer_assoc])
-            total_price = str(com.calculer_prix() +
-                              com.compute_reduction()) + " €"
-        else:
-            plats_names = "-"
-            total_price = "-"
+        # Récupération des formules commandées avec quantité
+        formules_list = [f"{assoc.formule.libelle_formule} (x{assoc.quantite_formule})" for assoc in com.constituer_formule_assoc] if com.constituer_formule_assoc else []
 
+        # Fusion des listes de plats et formules
+        articles_commandes = plats_list + formules_list
+        plats_names = ", ".join(articles_commandes) if articles_commandes else "-"
+
+        # Calcul du prix total
+        total_price = str(com.calculer_prix() + com.compute_reduction()) + " €" if articles_commandes else "-"
+        
         can_modify = False
         if com.etat != "Payée":
             elapsed = now - com.date_creation
-            if elapsed < timedelta(minutes=15):
+            if elapsed < timedelta(minutes=MIN_MAX_MODIF):
                 can_modify = True
 
         historique.append({
@@ -142,25 +147,81 @@ def client_historique():
     return render_template("historique_commandes.html", historique=historique)
 
 
+@app.route("/client/modif/<int:id_commande>")
+@login_required
+def client_modif(id_commande):
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('login'))
+    
+    commande = Commandes.get_commande(id_commande)
+    if commande is None:
+        return redirect(url_for('client_historique'))
+
+    commande.calculer_prix()
+    commande.compute_reduction()
+    
+    if not can_modify_commande(id_commande, user.id_client):
+        return redirect(url_for('client_historique'))
+    
+    num_commande = id_commande
+    form = CommanderForm()
+    
+    type = request.args.get('type', 'p')
+    query_plats = request.args.get('query', "")
+    
+    les_plats = get_plats_type(type, [], query_plats, False)
+
+    return render_template("modif_commande.html", 
+                        list_plats=les_plats,
+                        type=type,
+                        form=form,
+                        commande=commande,
+                        num_com = num_commande)
+
 @app.route("/client/fidelite")
 @login_required
 def client_fidelite():
-    return render_template("fidelite_client.html")
+    all_reductions = Reduction.query.order_by(Reduction.points_fidelite).all()
+    all_plats = Plats.query.all()
+    plats_map = {p.id_plat: p for p in all_plats}
+    
+    return render_template("fidelite_client.html",
+                           reductions=all_reductions,
+                           plats_map=plats_map)
 
+from sqlalchemy.exc import OperationalError
 
-@app.route("/client/modif")
-@login_required
-def client_modif():
-    return render_template("modif_commande.html")
-
-@app.route('/echanger_points', methods=['POST'])
+@app.route("/echanger_points", methods=["POST"])
 @login_required
 def echanger_points():
-    threshold = int(request.form['palier_threshold'])
-    if current_user.points_fidelite >= threshold:
-        current_user.points_fidelite -= threshold
+    rid = request.form.get("id_reduction")
+    reduction = Reduction.query.get(rid)
+    if not reduction:
+        flash("Réduction introuvable.", "danger")
+        return redirect(url_for("client_fidelite"))
+
+    if current_user.points_fidelite < reduction.points_fidelite:
+        flash("Vous n'avez pas assez de points pour cette réduction.", "danger")
+        return redirect(url_for("client_fidelite"))
+
+    try:
+        current_user.points_fidelite -= reduction.points_fidelite
+        current_user.reductions.append(reduction)
         db.session.commit()
-        flash(f"Vous avez échangé {threshold} points pour l'offre correspondante !", "success")
-    else:
-        flash("Vous n'avez pas assez de points pour cette offre...", "danger")
-    return redirect(url_for('client_fidelite'))
+        flash(f"La réduction sur le plat {reduction.id_plat} a bien été achetée !", "success")
+
+    except OperationalError as op_err:
+        db.session.rollback()
+        err_no, err_msg = op_err.orig.args  
+
+        flash(f"Une erreur s'est produite lors de l'achat : {err_msg}", "danger")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Une erreur s'est produite lors de l'achat : {e}", "danger")
+
+    return redirect(url_for("client_fidelite"))
+
+
+

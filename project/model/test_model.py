@@ -1,4 +1,4 @@
-from .class_model import User, Constituer, Commandes, Allergenes, Plats, Formule
+from .class_model import User, Constituer, Commandes, Allergenes, Plats, Formule, Reduction
 from hashlib import sha256
 from ..app import db
 from datetime import datetime
@@ -20,6 +20,7 @@ def create_user():
 
     db.session.add(usr)
     db.session.commit()
+    return usr
 
 def create_allergenes():
     allergene1 = Allergenes(id_allergene=1, nom_allergene='allergene1')
@@ -245,11 +246,20 @@ def add_plats_to_formule(formule1):
         print("Erreur:", e)
     db.session.commit()
 
+def create_reduction(usr) :
+    plat1, plat2 = Plats.query.filter(Plats.nom_plat.in_(['plat1', 'plat2'])).all()
+    reduction1 = Reduction(id_plat=plat1.id_plat, reduction=20, points_fidelite=100)
+    reduction2 = Reduction(id_plat=plat2.id_plat, reduction=15, points_fidelite=50)
+    db.session.add_all([reduction1, reduction2])
+    usr.reductions.extend([reduction1, reduction2])
+    db.session.commit()
+
 def execute_tests():
-    create_user()
+    usr = create_user()
     allergenes = create_allergenes()
     create_plats(allergenes)
     formule1 = create_formule()
     create_commandes()
     add_plats_to_commande()
     add_plats_to_formule(formule1)
+    create_reduction(usr)
