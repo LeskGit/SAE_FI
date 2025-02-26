@@ -101,7 +101,25 @@ body{
     text-decoration: none;
 }
 
-@media (max-width: 1163px) {
+.bin {
+    min-width:25px;
+    max-width: 80px;
+}
+
+.img_article {
+    min-width: 50px;
+    min-height: 50px;
+    border-radius: 5%;
+    margin: 0.8em auto; 
+}
+
+.container-articles {
+    overflow-y: auto;
+    max-height: 20em;
+}
+
+
+@media (max-width: 1280px) {
     
     .plat-container {
         margin: 0 auto;
@@ -119,7 +137,17 @@ body{
     .affiche-all {
         display: block;
     }
+
+    .container-principal {
+        flex-direction: column;
+    }
+
+    .recap-container {
+        margin: 5em auto;
+        width: 80%;
+    }
 }
+
 
 @media (max-width: 768px) {
 
@@ -131,3 +159,33 @@ body{
         width: 18rem;
     }
 }
+
+@media (max-width: 510px) {
+    .container-article {
+        flex-direction: column;
+    }
+
+    .utils {
+        flex-direction: column;
+        margin: 2em auto;
+    }
+
+    .container-article p, .container-article h3 {
+        text-align: center !important;
+    }
+
+    .img_article {
+        max-width: 3em;
+        max-height: 3em;
+        margin: 0 auto !important;
+    }
+
+    .img-container {
+        margin: 1em auto !important;
+    }
+
+    .container-article .link-article, .container-article span, .container-article p {
+        margin: 1em 0.5em !important;
+    }
+}
+
