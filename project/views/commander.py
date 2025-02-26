@@ -224,6 +224,11 @@ def modifier_quantite():
                     elif action == 'decrement' and constituer.quantite_plat > 1:
                         constituer.quantite_plat -= 1
                     break
+        try : 
+            db.session.commit()
+        except sqlalchemy.exc.OperationalError as e:
+            db.session.rollback()
+            flash("Erreur : " + str(e.orig.args[1]), "danger")
 
         db.session.commit()
 
@@ -245,6 +250,11 @@ def modifier_quantite_formule():
                     elif action == 'decrement' and constituer.quantite_formule > 1:
                         constituer.quantite_formule -= 1
                     break
+        try : 
+            db.session.commit()
+        except sqlalchemy.exc.OperationalError as e:
+            db.session.rollback()
+            flash("Erreur : " + str(e.orig.args[1]), "danger")
 
         db.session.commit()
 
@@ -298,7 +308,7 @@ def modifier_type():
             try:
                 db.session.commit()
             except Exception as e:
-                flash("Erreur : " + str(e.orig.args[1]), "danger")
+                flash("Erreur : " + str(e), "danger")
                 return redirect(url_for('panier'))
 
     return redirect(url_for('panier'))
@@ -356,11 +366,15 @@ def validation_paiement():
 
         for constituer_plat in panier.constituer_assoc:
             constituer_plat.plat.stock_utilisable -= constituer_plat.quantite_plat
+        
+        for constituer_formule in panier.constituer_formule_assoc:
+            for plat in constituer_formule.formule.les_plats:
+                plat.stock_utilisable -= constituer_formule.quantite_formule
 
         db.session.commit()
 
     except Exception as e:
-        flash("Erreur : " + str(e.orig.args[1]), "danger")
+        flash("Erreur : " + str(e), "danger")
         return redirect(url_for('panier'))
 
     return render_template("validation_commande.html", panier=panier)
