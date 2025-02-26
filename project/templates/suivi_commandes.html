@@ -57,7 +57,7 @@
                             <ul class="list-group">
                                 {% for association in commande.constituer_assoc %}
                                 <li class="list-group-item d-flex align-items-center">
-                                    <img src="{{ url_for('static', filename='img/product/' ~ association.plat.img) }}" class="img_plat rounded me-3 ms-5 mt-2 mb-2" alt="{{ association.plat.nom_plat }}">
+                                    <img src="{{ url_for('static', filename='img/product/' ~ association.plat.img) }}" class="img_plat rounded me-3" id="img80" alt="{{ association.plat.nom_plat }}">
                                     <div class="flex-grow-1">
                                         <h3 class="mb-0">{{ association.plat.nom_plat }}</h3>
                                     </div>

@@ -11,6 +11,11 @@ from hashlib import sha256
 from flask import render_template, url_for, redirect, request, flash
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
+from flask_login import login_user , current_user, logout_user, login_required
+from hashlib import sha256
+from project.models import Commandes, User, Plats, Allergenes, Reduction
+from functools import wraps
+from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
 from flask_wtf.file import FileAllowed
 from werkzeug.utils import secure_filename
 from wtforms import SelectMultipleField, StringField, HiddenField, FileField, FloatField, SelectField
@@ -408,6 +413,94 @@ def edition_offre():
                            formules=formules,
                            plats=plats,
                            type=type)
+
+@app.route("/admin/creation_reduc", methods=["GET", "POST"])
+@admin_required
+def creation_reduction():
+    if request.method == "POST":
+        id_plat = request.form.get("id_plat")
+        pourcentage = request.form.get("reduction")
+        cost_points = request.form.get("points_fidelite")
+        if not id_plat or not pourcentage or not cost_points:
+            flash("Formulaire incomplet.", "danger")
+            return redirect(url_for("creation_reduction"))
+
+        try:
+            new_reduc = Reduction(
+                id_plat=int(id_plat),
+                reduction=int(pourcentage),
+                points_fidelite=int(cost_points)
+            )
+            db.session.add(new_reduc)
+            db.session.commit()
+            flash("Réduction créée avec succès.", "success")
+            return redirect(url_for("edition_reduction"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de la création: {e}", "danger")
+            return redirect(url_for("creation_reduction"))
+
+    plats = Plats.query.all()
+    return render_template("creation_reduc.html", plats=plats)
+
+
+@app.route("/admin/edition_reduc", methods=["GET"])
+@admin_required
+def edition_reduction():
+    """
+    Liste et gère (modifier/supprimer) les réductions existantes.
+    """
+    reductions = Reduction.query.all()
+    all_plats = Plats.query.all()
+    plats_map = {p.id_plat: p for p in all_plats}
+
+    return render_template("edition_reduc.html",
+                           reductions=reductions,
+                           plats_map=plats_map,
+                           all_plats=all_plats)
+
+
+@app.route("/admin/update_reduction/<int:id_reduction>", methods=["POST"])
+@admin_required
+def update_reduction(id_reduction):
+    """
+    Met à jour une réduction existante (changement de plat, pourcentage, coût en points).
+    """
+    reduc = Reduction.query.get_or_404(id_reduction)
+    try:
+        new_plat_id = int(request.form.get("id_plat"))
+        new_pourcentage = int(request.form.get("reduction"))
+        new_points = int(request.form.get("points_fidelite"))
+
+        reduc.id_plat = new_plat_id
+        reduc.reduction = new_pourcentage
+        reduc.points_fidelite = new_points
+
+        db.session.commit()
+        flash("Réduction mise à jour avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la modification: {e}", "danger")
+
+    return redirect(url_for("edition_reduction"))
+
+
+@app.route("/admin/delete_reduction/<int:id_reduction>", methods=["POST"])
+@admin_required
+def delete_reduction(id_reduction):
+    """
+    Supprime une réduction (bouton 'Supprimer').
+    """
+    reduc = Reduction.query.get_or_404(id_reduction)
+    try:
+        db.session.delete(reduc)
+        db.session.commit()
+        flash("Réduction supprimée avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la suppression: {e}", "danger")
+
+    return redirect(url_for("edition_reduction"))
 
 @app.route("/add_offre", methods=["POST"])
 @admin_required

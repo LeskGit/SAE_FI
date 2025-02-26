@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Allergenes, Commandes, User, can_modify_commande
+from project.models import Allergenes, Commandes, User, Reduction, Plats, can_modify_commande
 from flask_wtf import FlaskForm
 from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
@@ -147,11 +147,6 @@ def client_historique():
     return render_template("historique_commandes.html", historique=historique)
 
 
-@app.route("/client/fidelite")
-@login_required
-def client_fidelite():
-    return render_template("fidelite_client.html")
-
 @app.route("/client/modif/<int:id_commande>")
 @login_required
 def client_modif(id_commande):
@@ -179,18 +174,54 @@ def client_modif(id_commande):
 
     return render_template("modif_commande.html", 
                         list_plats=les_plats,
+                        type=type,
                         form=form,
                         commande=commande,
                         num_com = num_commande)
 
-@app.route('/echanger_points', methods=['POST'])
+@app.route("/client/fidelite")
+@login_required
+def client_fidelite():
+    all_reductions = Reduction.query.order_by(Reduction.points_fidelite).all()
+    all_plats = Plats.query.all()
+    plats_map = {p.id_plat: p for p in all_plats}
+    
+    return render_template("fidelite_client.html",
+                           reductions=all_reductions,
+                           plats_map=plats_map)
+
+from sqlalchemy.exc import OperationalError
+
+@app.route("/echanger_points", methods=["POST"])
 @login_required
 def echanger_points():
-    threshold = int(request.form['palier_threshold'])
-    if current_user.points_fidelite >= threshold:
-        current_user.points_fidelite -= threshold
+    rid = request.form.get("id_reduction")
+    reduction = Reduction.query.get(rid)
+    if not reduction:
+        flash("Réduction introuvable.", "danger")
+        return redirect(url_for("client_fidelite"))
+
+    if current_user.points_fidelite < reduction.points_fidelite:
+        flash("Vous n'avez pas assez de points pour cette réduction.", "danger")
+        return redirect(url_for("client_fidelite"))
+
+    try:
+        current_user.points_fidelite -= reduction.points_fidelite
+        current_user.reductions.append(reduction)
         db.session.commit()
-        flash(f"Vous avez échangé {threshold} points pour l'offre correspondante !", "success")
-    else:
-        flash("Vous n'avez pas assez de points pour cette offre...", "danger")
-    return redirect(url_for('client_fidelite'))
+        flash(f"La réduction sur le plat {reduction.id_plat} a bien été achetée !", "success")
+
+    except OperationalError as op_err:
+        db.session.rollback()
+        err_no, err_msg = op_err.orig.args  
+
+        flash(f"Une erreur s'est produite lors de l'achat : {err_msg}", "danger")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Une erreur s'est produite lors de l'achat : {e}", "danger")
+
+    return redirect(url_for("client_fidelite"))
+
+
+
