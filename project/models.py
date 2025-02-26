@@ -133,8 +133,8 @@ class ConstituerFormule(db.Model):
     id_formule = db.Column(db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
     num_commande = db.Column(db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
     quantite_formule = db.Column(db.Integer, default=1)
-    formule = db.relationship("Formule", back_populates="constituer_assoc")
-    commande = db.relationship("Commandes", back_populates="constituer_formule_assoc")
+    formule = db.relationship("Formule", back_populates="constituer_assoc", overlaps="constituer_assoc,les_commandes")
+    commande = db.relationship("Commandes", back_populates="constituer_formule_assoc", overlaps="constituer_formule_assoc,les_formules")
 
     @classmethod
     def get_constituer(cls, id_formule, num_com):
@@ -152,10 +152,10 @@ class Commandes(db.Model):
     num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Non payée", "Payée"), default="Panier")
     les_clients = db.relationship("User", back_populates="les_commandes")
-    les_plats = db.relationship("Plats", secondary="constituer", back_populates="les_commandes")
+    les_plats = db.relationship("Plats", secondary="constituer", back_populates="les_commandes", overlaps="constituer_assoc,commande,plat")
     constituer_assoc = db.relationship("Constituer", back_populates="commande", overlaps="les_plats,plat")
-    les_formules = db.relationship("Formule", secondary="constituer_formule", back_populates="les_commandes")
-    constituer_formule_assoc = db.relationship("ConstituerFormule", back_populates="commande")
+    les_formules = db.relationship("Formule", secondary="constituer_formule", back_populates="les_commandes", overlaps="constituer_formule_assoc,commande,formule")
+    constituer_formule_assoc = db.relationship("ConstituerFormule", back_populates="commande", overlaps="les_formules,commande")
 
     prix_total = 0
     prix_avec_reduc = 0
@@ -404,9 +404,9 @@ class Formule(db.Model):
     id_formule = db.Column(db.Integer, primary_key=True)
     libelle_formule = db.Column(db.String(64))
     prix = db.Column(db.Float)
-    les_commandes = db.relationship("Commandes", secondary="constituer_formule", back_populates="les_formules")
+    les_commandes = db.relationship("Commandes", secondary="constituer_formule", back_populates="les_formules", overlaps="constituer_formule_assoc,commande")
     les_plats = db.relationship("Plats", secondary=contenir, back_populates="les_formules")
-    constituer_assoc = db.relationship("ConstituerFormule", back_populates="formule")
+    constituer_assoc = db.relationship("ConstituerFormule", back_populates="formule", overlaps="les_commandes,les_formules")
 
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
