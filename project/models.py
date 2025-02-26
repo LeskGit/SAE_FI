@@ -7,6 +7,31 @@ from datetime import date, datetime, timedelta
 from hashlib import sha256
 from enum import Enum
 
+client_reductions = db.Table("client_reductions",
+    db.Column("id_client", db.Integer, db.ForeignKey("user.id_client"), primary_key=True),
+    db.Column("id_reduction", db.Integer, db.ForeignKey("reduction.id_reduction"), primary_key=True)
+)
+
+def remove_reduction_association(reduction_id: int, client_id: int) -> None:
+    """
+    Supprime l'association entre une réduction et un client, par exemple lorsque la réduction a été utilisée.
+    
+    Args:
+        reduction_id (int): l'identifiant de la réduction.
+        client_id (int): l'identifiant du client.
+    """
+    reduction = Reduction.query.get(reduction_id)
+    client = User.query.get(client_id)
+    
+    if reduction is None:
+        raise ValueError("La réduction spécifiée n'existe pas.")
+    if client is None:
+        raise ValueError("Le client spécifié n'existe pas.")
+    
+    if client in reduction.clients:
+        reduction.clients.remove(client)
+        db.session.commit()
+
 class UserType(Enum):
     USER = 1
     GUEST = 2
@@ -28,6 +53,7 @@ class User(db.Model, UserMixin):
     points_fidelite = db.Column(db.Integer, default=0)
     fake = db.Column(db.Boolean, default=False)
     les_commandes = db.relationship("Commandes", back_populates = "les_clients")
+    reductions = db.relationship("Reduction", secondary=client_reductions, back_populates="clients")
 
     @validates("email")
     def validate_email(self, key, address):
@@ -357,6 +383,32 @@ class Formule(db.Model):
             return cls.get_formules()
         else:
             return Plats.filter_formules_by_allergenes(cls.get_formules(), selected_allergenes)
+
+class Reduction(db.Model):
+    id_reduction = db.Column(db.Integer, primary_key = True)
+    id_plat = db.Column(db.Integer, db.ForeignKey(CONTENIR_ID_PLAT))
+    reduction = db.Column(db.Integer) # en pourcentage
+    clients = db.relationship("User", secondary=client_reductions, back_populates="reductions")
+
+    def __repr__(self):
+        return f"{self.id_reduction} : {self.reduction}"
+
+    @classmethod
+    def get_prix(cls, id_reduction):
+        """Calcule le prix du plat après application de la réduction en pourcentage.
+        
+        Args:
+            id_reduction (int): L'identifiant de la réduction.
+        
+        Returns:
+            float: Le prix final du plat après réduction.
+        """
+        reduc = cls.query.get(id_reduction)
+        plat = Plats.query.get(reduc.id_plat)
+        prix_initial = plat.prix
+        pourcentage = reduction_record.reduction
+        prix_final = prix_initial * (1 - pourcentage / 100)
+        return prix_final
 
 #--------
 
@@ -865,7 +917,33 @@ class TriggerManager:
                 WHERE id_client = user;
             END IF;
         END;
-        """  
+        """
+
+    def trigger_reduction_unique_insert(self) -> str:
+        """
+        Un client ne peut pas avoir plusieurs réductions sur un même plat
+        """
+        return """
+        CREATE TRIGGER reduction_unique_insert BEFORE INSERT ON client_reductions FOR EACH ROW
+        BEGIN
+            DECLARE plat_id INT;
+            DECLARE nb INT;
+
+            SELECT id_plat INTO plat_id
+            FROM reduction
+            WHERE id_reduction = NEW.id_reduction;
+            
+            SELECT COUNT(*) INTO nb
+            FROM client_reductions cr
+            JOIN reduction r ON cr.id_reduction = r.id_reduction
+            WHERE cr.id_client = NEW.id_client AND r.id_plat = plat_id;
+
+            IF nb > 0 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Vous avez déjà une réduction sur ce plat";
+            END IF;
+        END;
+        """
 
 def execute_tests():
     password = "password"
@@ -1096,4 +1174,10 @@ def execute_tests():
         db.session.rollback()
         print("Erreur:", e)
 
+    reduction1 = Reduction(id_plat=plat1.id_plat, reduction=20)
+    reduction2 = Reduction(id_plat=plat2.id_plat, reduction=15)
+    db.session.add_all([reduction1, reduction2])
+    db.session.commit()
+
+    usr.reductions.extend([reduction1, reduction2])
     db.session.commit()

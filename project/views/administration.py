@@ -4,7 +4,7 @@ from project.models import Formule, Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Commandes, User, Plats, Allergenes
+from project.models import Commandes, User, Plats, Allergenes, Reduction
 from functools import wraps
 from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
 from wtforms.widgets import CheckboxInput, ListWidget
@@ -384,3 +384,88 @@ def edition_offre():
     formules = Formule.query.all()
     plats = Plats.query.all()
     return render_template("edition_offre.html", formules=formules, plats=plats, type=type)
+
+@app.route("/admin/creation_reduc", methods=["GET", "POST"])
+@admin_required
+def creation_reduction():
+    """
+    Crée une nouvelle réduction (sélection d'un plat + pourcentage).
+    """
+    if request.method == "POST":
+        id_plat = request.form.get("id_plat")
+        pourcentage = request.form.get("reduction")
+        if not id_plat or not pourcentage:
+            flash("Formulaire incomplet.", "danger")
+            return redirect(url_for("creation_reduction"))
+
+        try:
+            new_reduc = Reduction(id_plat=int(id_plat), reduction=int(pourcentage))
+            db.session.add(new_reduc)
+            db.session.commit()
+            flash("Réduction créée avec succès.", "success")
+            return redirect(url_for("edition_reduction"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de la création: {e}", "danger")
+            return redirect(url_for("creation_reduction"))
+
+    # GET : on affiche le formulaire et la liste des plats
+    plats = Plats.query.all()
+    return render_template("creation_reduc.html", plats=plats)
+
+
+@app.route("/admin/edition_reduc", methods=["GET"])
+@admin_required
+def edition_reduction():
+    """
+    Liste et gère (modifier/supprimer) les réductions existantes.
+    """
+    # Récupération des réductions
+    reductions = Reduction.query.all()
+    all_plats = Plats.query.all()
+    # On fait un dict pour accéder facilement au plat associé
+    plats_map = {p.id_plat: p for p in all_plats}
+
+    return render_template("edition_reduc.html",
+                           reductions=reductions,
+                           plats_map=plats_map,
+                           all_plats=all_plats)
+
+
+@app.route("/admin/update_reduction/<int:id_reduction>", methods=["POST"])
+@admin_required
+def update_reduction(id_reduction):
+    """
+    Met à jour une réduction existante (changement de plat ou pourcentage).
+    """
+    reduc = Reduction.query.get_or_404(id_reduction)
+    try:
+        new_plat_id = int(request.form.get("id_plat"))
+        new_pourcentage = int(request.form.get("reduction"))
+        reduc.id_plat = new_plat_id
+        reduc.reduction = new_pourcentage
+        db.session.commit()
+        flash("Réduction mise à jour avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la modification: {e}", "danger")
+
+    return redirect(url_for("edition_reduction"))
+
+
+@app.route("/admin/delete_reduction/<int:id_reduction>", methods=["POST"])
+@admin_required
+def delete_reduction(id_reduction):
+    """
+    Supprime une réduction (bouton 'Supprimer').
+    """
+    reduc = Reduction.query.get_or_404(id_reduction)
+    try:
+        db.session.delete(reduc)
+        db.session.commit()
+        flash("Réduction supprimée avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la suppression: {e}", "danger")
+
+    return redirect(url_for("edition_reduction"))

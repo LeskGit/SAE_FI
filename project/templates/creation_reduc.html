@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="mt-4 w-auto retour_admin">
+    <a class="btn btn-dark" href="{{ url_for('edition_reduction') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" 
+             class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" 
+                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 
+                  0 1 0-.708-.708l-4 4a.5.5 
+                  0 0 0 0 .708l4 4a.5.5 
+                  0 0 0 .708-.708L2.707 8.5H14.5A.5.5 
+                  0 0 0 15 8"/>
+        </svg>
+    </a>
+</div>
+
+<div class="top-info">
+    <h1 class="text-center my-3">Créer une Réduction</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container mt-4">
+    <form method="POST" action="{{ url_for('creation_reduction') }}">
+        <div class="form-group">
+            <label for="id_plat">Sélectionner le plat</label>
+            <select class="form-control" id="id_plat" name="id_plat" required>
+                <option value="" disabled selected>-- Sélectionnez un plat --</option>
+                {% for plat in plats %}
+                <option value="{{ plat.id_plat }}">
+                    {{ plat.nom_plat }} ({{ plat.type_plat }}) - {{ plat.prix }} €
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="reduction">Pourcentage de réduction</label>
+            <input type="number" class="form-control" id="reduction" name="reduction" 
+                   placeholder="Ex: 20 pour 20%" min="1" max="100" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Créer la réduction</button>
+        <a href="{{ url_for('edition_reduction') }}" class="btn btn-secondary mt-3">Revenir à la liste</a>
+    </form>
+</div>
+{% endblock %}
