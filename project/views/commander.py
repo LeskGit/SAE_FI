@@ -263,11 +263,18 @@ def supprimer_plat(id_commande):
     user = get_current_user()
     if user is not None:
         panier = user.get_panier() if id_commande is None else Commandes.get_commande(id_commande)
+
         for constituer in panier.constituer_assoc:
             if constituer.plat.nom_plat == nom_plat:
                 db.session.delete(constituer)
-
         db.session.commit()
+        
+        if id_commande and len(panier.constituer_assoc) == 0:
+            flash("Votre commande a été supprimée", "success")
+            db.session.delete(panier)
+            db.session.commit()
+            return redirect(url_for('client_modif', id_commande=id_commande))
+
     return redirect(url_for('panier')) if id_commande is None else redirect(url_for('client_modif', id_commande=id_commande))
 
 @app.route("/choix_paiement")
