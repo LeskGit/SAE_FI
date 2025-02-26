@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Allergenes, Commandes, User
+from project.models import Allergenes, Commandes, User, can_modify_commande
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
@@ -8,10 +8,8 @@ from project.views.authentification import RegisterForm
 from wtforms import StringField, PasswordField, EmailField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from datetime import datetime, timedelta
-
+from project.app import MIN_MAX_MODIF
 from project.views.commander import CommanderForm, get_current_user, get_plats_type
-
-MIN_MAX_MODIF = 15000
 
 class PersoForm(FlaskForm):
     phone_number = StringField("Téléphone", validators=[DataRequired(), 
@@ -79,7 +77,7 @@ def client_profil():
 
     return render_template("profil_client_connecte.html", form=f, edit=edit, pw_form=pw_form)
 
-@app.route("/client/historique")
+@app.route("/client/historique", methods=["GET", "POST"])
 @login_required
 def client_historique():
     commandes = (Commandes.get_historique(id_client=current_user.id_client))
@@ -134,19 +132,14 @@ def client_modif(id_commande):
     
     commande = Commandes.get_commande(id_commande)
     if commande is None:
-        flash("Commande introuvable", "danger")
-        return redirect(url_for('client_historique'))
-    if commande.id_client != user.id_client:
-        flash("Vous n'êtes pas autorisé à modifier cette commande", "danger")
         return redirect(url_for('client_historique'))
 
-    now = datetime.now()
-    if commande.etat != "Payée":
-        elapsed = now - commande.date_creation
-        if elapsed >= timedelta(minutes=MIN_MAX_MODIF):
-            flash("Vous ne pouvez plus modifier cette commande", "danger")
-            return redirect(url_for('client_historique'))
-
+    commande.calculer_prix()
+    commande.compute_reduction()
+    
+    if not can_modify_commande(id_commande, user.id_client):
+        return redirect(url_for('client_historique'))
+    
     num_commande = id_commande
     form = CommanderForm()
     

@@ -1,6 +1,8 @@
+from flask import flash
 from sqlalchemy import CheckConstraint, text
 from sqlalchemy.orm import validates
-from .app import db, login_manager
+
+from .app import MIN_MAX_MODIF, db, login_manager
 from flask_login import UserMixin
 import re
 from datetime import date, datetime, timedelta
@@ -104,6 +106,25 @@ class Constituer(db.Model):
         """getter de constituer en fonction d'un nom de plat et d'un numéro de commande
         """
         return cls.query.get((id_plat, num_com))
+
+
+def can_modify_commande(id_commande, id_client):
+    commande = Commandes.get_commande(id_commande)
+    if commande is None:
+        flash("Commande introuvable", "danger")
+        return False
+    if commande.id_client != id_client:
+        flash("Vous n'êtes pas autorisé à modifier cette commande", "danger")
+        return False
+
+    now = datetime.now()
+    if commande.etat != "Payée":
+        elapsed = now - commande.date_creation
+        if elapsed >= timedelta(minutes=MIN_MAX_MODIF):
+            flash("Vous ne pouvez plus modifier cette commande", "danger")
+            return False
+    return True
+
 
 class Commandes(db.Model):
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)

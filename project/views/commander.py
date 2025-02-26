@@ -11,7 +11,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, Allergenes, Constituer, Commandes, Formule, User, UserType
+from project.models import Plats, Allergenes, Constituer, Commandes, Formule, User, UserType, can_modify_commande
 
 def get_current_user():
     if current_user.is_authenticated:
@@ -130,11 +130,11 @@ def filter_allergenes():
     # Rendre la page commander avec les données filtrées
     return resp
 
-
-@app.route("/commander_plat", methods = ("POST",))
-def ajout_plat() :
+@app.route("/commander_plat", methods = ("POST",), defaults={'modif': None})
+@app.route('/commander_plat/<modif>', methods = ("POST",))
+def ajout_plat(modif):
     f = CommanderForm()
-    if f.num_com.data :
+    if f.num_com.data:
         try:
             commande = Commandes.get_commande(f.num_com.data)
             constituer = Constituer.get_constituer(f.id_plat.data, f.num_com.data)
@@ -147,9 +147,8 @@ def ajout_plat() :
             db.session.commit()
         except Exception as e:
             flash("Erreur : " + str(e.orig.args[1]), "danger")
-            return redirect(url_for('commander'))
 
-    return redirect(url_for('commander'))
+    return redirect(url_for('client_modif', id_commande=f.num_com.data)) if modif else redirect(url_for('commander'))
 
 @app.route("/panier")
 def panier():
@@ -168,13 +167,22 @@ def panier():
         sur_place_disponible = True if Commandes.get_num_table_dispo(panier.date) != -1 else False
     return render_template("panier.html", panier=panier, sur_place_disponible=sur_place_disponible)
 
-@app.route('/modifier_quantite')
-def modifier_quantite():
+@app.route("/modifier_quantite", defaults={'id_commande': None})
+@app.route('/modifier_quantite/<id_commande>')
+def modifier_quantite(id_commande):
+
     action = request.args.get('action')
     nom_plat = request.args.get('nom_plat')
     user = get_current_user()
+
+    can_edit_command = can_modify_commande(id_commande, user.id_client)
+    if id_commande:
+        if not can_edit_command: # Si l'utilisateur n'a pas le droit de modifier la commande, on le redirige directement
+            flash("Pas le droit de modifier", "danger")
+            return redirect(url_for('client_modif', id_commande=id_commande))
+
     if user is not None:
-        panier = user.get_panier()
+        panier = user.get_panier() if id_commande is None else Commandes.get_commande(id_commande)
         if panier is not None:
             for constituer in panier.constituer_assoc:
                 if constituer.plat.nom_plat == nom_plat:
@@ -190,6 +198,10 @@ def modifier_quantite():
         except sqlalchemy.exc.OperationalError as e:
             db.session.rollback()
             flash("Erreur : " + str(e.orig.args[1]), "danger")
+    
+    if id_commande:
+        if can_edit_command:
+            return redirect(url_for('client_modif', id_commande=id_commande))
 
     return redirect(url_for('panier'))
 
@@ -244,17 +256,19 @@ def modifier_type():
     return redirect(url_for('panier'))
 
 
-@app.route('/supprimer_plat')
-def supprimer_plat():
+@app.route("/supprimer_plat", defaults={'id_commande': None})
+@app.route('/supprimer_plat/<id_commande>')
+def supprimer_plat(id_commande):
     nom_plat = request.args.get('nom_plat')
     user = get_current_user()
     if user is not None:
-        for constituer in user.get_panier().constituer_assoc:
+        panier = user.get_panier() if id_commande is None else Commandes.get_commande(id_commande)
+        for constituer in panier.constituer_assoc:
             if constituer.plat.nom_plat == nom_plat:
                 db.session.delete(constituer)
 
         db.session.commit()
-    return redirect(url_for('panier'))
+    return redirect(url_for('panier')) if id_commande is None else redirect(url_for('client_modif', id_commande=id_commande))
 
 @app.route("/choix_paiement")
 def choix_paiement():

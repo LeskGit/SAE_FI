@@ -35,6 +35,7 @@ mail = Mail(app)
 
 db = SQLAlchemy(app)
 
+MIN_MAX_MODIF = 15
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
