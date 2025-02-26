@@ -2,27 +2,8 @@
 
 {% block styles %}
     {{ super() }}
-    <!-- Exemple : on peut ajouter des styles personnalisés ici -->
-    <style>
-      /* Exemple de style pour la liste des paliers */
-      .list-group-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .threshold-badge {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        margin-right: 0.8rem;
-        background-color: #E84D0E; /* Orange */
-        color: white;
-      }
-    </style>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='profil.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -31,13 +12,13 @@
     {% from "macro_client_aside.html" import sidebar_client with context %}
     {{ sidebar_client() }}
 
-    {% from "macro_client_aside.html" import mobile_navbar with context %}
-    {{ mobile_navbar() }}
-
     <div class="p-5 rounded shadow w-100 main_profil">
         <!-- Titre de la page -->
-        <h2 class="mb-4"><strong>Mes Points de Fidélité</strong></h2>
-
+        <div class="d-flex justify-content-start align-items-center">
+        {% from "macro_client_aside.html" import mobile_navbar with context %}
+          {{ mobile_navbar() }}
+        <h2 class=" mx-3"><strong>Mes Points de Fidélité</strong></h2>
+          </div>
         <!-- Message de bienvenue -->
         <p>Bonjour <strong>{{ current_user.prenom }}</strong>, vous avez actuellement 
            <strong>{{ current_user.points_fidelite }}</strong> point(s) de fidélité.</p>
