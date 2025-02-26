@@ -108,54 +108,48 @@
 
 
 <footer class="footer-bg py-4">
-    <div class="container d-flex align-items-center justify-content-between">
-      <!-- Logo -->
-      <div class="text_footer logo-footer">
-        <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_footer" alt="Logo Oumami">
-      </div>
-  
-      <!-- Sections du footer en grille -->
-      <div class="container">
+    <div class="container">
+        <!-- Logo et sections -->
+        <div class="row align-items-center">
+            <!-- Logo -->
+            <div class="col-12 col-md-3 text-center text-md-start">
+                <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_footer" alt="Logo Oumami">
+            </div>
 
-        <div class="container d-flex justify-content-between">
-            <!-- Section 1 : Contact -->
-            <div class="text_footer contact-footer">
-            <h5>Contact</h5>
-            <p>Adresse : 4, place de la Halle,  41250 BRACIEUX</p>
-            <p>Téléphone : 02.54.79.05.48</p>
-            </div>
-    
-            <!-- Section 2 : Partenaires -->
-            <div class="text_footer partenaire-footer">
-            <h5>Nos Partenaires</h5>
-            <a href="http://www.creation-nao.com/">SANGA : miso, koji et produits BIO</a>
-            </div>
-    
-            <!-- Section 3 : Réseaux sociaux -->
-            <div class="text_footer reseau-footer">
-            <h5>Suivez-nous</h5>
-            <a href="https://www.facebook.com/pages/Oumami/676898092430564?ref=hl" target="_blank" rel="noopener noreferrer">
-                <img src="{{ url_for('static', filename='img/facebook.png') }}" alt="Facebook" style="width: 32px; height: 32px;">
-            </a>
-            
+            <!-- Sections du footer -->
+            <div class="col-12 col-md-9">
+                <div class="row">
+                    <div class="col-12 col-md-4 text_footer contact-footer">
+                        <h5>Contact</h5>
+                        <p>Adresse : 4, place de la Halle,  41250 BRACIEUX</p>
+                        <p>Téléphone : 02.54.79.05.48</p>
+                    </div>
+                    <div class="col-12 col-md-4 text_footer partenaire-footer">
+                        <h5>Nos Partenaires</h5>
+                        <a href="http://www.creation-nao.com/">SANGA : miso, koji et produits BIO</a>
+                    </div>
+                    <div class="col-12 col-md-4 text_footer reseau-footer">
+                        <h5>Suivez-nous</h5>
+                        <a href="https://www.facebook.com/pages/Oumami/676898092430564?ref=hl" target="_blank" rel="noopener noreferrer">
+                            <img src="{{ url_for('static', filename='img/facebook.png') }}" alt="Facebook" style="width: 32px; height: 32px;">
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="container d-flex align-items-center justify-content-between">
-  
-            <!-- Section 4 : Horaires -->
-            <div class="text_footer horaire-footer">
-            <p>Ouverture du magasin : Du mardi au samedi 11h30 - 14h / 17h - 20h</p>
+
+        <!-- Horaires et droits -->
+        <div class="row mt-3 text-center">
+            <div class="col-12 col-md-6 text_footer horaire-footer">
+                <p>Ouverture du magasin : Du mardi au samedi 11h30 - 14h / 17h - 20h</p>
             </div>
-    
-            <!-- Section 5 : Droits -->
-            <div class="text_footer droit-footer">
-            <p>© 2014-2024 Oumami - Tous droits réservés.</p>
+            <div class="col-12 col-md-6 text_footer droit-footer">
+                <p>© 2014-2024 Oumami - Tous droits réservés.</p>
             </div>
         </div>
-      </div>
     </div>
-   
 </footer>
+
 
 
 

@@ -21,6 +21,10 @@ main {
 footer {
     bottom: 0;
 }
+
+
+
+
   html, body {
     overflow-x: hidden;
     width: 100%;
@@ -53,9 +57,9 @@ footer {
     background-position: center;
     color: black;
     padding: 20px 0;
-    /*position: relative;
+    position: relative;
     bottom: 0;
-    width: 100%; */
+    width: 100%;   
 }
 
 .bar {
