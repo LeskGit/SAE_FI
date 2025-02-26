@@ -8,11 +8,14 @@
 }
 
 .texte-container {
+    box-sizing: border-box;
     text-align: justify;
     margin: 0 20px;
+    width: 50%;
 }
 
 .container-parent img {
+    box-sizing: border-box;
     width: 50%;
 }
 
