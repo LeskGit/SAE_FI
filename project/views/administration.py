@@ -19,7 +19,7 @@ from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 
 from project import app, db
-from project.models import Commandes, User, Plats, Allergenes, Formule
+from project.model.class_model import Commandes, User, Plats, Allergenes, Formule
 from project.app import mkpath
 
 

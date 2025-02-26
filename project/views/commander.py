@@ -11,7 +11,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, Allergenes, Constituer, Commandes, Formule, User, UserType
+from project.model.class_model import Plats, Allergenes, Constituer, Commandes, Formule, User, UserType
 
 
 def get_current_user():

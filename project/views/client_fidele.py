@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Commandes, User
+from project.model.class_model import Commandes, User
 from flask_wtf import FlaskForm
 from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
