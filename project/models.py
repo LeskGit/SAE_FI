@@ -946,6 +946,32 @@ class TriggerManager:
         END;
         """
 
+    def trigger_reduction_unique_update(self) -> str:
+        """
+        Un client ne peut pas avoir plusieurs réductions sur un même plat
+        """
+        return """
+        CREATE TRIGGER reduction_unique_insert BEFORE UPDATE ON client_reductions FOR EACH ROW
+        BEGIN
+            DECLARE plat_id INT;
+            DECLARE nb INT;
+
+            SELECT id_plat INTO plat_id
+            FROM reduction
+            WHERE id_reduction = NEW.id_reduction;
+            
+            SELECT COUNT(*) INTO nb
+            FROM client_reductions cr
+            JOIN reduction r ON cr.id_reduction = r.id_reduction
+            WHERE cr.id_client = NEW.id_client AND r.id_plat = plat_id;
+
+            IF nb > 0 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = "Vous avez déjà une réduction sur ce plat";
+            END IF;
+        END;
+        """
+
 def execute_tests():
     password = "password"
     m = sha256()

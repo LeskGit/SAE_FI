@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    {{ super() }}
-    <style>
-      .list-group-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .threshold-badge {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        margin-right: 0.8rem;
-        background-color: #E84D0E;
-        color: white;
-      }
-    </style>
+{{ super() }}
+<style>
+  .list-group-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .threshold-badge {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 0.8rem;
+    background-color: #E84D0E;
+    color: white;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -31,34 +31,34 @@
     <div class="p-5 rounded shadow w-100 main_profil">
         <h2 class="mb-4"><strong>Mes Points de Fidélité</strong></h2>
 
-        <p>Bonjour <strong>{{ current_user.prenom }}</strong>, vous avez actuellement 
+        <p>Bonjour <strong>{{ current_user.prenom }}</strong>, 
+           vous avez actuellement 
            <strong>{{ current_user.points_fidelite }}</strong> point(s) de fidélité.</p>
 
         <hr>
 
-        {% set paliers = [
-            {'label': '-20% sur les sushis',       'threshold': 30},
-            {'label': '-10% sur les plats',        'threshold': 50},
-            {'label': '-30% sur les entrées',      'threshold': 80},
-            {'label': '-10% sur les boissons',     'threshold': 120},
-            {'label': 'Un plat de votre choix offert', 'threshold': 170}
-        ] %}
-
         <h3 class="mt-4">Réductions disponibles</h3>
-
         <ul class="list-group">
-            {% for palier in paliers %}
+            {% for r in reductions %}
             <li class="list-group-item mb-2">
                 <div>
-                  <span class="threshold-badge">{{ palier.threshold }}</span>
-                  {{ palier.label }}
+                  <span class="threshold-badge">{{ r.points_fidelite }}</span>
+                  {% set p = plats_map[r.id_plat] %}
+                  <strong>{{ p.nom_plat }}</strong> : {{ r.reduction }}% de réduction
                 </div>
 
                 <form action="{{ url_for('echanger_points') }}" method="POST" class="m-0 p-0">
-                    <input type="hidden" name="palier_threshold" value="{{ palier.threshold }}">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        Échanger mes points
-                    </button>
+                    <input type="hidden" name="id_reduction" value="{{ r.id_reduction }}">
+                    
+                    {% if current_user.points_fidelite < r.points_fidelite %}
+                      <button type="submit" class="btn btn-primary btn-sm" disabled>
+                        Échanger
+                      </button>
+                    {% else %}
+                      <button type="submit" class="btn btn-primary btn-sm">
+                        Échanger
+                      </button>
+                    {% endif %}
                 </form>
             </li>
             {% endfor %}
