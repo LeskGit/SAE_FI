@@ -951,7 +951,7 @@ class TriggerManager:
         Un client ne peut pas avoir plusieurs réductions sur un même plat
         """
         return """
-        CREATE TRIGGER reduction_unique_insert BEFORE UPDATE ON client_reductions FOR EACH ROW
+        CREATE TRIGGER reduction_unique_update BEFORE UPDATE ON client_reductions FOR EACH ROW
         BEGIN
             DECLARE plat_id INT;
             DECLARE nb INT;
