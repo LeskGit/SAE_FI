@@ -113,16 +113,20 @@ def client_historique():
         else:
             statut_label = "EN COURS"
             statut_class = "status-encours"
+        
+        # Récupération des plats commandés avec quantité
+        plats_list = [f"{assoc.plat.nom_plat} (x{assoc.quantite_plat})" for assoc in com.constituer_assoc] if com.constituer_assoc else []
 
-        if com.constituer_assoc:
-            plats_names = ", ".join(
-                [assoc.plat.nom_plat for assoc in com.constituer_assoc])
-            total_price = str(com.calculer_prix() +
-                              com.compute_reduction()) + " €"
-        else:
-            plats_names = "-"
-            total_price = "-"
+        # Récupération des formules commandées avec quantité
+        formules_list = [f"{assoc.formule.libelle_formule} (x{assoc.quantite_formule})" for assoc in com.constituer_formule_assoc] if com.constituer_formule_assoc else []
 
+        # Fusion des listes de plats et formules
+        articles_commandes = plats_list + formules_list
+        plats_names = ", ".join(articles_commandes) if articles_commandes else "-"
+
+        # Calcul du prix total
+        total_price = str(com.calculer_prix() + com.compute_reduction()) + " €" if articles_commandes else "-"
+        
         can_modify = False
         if com.etat != "Payée":
             elapsed = now - com.date_creation

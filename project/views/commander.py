@@ -11,7 +11,7 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import Plats, Allergenes, Constituer, Commandes, Formule, User, UserType, can_modify_commande
+from project.models import ConstituerFormule, Plats, Allergenes, Constituer, Commandes, Formule, User, UserType, can_modify_commande
 
 def get_current_user():
     if current_user.is_authenticated:
@@ -150,6 +150,33 @@ def ajout_plat(modif):
 
     return redirect(url_for('client_modif', id_commande=f.num_com.data)) if modif else redirect(url_for('commander'))
 
+@app.route("/commander_formule", methods=["POST"])
+def ajout_formule():
+    if current_user.is_authenticated:
+        form = CommanderForm()
+        if form.num_com.data:
+            try:
+                commande = Commandes.get_commande(form.num_com.data)
+                constituer_formule = ConstituerFormule.get_constituer(form.id_plat.data, form.num_com.data)
+                
+                if constituer_formule:
+                    constituer_formule.quantite_formule += form.quantite.data
+                else:
+                    constituer_formule = ConstituerFormule(
+                        id_formule=form.id_plat.data, 
+                        num_commande=form.num_com.data, 
+                        quantite_formule=form.quantite.data
+                    )
+                    commande.constituer_formule_assoc.append(constituer_formule)
+
+                db.session.add(constituer_formule)
+                db.session.commit()
+            except Exception as e:
+                flash("Erreur : " + str(e), "danger")
+                return redirect(url_for('commander'))
+
+    return redirect(url_for('commander'))
+
 @app.route("/panier")
 def panier():
     user = get_current_user()
@@ -175,8 +202,10 @@ def modifier_quantite(id_commande):
     nom_plat = request.args.get('nom_plat')
     user = get_current_user()
 
-    can_edit_command = can_modify_commande(id_commande, user.id_client)
+    can_edit_command = None
     if id_commande:
+
+        can_edit_command = can_modify_commande(id_commande, user.id_client)
         if not can_edit_command: # Si l'utilisateur n'a pas le droit de modifier la commande, on le redirige directement
             flash("Pas le droit de modifier", "danger")
             return redirect(url_for('client_modif', id_commande=id_commande))
@@ -192,8 +221,7 @@ def modifier_quantite(id_commande):
                     elif action == 'decrement' and constituer.quantite_plat > 1:
                             constituer.quantite_plat -= 1
                     break
-
-        try:
+        try : 
             db.session.commit()
         except sqlalchemy.exc.OperationalError as e:
             db.session.rollback()
@@ -205,6 +233,29 @@ def modifier_quantite(id_commande):
 
     return redirect(url_for('panier'))
 
+@app.route('/modifier_quantite_formule')
+def modifier_quantite_formule():
+    action = request.args.get('action')
+    libelle_formule = request.args.get('libelle_formule')
+    user = get_current_user()
+    if user is not None:
+        panier = user.get_panier()
+        if panier is not None:
+            for constituer in panier.constituer_formule_assoc:
+                if constituer.formule.libelle_formule == libelle_formule:
+                    if action == 'increment':
+                        if constituer.quantite_formule +1 <= int(constituer.formule.get_stock_utilisable() * 0.8):
+                            constituer.quantite_formule += 1
+                    elif action == 'decrement' and constituer.quantite_formule > 1:
+                        constituer.quantite_formule -= 1
+                    break
+        try : 
+            db.session.commit()
+        except sqlalchemy.exc.OperationalError as e:
+            db.session.rollback()
+            flash("Erreur : " + str(e.orig.args[1]), "danger")
+
+    return redirect(url_for('panier'))
 @app.route('/modifier_date_heure')
 def modifier_date_heure():
     hours = request.args.get('datetime')
@@ -248,7 +299,8 @@ def modifier_type():
                 
             try:
                 db.session.commit()
-            except Exception as e:
+            except sqlalchemy.exc.OperationalError as e:
+                db.session.rollback()
                 flash("Erreur : " + str(e.orig.args[1]), "danger")
                 return redirect(url_for('panier'))
 
@@ -277,6 +329,18 @@ def supprimer_plat(id_commande):
 
     return redirect(url_for('panier')) if id_commande is None else redirect(url_for('client_modif', id_commande=id_commande))
 
+@app.route('/supprimer_formule')
+def supprimer_formule():
+    libelle_formule = request.args.get('libelle_formule')
+    user = get_current_user()
+    if user is not None:
+        for constituer in user.get_panier().constituer_formule_assoc:
+            if constituer.formule.libelle_formule == libelle_formule:
+                db.session.delete(constituer)
+
+        db.session.commit()
+    return redirect(url_for('panier'))
+
 @app.route("/choix_paiement")
 def choix_paiement():
     return render_template("choix_paiement.html")
@@ -302,10 +366,15 @@ def validation_paiement():
 
         for constituer_plat in panier.constituer_assoc:
             constituer_plat.plat.stock_utilisable -= constituer_plat.quantite_plat
+        
+        for constituer_formule in panier.constituer_formule_assoc:
+            for plat in constituer_formule.formule.les_plats:
+                plat.stock_utilisable -= constituer_formule.quantite_formule
 
         db.session.commit()
 
-    except Exception as e:
+    except sqlalchemy.exc.OperationalError as e:
+        db.session.rollback()
         flash("Erreur : " + str(e.orig.args[1]), "danger")
         return redirect(url_for('panier'))
 

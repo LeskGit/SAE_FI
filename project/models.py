@@ -68,7 +68,7 @@ class User(db.Model, UserMixin):
     def get_nb_items_panier(self):
         panier = self.get_panier()
         if panier is not None:
-            return len(panier.constituer_assoc)
+            return len(panier.constituer_assoc) + len(panier.constituer_formule_assoc)
         return 0
 
     @classmethod
@@ -133,6 +133,19 @@ class Constituer(db.Model):
         """getter de constituer en fonction d'un nom de plat et d'un numéro de commande
         """
         return cls.query.get((id_plat, num_com))
+      
+class ConstituerFormule(db.Model):
+    __tablename__ = "constituer_formule"
+    id_formule = db.Column(db.Integer, db.ForeignKey("formule.id_formule"), primary_key=True)
+    num_commande = db.Column(db.Integer, db.ForeignKey("commandes.num_commande"), primary_key=True)
+    quantite_formule = db.Column(db.Integer, default=1)
+    formule = db.relationship("Formule", back_populates="constituer_assoc", overlaps="constituer_assoc,les_commandes")
+    commande = db.relationship("Commandes", back_populates="constituer_formule_assoc", overlaps="constituer_formule_assoc,les_formules")
+
+    @classmethod
+    def get_constituer(cls, id_formule, num_com):
+        return cls.query.get((id_formule, num_com))
+
 
 
 def can_modify_commande(id_commande, id_client):
@@ -153,23 +166,19 @@ def can_modify_commande(id_commande, id_client):
     return True
 
 class Commandes(db.Model):
+    __tablename__ = "commandes"
     num_commande = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_client = db.Column(db.Integer, db.ForeignKey("user.id_client"))
     date = db.Column(db.DateTime)
     date_creation = db.Column(db.DateTime, default=db.func.current_timestamp())
     sur_place = db.Column(db.Boolean, default=False)
-    num_table = db.Column(db.Integer,
-                          CheckConstraint("0 < num_table AND num_table <= 12"))
+    num_table = db.Column(db.Integer, CheckConstraint("0 < num_table AND num_table <= 12"))
     etat = db.Column(db.Enum("Panier", "Non payée", "Payée"), default="Panier")
-
-    les_plats = db.relationship("Plats",
-                                secondary="constituer",
-                                back_populates="les_commandes",
-                                overlaps="constituer_assoc,plat")
     les_clients = db.relationship("User", back_populates="les_commandes")
-    constituer_assoc = db.relationship("Constituer",
-                                       back_populates="commande",
-                                       overlaps="les_plats,plat")
+    les_plats = db.relationship("Plats", secondary="constituer", back_populates="les_commandes", overlaps="constituer_assoc,commande,plat")
+    constituer_assoc = db.relationship("Constituer", back_populates="commande", overlaps="les_plats,plat")
+    les_formules = db.relationship("Formule", secondary="constituer_formule", back_populates="les_commandes", overlaps="constituer_formule_assoc,commande,formule")
+    constituer_formule_assoc = db.relationship("ConstituerFormule", back_populates="commande", overlaps="les_formules,commande")
 
     prix_total = 0
     prix_avec_reduc = 0
@@ -178,10 +187,7 @@ class Commandes(db.Model):
         return f"{self.num_commande} : {self.date}"
 
     def calculer_prix(self):
-        self.prix_total = sum([
-            constituer.plat.prix * constituer.quantite_plat
-            for constituer in self.constituer_assoc
-        ])
+        self.prix_total = sum([constituer.plat.prix * constituer.quantite_plat for constituer in self.constituer_assoc]) + sum([constituerF.formule.prix * constituerF.quantite_formule for constituerF in self.constituer_formule_assoc])
         return self.prix_total
 
     def compute_reduction(self):
@@ -417,12 +423,13 @@ class Plats(db.Model):
 
 
 class Formule(db.Model):
+    __tablename__ = "formule"
     id_formule = db.Column(db.Integer, primary_key=True)
     libelle_formule = db.Column(db.String(64))
     prix = db.Column(db.Float)
-    les_plats = db.relationship("Plats",
-                                secondary=contenir,
-                                back_populates="les_formules")
+    les_commandes = db.relationship("Commandes", secondary="constituer_formule", back_populates="les_formules", overlaps="constituer_formule_assoc,commande")
+    les_plats = db.relationship("Plats", secondary=contenir, back_populates="les_formules")
+    constituer_assoc = db.relationship("ConstituerFormule", back_populates="formule", overlaps="les_commandes,les_formules")
 
     def __repr__(self):
         return f"{self.id_formule} : {self.libelle_formule}"
@@ -439,9 +446,14 @@ class Formule(db.Model):
         """
         if len(selected_allergenes) == 0:
             return cls.get_formules()
-        return Plats.filter_formules_by_allergenes(cls.get_formules(),
-                                                    selected_allergenes)
-
+        else:
+            return Plats.filter_formules_by_allergenes(cls.get_formules(), selected_allergenes)
+  
+    @classmethod
+    def get_stock_utilisable(cls):
+        """getter du stock utilisable du plat avec le moins de quantité
+        """
+        return min([plat.stock_utilisable for plat in Plats.query.join(contenir).filter(contenir.c.id_formule == cls.id_formule).all()])
 
 #--------
 
