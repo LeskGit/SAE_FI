@@ -13,26 +13,6 @@ client_reductions = db.Table("client_reductions",
     db.Column("id_reduction", db.Integer, db.ForeignKey("reduction.id_reduction"), primary_key=True)
 )
 
-def remove_reduction_association(reduction_id: int, client_id: int) -> None:
-    """
-    Supprime l'association entre une réduction et un client, par exemple lorsque la réduction a été utilisée.
-    
-    Args:
-        reduction_id (int): l'identifiant de la réduction.
-        client_id (int): l'identifiant du client.
-    """
-    reduction = Reduction.query.get(reduction_id)
-    client = User.query.get(client_id)
-    
-    if reduction is None:
-        raise ValueError("La réduction spécifiée n'existe pas.")
-    if client is None:
-        raise ValueError("Le client spécifié n'existe pas.")
-    
-    if client in reduction.clients:
-        reduction.clients.remove(client)
-        db.session.commit()
-
 class UserType(Enum):
     USER = 1
     GUEST = 2
@@ -498,3 +478,24 @@ class Reduction(db.Model):
         pourcentage = reduc.reduction
         prix_final = prix_initial * (1 - pourcentage / 100)
         return prix_final
+    
+    @classmethod
+    def remove_reduction_association(cls, reduction_id: int, client_id: int) -> None:
+        """
+        Supprime l'association entre une réduction et un client, par exemple lorsque la réduction a été utilisée.
+        
+        Args:
+            reduction_id (int): l'identifiant de la réduction.
+            client_id (int): l'identifiant du client.
+        """
+        reduction = cls.query.get(reduction_id)
+        client = User.query.get(client_id)
+        
+        if reduction is None:
+            raise ValueError("La réduction spécifiée n'existe pas.")
+        if client is None:
+            raise ValueError("Le client spécifié n'existe pas.")
+        
+        if client in reduction.clients:
+            reduction.clients.remove(client)
+            db.session.commit()
