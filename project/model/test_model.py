@@ -3,7 +3,7 @@ from hashlib import sha256
 from ..app import db
 from datetime import datetime
 
-def execute_tests():
+def create_user():
     password = "password"
     m = sha256()
     m.update(password.encode())
@@ -21,8 +21,7 @@ def execute_tests():
     db.session.add(usr)
     db.session.commit()
 
-    #Allergenes
-
+def create_allergenes():
     allergene1 = Allergenes(id_allergene=1, nom_allergene='allergene1')
     allergene2 = Allergenes(id_allergene=2, nom_allergene='allergene2')
     allergene3 = Allergenes(id_allergene=3, nom_allergene='allergene3')
@@ -34,13 +33,13 @@ def execute_tests():
     allergene9 = Allergenes(id_allergene=9, nom_allergene='allergene9')
     allergene10 = Allergenes(id_allergene=10, nom_allergene='allergene10')
 
-    db.session.add_all([
-        allergene1, allergene2, allergene3, allergene4, allergene5, allergene6,
-        allergene7, allergene8, allergene9, allergene10
-    ])
+    allergenes = [allergene1, allergene2, allergene3, allergene4, allergene5, allergene6,
+        allergene7, allergene8, allergene9, allergene10]
+    db.session.add_all(allergenes)
     db.session.commit()
+    return allergenes
 
-    #5 Plats
+def create_plats(allergenes):
     plat1 = Plats(nom_plat='plat1',
                   type_plat='Plat chaud',
                   stock_utilisable=10,
@@ -89,23 +88,25 @@ def execute_tests():
     db.session.add_all([plat1, plat2, plat3, plat4, plat5])
 
     # Ajouter les allergènes aux plats
-    plat1.les_allergenes.append(allergene1)
-    plat1.les_allergenes.append(allergene2)
-    plat2.les_allergenes.append(allergene3)
-    plat2.les_allergenes.append(allergene4)
-    plat3.les_allergenes.append(allergene5)
-    plat3.les_allergenes.append(allergene6)
-    plat4.les_allergenes.append(allergene7)
-    plat4.les_allergenes.append(allergene8)
-    plat5.les_allergenes.append(allergene9)
-    plat5.les_allergenes.append(allergene10)
+    plat1.les_allergenes.append(allergenes[0])
+    plat1.les_allergenes.append(allergenes[1])
+    plat2.les_allergenes.append(allergenes[2])
+    plat2.les_allergenes.append(allergenes[3])
+    plat3.les_allergenes.append(allergenes[4])
+    plat3.les_allergenes.append(allergenes[5])
+    plat4.les_allergenes.append(allergenes[6])
+    plat4.les_allergenes.append(allergenes[7])
+    plat5.les_allergenes.append(allergenes[8])
+    plat5.les_allergenes.append(allergenes[9])
     db.session.commit()
 
-    #Formule
+def create_formule():
     formule1 = Formule(id_formule=1, libelle_formule='formule1', prix=20)
-
     db.session.add(formule1)
+    db.session.commit()
+    return formule1
 
+def create_commandes():
     com1 = Commandes(id_client=1,
                      date=datetime(2024, 11, 6, 12),
                      date_creation=datetime(2024, 11, 6),
@@ -210,6 +211,7 @@ def execute_tests():
 
     db.session.commit()
 
+def add_plats_to_commande():
     commande = Commandes.query.get(1)
 
     try:
@@ -231,7 +233,9 @@ def execute_tests():
         db.session.rollback()
         print("Erreur:", e)
 
+def add_plats_to_formule(formule1):
     try:
+        plat1, plat2, plat4 = Plats.query.filter(Plats.nom_plat.in_(['plat1', 'plat2', 'plat4'])).all()
         formule1.les_plats.append(plat1)
         formule1.les_plats.append(plat2)
         formule1.les_plats.append(plat4)
@@ -239,5 +243,13 @@ def execute_tests():
     except Exception as e:
         db.session.rollback()
         print("Erreur:", e)
-
     db.session.commit()
+
+def execute_tests():
+    create_user()
+    allergenes = create_allergenes()
+    create_plats(allergenes)
+    formule1 = create_formule()
+    create_commandes()
+    add_plats_to_commande()
+    add_plats_to_formule(formule1)
