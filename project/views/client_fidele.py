@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.model.class_model import Allergenes, Commandes, User, Reduction, Plats, can_modify_commande
+from project.model.class_model import Allergenes, Commandes, User, Reduction, Plats
 from flask_wtf import FlaskForm
 from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
@@ -161,7 +161,7 @@ def client_modif(id_commande):
     commande.calculer_prix()
     commande.compute_reduction()
     
-    if not can_modify_commande(id_commande, user.id_client):
+    if not Commandes.can_modify_commande(id_commande, user.id_client):
         return redirect(url_for('client_historique'))
     
     num_commande = id_commande
