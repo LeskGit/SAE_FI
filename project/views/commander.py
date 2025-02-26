@@ -11,7 +11,8 @@ from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.models import ConstituerFormule, Plats, Allergenes, Constituer, Commandes, Formule, User, UserType, can_modify_commande
+from project.model.class_model import ConstituerFormule, Plats, Allergenes, Constituer, Commandes, Formule, User, UserType
+
 
 def get_current_user():
     if current_user.is_authenticated:
@@ -205,7 +206,7 @@ def modifier_quantite(id_commande):
     can_edit_command = None
     if id_commande:
 
-        can_edit_command = can_modify_commande(id_commande, user.id_client)
+        can_edit_command = Commandes.can_modify_commande(id_commande, user.id_client)
         if not can_edit_command: # Si l'utilisateur n'a pas le droit de modifier la commande, on le redirige directement
             flash("Pas le droit de modifier", "danger")
             return redirect(url_for('client_modif', id_commande=id_commande))
@@ -244,7 +245,7 @@ def modifier_quantite_formule(id_commande):
     can_edit_command = None
     if id_commande:
 
-        can_edit_command = can_modify_commande(id_commande, user.id_client)
+        can_edit_command = Commandes.can_modify_commande(id_commande, user.id_client)
         if not can_edit_command: # Si l'utilisateur n'a pas le droit de modifier la commande, on le redirige directement
             flash("Pas le droit de modifier", "danger")
             return redirect(url_for('client_modif', id_commande=id_commande))

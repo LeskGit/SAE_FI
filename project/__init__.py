@@ -9,4 +9,4 @@ import project.views.client_fidele
 import project.views.commander
 import project.views.home_views
 import project.commands
-import project.models
+import project.model.class_model
