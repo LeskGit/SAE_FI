@@ -230,8 +230,6 @@ def modifier_quantite():
             db.session.rollback()
             flash("Erreur : " + str(e.orig.args[1]), "danger")
 
-        db.session.commit()
-
     return redirect(url_for('panier'))
 
 @app.route('/modifier_quantite_formule')
@@ -255,8 +253,6 @@ def modifier_quantite_formule():
         except sqlalchemy.exc.OperationalError as e:
             db.session.rollback()
             flash("Erreur : " + str(e.orig.args[1]), "danger")
-
-        db.session.commit()
 
     return redirect(url_for('panier'))
 
