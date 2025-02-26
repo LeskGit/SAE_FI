@@ -414,6 +414,28 @@ def edition_offre():
                            plats=plats,
                            type=type)
 
+@app.route("/admin/creation_promo", methods=["GET", "POST"])
+@admin_required
+def creation_promo():
+    if request.method == "POST":
+        #TODO: Ajouter la réduction dans la base de données
+        pass
+    plats = Plats.query.all()
+    return render_template("creation_promo.html", plats=plats)
+
+@app.route("/admin/edition_promo", methods=["GET"])
+@admin_required
+def edition_promo():
+    """
+    Liste et gère (modifier/supprimer) les réductions existantes.
+    """
+    promo = Reduction.query.all()
+    all_plats = Plats.query.all()
+
+    return render_template("edition_promo.html",
+                           promo=promo,
+                           all_plats=all_plats)
+
 @app.route("/admin/creation_reduc", methods=["GET", "POST"])
 @admin_required
 def creation_reduction():
