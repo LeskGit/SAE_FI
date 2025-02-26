@@ -128,6 +128,7 @@
 }
 
 .offres-title {
+    margin: 0 auto ;
     font-size: 2rem;
     font-weight: bold;
 }
@@ -173,7 +174,7 @@
 }
 
 .offres-container > div {
-    max-width: 33%;
+    max-width: 30%;
 }
 
 
