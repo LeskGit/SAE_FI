@@ -1,6 +1,6 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, flash
-from project.models import Commandes, User
+from project.models import Allergenes, Commandes, User, can_modify_commande
 from flask_wtf import FlaskForm
 from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
@@ -8,7 +8,8 @@ from project.views.authentification import RegisterForm
 from wtforms import StringField, PasswordField, EmailField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from datetime import datetime, timedelta
-
+from project.app import MIN_MAX_MODIF
+from project.views.commander import CommanderForm, get_current_user, get_plats_type
 
 class PersoForm(FlaskForm):
     phone_number = StringField(
@@ -98,7 +99,7 @@ def client_profil():
                            pw_form=pw_form)
 
 
-@app.route("/client/historique")
+@app.route("/client/historique", methods=["GET", "POST"])
 @login_required
 def client_historique():
     commandes = (Commandes.get_historique(id_client=current_user.id_client))
@@ -125,7 +126,7 @@ def client_historique():
         can_modify = False
         if com.etat != "Payée":
             elapsed = now - com.date_creation
-            if elapsed < timedelta(minutes=15):
+            if elapsed < timedelta(minutes=MIN_MAX_MODIF):
                 can_modify = True
 
         historique.append({
@@ -147,11 +148,36 @@ def client_historique():
 def client_fidelite():
     return render_template("fidelite_client.html")
 
-
-@app.route("/client/modif")
+@app.route("/client/modif/<int:id_commande>")
 @login_required
-def client_modif():
-    return render_template("modif_commande.html")
+def client_modif(id_commande):
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for('login'))
+    
+    commande = Commandes.get_commande(id_commande)
+    if commande is None:
+        return redirect(url_for('client_historique'))
+
+    commande.calculer_prix()
+    commande.compute_reduction()
+    
+    if not can_modify_commande(id_commande, user.id_client):
+        return redirect(url_for('client_historique'))
+    
+    num_commande = id_commande
+    form = CommanderForm()
+    
+    type = request.args.get('type', 'p')
+    query_plats = request.args.get('query', "")
+    
+    les_plats = get_plats_type(type, [], query_plats, False)
+
+    return render_template("modif_commande.html", 
+                        list_plats=les_plats,
+                        form=form,
+                        commande=commande,
+                        num_com = num_commande)
 
 @app.route('/echanger_points', methods=['POST'])
 @login_required
