@@ -42,7 +42,7 @@ def contact():
 
 @app.route("/envoie_email", methods=['POST'])
 def envoie_email():
-    if current_user.is_authentificated :
+    if current_user.is_authenticated :
         form = ContactForm()
         if form.validate_on_submit():
             objet = form.objet.data
