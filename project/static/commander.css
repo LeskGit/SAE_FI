@@ -83,3 +83,44 @@ body{
     border-color: #000000 !important; /* force la couleur pour écraser le css de bootstrap */
 }
 
+.plat-container {
+    display: flex;
+    overflow-y: auto;
+    height: 500px;
+}
+
+.affiche-all {
+    display: none;
+    text-decoration: none;
+}
+
+@media (max-width: 1163px) {
+    
+    .plat-container {
+        margin: 0 auto;
+    }
+
+    .all-desktop {
+        display: none;
+    }
+
+    .main-container {
+        margin: 0 auto;
+        width: 90%;
+    }
+
+    .affiche-all {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .card-img-top {
+    }
+
+    .card {
+        justify-self: center;
+        width: 18rem;
+    }
+}

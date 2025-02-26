@@ -1,0 +1,39 @@
+<div class="modal fade" id="editModal{{ plat.id_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat.id_plat }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editForm{{ plat.id_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel{{ plat.id_plat }}">{{ plat.nom_plat }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group text-center">
+                        <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity{{ plat.id_plat }}">Quantité</label>
+                        <input type="number" class="form-control" id="quantity{{ plat.id_plat }}" name="quantite" min="1" value="1" max="{{ plat.stock_utilisable * 0.8 if plat.stock_utilisable else 1 }}">
+                        <input type="hidden" name="id_plat" value="{{ plat.id_plat }}">
+                        <input type="hidden" name="num_com" value="{{ num_com }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Allergènes</label>
+                        <select class="form-select" id="comment{{ plat.id_plat }}">
+                            <option value="" selected>-- Voir les allergènes --</option>
+                            {% for allergene in plat.les_allergenes %}
+                            <option disabled value="{{ allergene.nom_allergene }}">{{ allergene.nom_allergene }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group mt-3">
+                        <p>Prix unitaire : <span id="totalPrice{{ plat.id_plat }}">{{ plat.prix }}</span>€</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

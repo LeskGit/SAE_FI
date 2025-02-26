@@ -9,6 +9,8 @@ from flask import Flask
 from flask_bootstrap import Bootstrap5
 from flask_login import LoginManager
 from project import auth
+from flask_mail import Mail
+
 
 def mkpath(p):
     """
@@ -37,6 +39,15 @@ app.config[
 app.config['RECAPTCHA_PRIVATE_KEY'] = app.config['SECRET_KEY']
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = f'mysql://{auth.nom}:{auth.mdp}@{auth.db}/DB{auth.nom}'
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'oumami.test@gmail.com'
+app.config['MAIL_PASSWORD'] = "sels lwsh qkta cnjx"
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
 
 db = SQLAlchemy(app)
 

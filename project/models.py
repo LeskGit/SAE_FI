@@ -241,7 +241,7 @@ class Allergenes(db.Model):
     def get_allergenes(cls):
         """getter de tous les allergènes
         """
-        return cls.query.all()
+        return cls.query.order_by(cls.id_allergene).all()
 
 
 contenir_allergene = db.Table(
@@ -906,8 +906,32 @@ class TriggerManager:
         """
 
 
-def execute_tests():
+    def trigger_fidelite_insert(self) -> str:
+        """
+        Permet d'ajouter des points de fidelité à un utilisateur à chaque commande
+        """
+        return """
+        CREATE TRIGGER fidelite_insert AFTER INSERT ON commandes FOR EACH ROW
+        BEGIN
+            DECLARE user VARCHAR(62);
+            DECLARE points INT;
 
+            if NEW.etat = "Payée" THEN
+                SELECT id_client into user
+                FROM user
+                WHERE id_client = NEW.id_client;
+
+                Select points_fidelite into points
+                FROM user
+                WHERE id_client = user;
+                UPDATE user
+                SET points_fidelite = points + 10
+                WHERE id_client = user;
+            END IF;
+        END;
+        """  
+
+def execute_tests():
     password = "password"
     m = sha256()
     m.update(password.encode())

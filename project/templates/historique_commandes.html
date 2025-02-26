@@ -11,9 +11,14 @@
     {% from "macro_client_aside.html" import sidebar_client with context %}
     {{ sidebar_client() }}
 
+
     <div class="p-5 rounded shadow w-100 main_profil">
         <!-- Titre et ligne de séparation -->
-        <h1 class="historique-title">Historique Commande</h1>
+        <div class="d-flex justify-content-start align-items-center">
+            {% from "macro_client_aside.html" import mobile_navbar with context %}
+            {{ mobile_navbar() }}
+            <h1 class="historique-title mt-2 mx-3">Historique Commande</h1>
+        </div>
         <div class="separator"></div>
         
         <table class="historique-table">
