@@ -1,0 +1,34 @@
+
+.container-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5em auto;
+    padding: 0 20px;
+}
+
+.texte-container {
+    text-align: justify;
+    margin: 0 20px;
+}
+
+.container-parent img {
+    width: 50%;
+    height: auto;
+}
+
+@media screen and (max-width: 1100px) {
+    .container-parent {
+        flex-direction: column;
+        margin: 3em auto;
+    }
+
+    .texte-container {
+        width: 70%;
+        margin: 3em auto;
+    }
+
+    .container-parent img {
+        min-width: 70%;
+    }
+}

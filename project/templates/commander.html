@@ -10,13 +10,15 @@
 <div class="top-info"></div>
 <h1 class="text-center my-3">Commander</h1>
 <hr class="w-25 mx-auto bg-dark bar">
+
 <div class="row me-0 mt-3">
-    <div class="col-md-3">
+    <!-- Filtres allergènes -->
+    <div class="offcanvas offcanvas-start col-md-3 form-allergene all-tel" tabindex="-1" id="offcanvasAllergenes" aria-labelledby="offcanvasAllergenesLabel">
         <form method="POST" action="{{ url_for('filter_allergenes') }}">
             <div class="bg-light p-3 rounded">
                 <h5>Liste des allergènes</h5>
                 <ul class="list-group">
-                    {% for allergene in allergenes %}
+                    {% for allergene in list_allergenes %}
                     <li class="list-group-item d-flex align-items-center">
                         <span class="badge bg-primary rounded-circle me-3">A</span>
                         <span class="flex-grow-1">{{ allergene.nom_allergene }}</span>
@@ -29,33 +31,41 @@
         </form>
     </div>
 
-    <div class="col-md-9">
+    <div class="col-md-3 form-allergene all-desktop">
+        <form method="POST" action="{{ url_for('filter_allergenes') }}">
+            <div class="bg-light p-3 rounded">
+                <h5>Liste des allergènes</h5>
+                <ul class="list-group">
+                    {% for allergene in list_allergenes %}
+                    <li class="list-group-item d-flex align-items-center">
+                        <span class="badge bg-primary rounded-circle me-3">A</span>
+                        <span class="flex-grow-1">{{ allergene.nom_allergene }}</span>
+                        <input type="checkbox" name="allergenes" class="form-check-input ms-auto" value="{{ allergene.id_allergene }}" {% if allergene.id_allergene in selected_allergenes %}checked{% endif %}>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <input type="submit" class="btn btn-orange shadow mt-3" value="Filtrer">   
+            </div>
+        </form>
+    </div>
+    
+    <!-- Liste des plats -->
+    
+    <div class="col-md-9 main-container">
+        <a class="my-3 affiche-all" data-bs-toggle="offcanvas" href="#offcanvasAllergenes" aria-controls="offcanvasAllergenes">Voir allèrgenes</a>   
         <!-- Catégories -->
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs d-flex">
+            {% for key, value in {'p': 'Tous les plats', 'pc': 'Plats chauds', 'pf': 'Plats froids', 's': 'Sushis', 'd': 'Desserts', 'f': 'Formules'}.items() %}
             <li class="nav-item">
-                <a class="nav-link {% if type == 'p' %}active{% endif %}" href="?type=p"><h4>Tous les plats</h4></a>
+                <a class="nav-link {% if type == key %}active{% endif %}" href="?type={{ key }}"><h4>{{ value }}</h4></a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {% if type == 'pc' %}active{% endif %}" href="?type=pc"><h4>Plats chauds</h4></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if type == 'pf' %}active{% endif %}" href="?type=pf"><h4>Plats froids</h4></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if type == 's' %}active{% endif %}" href="?type=s"><h4>Sushis</h4></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if type == 'd' %}active{% endif %}" href="?type=d"><h4>Desserts</h4></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if type == 'f' %}active{% endif %}" href="?type=f"><h4>Formules</h4></a>
-            </li>
+            {% endfor %}
         </ul>
 
-        <!-- Formulaire de recherche aligné à droite -->
+        <!-- Formulaire de recherche -->
         <form class="d-flex ms-auto" action="{{ url_for('commander') }}" role="search">
             <div class="input-group">
-                <input type="text" name="query" class="form-control" placeholder="Rechercher" value="{{ request.args.get('query') if request.args.get('query') else '' }}">
+                <input type="text" name="query" class="form-control" placeholder="Rechercher" value="{{ request.args.get('query', '') }}">
                 <span class="input-group-text bg-light">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
@@ -64,307 +74,28 @@
             </div>
         </form>
 
-        {% if type=="p" %}
         <!-- Grille des plats -->
-        <div class="row g-3 rounded me-0" style="height: 500px; overflow-y: auto;">
-            <h2>{{nb_plats}} plats disponibles</h2>
-            {% for plat in plats %}
-            <div class="col-md-4">
-                <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.nom_plat }}">
-                    <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
-                    <div class="card-body text-center">
-                        <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
-                    </div>
-                </div>
-
-                <!-- Modal spécifique au plat -->
-                <div class="modal fade" id="editModal{{ plat.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat.nom_plat }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="editForm{{ plat.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabel{{ plat.nom_plat }}">{{ plat.nom_plat }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-group">
-                                        <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="quantity{{ plat.nom_plat }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantity{{ plat.nom_plat }}" name="quantite" min="1" value="1" max="{{plat.stock_utilisable * 0.8}}">
-                                        <input type="hidden" name="id_plat" value="{{ plat.id_plat }}">
-                                        <input type="hidden" name="num_com" value="{{ num_com }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Allergènes</label>
-                                        <select class="form-select" id="comment{{ plat.nom_plat }}">
-                                            <option value="" selected>-- Voir les allergenes --</option>
-                                            {% for allergene in plat.les_allergenes %}
-                                            <option value="{{ allergene.nom_allergene }}">{{ allergene.nom_allergene }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group mt-3">
-                                        <p>Prix unitaire : <span id="totalPrice{{ plat.id }}">{{ plat.prix }}</span>€</p>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if type=="pc" %}
-        <!-- Grille des plats chauds -->
-        <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
-            <h2>{{nb_plats_chauds}} plats chauds disponibles</h2>
-            {% for plat_chaud in plats_chauds %}
-            <div class="col-md-4">
-                <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat_chaud.nom_plat }}">
-                    <img src="{{ url_for('static', filename='img/product/' ~ plat_chaud.img) }}" class="card-img-top" alt="{{ plat_chaud.nom_plat }}">
-                    <div class="card-body text-center">
-                        <p>{{ plat_chaud.nom_plat }} <br> {{ plat_chaud.prix }}€</p>
-                    </div>
-                </div>
-
-                <!-- Modal spécifique au plat chaud -->
-                <div class="modal fade" id="editModal{{ plat_chaud.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat_chaud.nom_plat }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="editForm{{ plat_chaud.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabel{{ plat_chaud.nom_plat }}">{{ plat_chaud.nom_plat }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-group">
-                                        <img src="{{ url_for('static', filename='img/product/' ~ plat_chaud.img) }}" class="card-img-top" alt="{{ plat_chaud.nom_plat }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="quantity{{ plat_chaud.nom_plat }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantity{{ plat_chaud.nom_plat }}" name="quantite" min="1" value="1" max="{{plat_chaud.stock_utilisable * 0.8}}">
-                                        <input type="hidden" name="id_plat" value="{{ plat_chaud.id_plat }}">
-                                        <input type="hidden" name="num_com" value="{{ num_com }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="comment{{ plat_chaud.nom_plat }}">Allergènes</label>
-                                        <select class="form-select" id="comment{{ plat_chaud.nom_plat }}" name="comment">
-                                            <option value="" selected>-- Voir les allergenes --</option>
-                                            {% for allergene in plat_chaud.les_allergenes %}
-                                            <option value="{{ allergene.nom_allergene }}">{{ allergene.nom_allergene }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <p>Prix unitaire : <span id="totalPrice{{ plat_chaud.id }}">{{ plat_chaud.prix }}</span>€</p>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if type=="pf" %}
-        <!-- Grille des plats froids -->
-        <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
-            <h2>{{nb_plats_froids}} plats froids disponibles</h2>
-            {% for plat_froid in plats_froids %}
-            <div class="col-md-4">
-                <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModal{{ plat_froid.nom_plat }}">
-                    <img src="{{ url_for('static', filename='img/product/' ~ plat_froid.img) }}" class="card-img-top" alt="{{ plat_froid.nom_plat }}">
-                    <div class="card-body text-center">
-                        <p>{{ plat_froid.nom_plat }} <br> {{ plat_froid.prix }}€</p>
-                    </div>
-                </div>
-
-                <!-- Modal spécifique au plat froid -->
-                <div class="modal fade" id="editModal{{ plat_froid.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabel{{ plat_froid.nom_plat }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="editForm{{ plat_froid.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabel{{ plat_froid.nom_plat }}">{{ plat_froid.nom_plat }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-group">
-                                        <img src="{{ url_for('static', filename='img/product/' ~ plat_froid.img) }}" class="card-img-top" alt="{{ plat_froid.nom_plat }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="quantity{{ plat_froid.nom_plat }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantity{{ plat_froid.nom_plat }}" name="quantite" min="1" value="1" max="{{plat_froid.stock_utilisable * 0.8}}">
-                                        <input type="hidden" name="id_plat" value="{{ plat_froid.id_plat }}">
-                                        <input type="hidden" name="num_com" value="{{ num_com }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="comment{{ plat_froid.nom_plat }}">Allergènes</label>
-                                        <select class="form-select" id="comment{{ plat_froid.nom_plat }}" name="comment">
-                                            <option value="" selected>-- Voir les allergenes --</option>
-                                            {% for allergene in plat_froid.les_allergenes %}
-                                            <option value="{{ allergene.nom_allergene }}">{{ allergene.nom_allergene }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <p>Prix unitaire : <span id="totalPrice{{ plat_froid.id }}">{{ plat_froid.prix }}</span>€</p>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if type=="s" %}
-        <!-- Grille des sushis -->
-        <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
-            <h2>{{nb_sushis}} sushis disponibles</h2>
-            {% for sushi in sushis %}
-            <div class="col-md-4">
-                <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModalSushi{{ sushi.nom_plat }}">
-                    <img src="{{ url_for('static', filename='img/product/' ~ sushi.img) }}" class="card-img-top" alt="{{ sushi.nom_plat }}">
-                    <div class="card-body text-center">
-                        <p>{{ sushi.nom_plat }} <br> {{ sushi.prix }}€</p>
-                    </div>
-                </div>
-
-                <!-- Modal spécifique au sushi -->
-                <div class="modal fade" id="editModalSushi{{ sushi.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabelSushi{{ sushi.nom_plat }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="editFormSushi{{ sushi.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editModalLabelSushi{{ sushi.nom_plat }}">{{ sushi.nom_plat }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-group">
-                                        <img src="{{ url_for('static', filename='img/product/' ~ sushi.img) }}" class="card-img-top" alt="{{ sushi.nom_plat }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="quantity{{ sushi.nom_plat }}">Quantité</label>
-                                        <input type="number" class="form-control" id="quantity{{ sushi.nom_plat }}" name="quantite" min="1" value="1" max="{{sushi.stock_utilisable * 0.8}}">
-                                        <input type="hidden" name="id_plat" value="{{ sushi.id_plat }}">
-                                        <input type="hidden" name="num_com" value="{{ num_com }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="commentSushi{{ sushi.nom_plat }}">Allergènes</label>
-                                        <select class="form-select" id="commentSushi{{ sushi.nom_plat }}" name="comment">
-                                            <option value="" selected>-- Voir les allergenes --</option>
-                                            {% for allergene in sushi.les_allergenes %}
-                                            <option value="{{ allergene.nom_allergene }}">{{ allergene.nom_allergene }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <p>Prix unitaire : <span id="totalPriceSushi{{ sushi.id }}">{{ sushi.prix }}</span>€</p>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    
-                        
-
-
-            {% if type=="d" %}
-            <!-- Grille des desserts -->
-            <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
-                <h2>{{nb_desserts}} desserts disponibles</h2>
-                {% for dessert in desserts %}
+        {% if type != 'f' %}
+            <div class="row g-3 rounded me-0 plat-container">
+                <h2>{{ list_plats|length }} plats disponibles</h2>
+                {% for plat in list_plats %}
                 <div class="col-md-4">
-                    <div class="card" style="width: 18rem;" data-bs-toggle="modal" data-bs-target="#editModalDessert{{ dessert.nom_plat }}">
-                        <img src="{{ url_for('static', filename='img/product/' ~ dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
+                    <div class="card" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.id_plat }}">
+                        <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
                         <div class="card-body text-center">
-                            <p>{{ dessert.nom_plat }} <br> {{ dessert.prix }}€</p>
+                            <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
                         </div>
                     </div>
 
-                    <!-- Modal spécifique au dessert -->
-                    <div class="modal fade" id="editModalDessert{{ dessert.nom_plat }}" tabindex="-1" aria-labelledby="editModalLabelDessert{{ dessert.nom_plat }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <form id="editFormDessert{{ dessert.nom_plat }}" method="POST" action="{{ url_for('ajout_plat') }}">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editModalLabelDessert{{ dessert.nom_plat }}">{{ dessert.nom_plat }}</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="form-group">
-                                            <img src="{{ url_for('static', filename='img/product/' ~ dessert.img) }}" class="card-img-top" alt="{{ dessert.nom_plat }}">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="quantity{{ dessert.nom_plat }}">Quantité</label>
-                                            <input type="number" class="form-control" id="quantity{{ dessert.nom_plat }}" name="quantite" min="1" value="1" max="{{dessert.stock_utilisable * 0.8}}">
-                                            <input type="hidden" name="id_plat" value="{{ dessert.id_plat }}">
-                                            <input type="hidden" name="num_com" value="{{ num_com }}">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="commentDessert{{ dessert.nom_plat }}">Allergènes</label>
-                                            <select class="form-select" id="commentDessert{{ dessert.nom_plat }}" name="comment">
-                                                <option value="" selected>-- Voir les allergenes --</option>
-                                                {% for allergene in dessert.les_allergenes %}
-                                                <option value="{{ allergene.nom_allergene }}">{{ allergene.nom_allergene }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <div class="form-group mt-3">
-                                            <p>Prix unitaire : <span id="totalPriceDessert{{ dessert.id }}">{{ dessert.prix }}</span>€</p>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                        <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    {% include "modal_plat.html" %}
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
-
-
-            
-        {% if type=="f" %}
+        {% else %}
         <!-- Grille des formules -->
-        <div class="row g-3 rounded" style="height: 500px; overflow-y: auto;">
-            <h2 class="text-center mb-4">{{ nb_formules }} formules disponibles</h2>
-            {% for formule in formules %}
+        <div class="row g-3 rounded me-0 plat-container">
+            <h2 class="text-center mb-4">{{ list_plats|length }} formules disponibles</h2>
+            {% for formule in list_plats %}
                 <div class="col-md-4">
                     <div class="card shadow-sm h-100 border-0" data-bs-toggle="modal" data-bs-target="#formuleModal{{ formule.id_formule }}">
                         <div class="card-header text-center bg-primary text-white rounded-top">
@@ -423,6 +154,7 @@
 
 
     </div>
+
     <!-- Bouton Commander -->
     <div class="text-center mt-4">
         <a href="{{ url_for('panier') }}" class="btn btn-orange shadow rounded-pill px-4 py-2">Commander</a>

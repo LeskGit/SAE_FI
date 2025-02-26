@@ -1,18 +1,25 @@
 from project import app, db
 from flask import render_template, url_for, redirect, request, session
 from flask_wtf import FlaskForm, RecaptchaField
-from flask_login import login_user , current_user, logout_user, login_required
+from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, ValidationError
 from project.models import User
 
-class LoginForm (FlaskForm):
-    phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
-                                                                  Length(min=10, max=10, message = 'Longueur incorrecte.'), 
-                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
-    password = PasswordField("Mot de passe", validators=[DataRequired(), Length(max=64)])
+
+class LoginForm(FlaskForm):
+    phone_number = StringField(
+        "Numéro de téléphone",
+        validators=[
+            DataRequired(),
+            Length(min=10, max=10, message='Longueur incorrecte.'),
+            Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")
+        ])
+    password = PasswordField("Mot de passe",
+                             validators=[DataRequired(),
+                                         Length(max=64)])
 
     def get_authentificated_user(self):
         """permet de savoir si le mot de passe de 
@@ -28,12 +35,16 @@ class LoginForm (FlaskForm):
         m.update(self.password.data.encode())
         passwd = m.hexdigest()
         return user if passwd == user.mdp else None
-    
 
-class LoginUnsafeForm (FlaskForm):
-    phone_number = StringField("Numéro de téléphone", validators=[DataRequired(), 
-                                                                  Length(min=10, max=10, message = 'Longueur incorrecte.'), 
-                                                                  Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
+
+class LoginUnsafeForm(FlaskForm):
+    phone_number = StringField(
+        "Numéro de téléphone",
+        validators=[
+            DataRequired(),
+            Length(min=10, max=10, message='Longueur incorrecte.'),
+            Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")
+        ])
 
     def create_user(self):
         return User(num_tel=self.phone_number.data, fake=True)
@@ -55,30 +66,46 @@ class LoginUnsafeForm (FlaskForm):
             return user
         return None
 
-class RegisterForm (FlaskForm):
-    phone_number = StringField("Numéro téléphone", validators=[DataRequired(), 
-                                                               Length(min=10, max=10, message = 'Longueur incorrecte.'),
-                                                               Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
-    name = StringField("Nom", validators=[DataRequired(), 
-                                          Length(max=32)])
-                                          
-                                          
-    first_name = StringField("Prénom", validators=[DataRequired(), 
-                                                   Length(max=32)])
 
-    email = EmailField("Email", validators=[DataRequired(), Email(message='Adresse mail invalide.'), 
-                                            Length(max=64)])
+class RegisterForm(FlaskForm):
+    phone_number = StringField(
+        "Numéro téléphone",
+        validators=[
+            DataRequired(),
+            Length(min=10, max=10, message='Longueur incorrecte.'),
+            Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")
+        ])
+    name = StringField("Nom", validators=[DataRequired(), Length(max=32)])
 
-    address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
+    first_name = StringField("Prénom",
+                             validators=[DataRequired(),
+                                         Length(max=32)])
 
-    password = PasswordField("Mot de passe", validators=[DataRequired(), 
-                                                         Length(max=64)])
+    email = EmailField("Email",
+                       validators=[
+                           DataRequired(),
+                           Email(message='Adresse mail invalide.'),
+                           Length(max=64)
+                       ])
 
-    password_check = PasswordField("Confirmez votre mot de passe", validators=[DataRequired(), 
-                                                                               EqualTo('password', message='Les mots de passe doivent correspondre.'),])
+    address = StringField("Adresse",
+                          validators=[DataRequired(),
+                                      Length(max=64)])
 
-    # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place 
-    #recaptcha = RecaptchaField() 
+    password = PasswordField("Mot de passe",
+                             validators=[DataRequired(),
+                                         Length(max=64)])
+
+    password_check = PasswordField(
+        "Confirmez votre mot de passe",
+        validators=[
+            DataRequired(),
+            EqualTo('password',
+                    message='Les mots de passe doivent correspondre.'),
+        ])
+
+    # Commentaire de la ligne en-dessous à enlever une fois le captcha mis en place
+    #recaptcha = RecaptchaField()
 
     def validate_email(self, field):
         if User.check_user_email(email_u=field.data):
@@ -88,19 +115,23 @@ class RegisterForm (FlaskForm):
         user = User.get_user(num_tel=field.data)
         if user is not None and not user.fake:
             raise ValidationError("Ce numéro de téléphone est déjà utilisé.")
-    
-    def create_user(self) :
+
+    def create_user(self):
         passwd = self.password.data
         m = sha256()
         m.update(passwd.encode())
         return User(num_tel=self.phone_number.data,
-                mdp=m.hexdigest(),
-                nom = self.name.data,
-                prenom = self.first_name.data,
-                adresse = self.address.data,
-                email = self.email.data)
+                    mdp=m.hexdigest(),
+                    nom=self.name.data,
+                    prenom=self.first_name.data,
+                    adresse=self.address.data,
+                    email=self.email.data)
 
-@app.route("/connexion", methods = ("GET", "POST", ))
+
+@app.route("/connexion", methods=(
+    "GET",
+    "POST",
+))
 def login():
     f = LoginForm()
     if f.validate_on_submit():
@@ -109,10 +140,16 @@ def login():
             session.pop('user', None)
             login_user(the_user)
             return redirect(url_for("home"))
-        return render_template("connexion.html", form = f, error = "incorrect_password")
-    return render_template("connexion.html", form = f)
+        return render_template("connexion.html",
+                               form=f,
+                               error="incorrect_password")
+    return render_template("connexion.html", form=f)
 
-@app.route("/connexion_insecure", methods = ("GET", "POST", ))
+
+@app.route("/connexion_insecure", methods=(
+    "GET",
+    "POST",
+))
 def login_unsafe():
     f = LoginUnsafeForm()
     if f.validate_on_submit():
@@ -121,8 +158,11 @@ def login_unsafe():
             session['user'] = the_user.get_num_tel()
             return redirect(url_for("commander"))
         else:
-           return render_template("connexion_insecure.html", form = f, error = 'existant')
-    return render_template("connexion_insecure.html", form = f) 
+            return render_template("connexion_insecure.html",
+                                   form=f,
+                                   error='existant')
+    return render_template("connexion_insecure.html", form=f)
+
 
 @app.route("/deconnexion")
 def logout():
@@ -130,7 +170,8 @@ def logout():
     logout_user()
     return redirect(url_for("home"))
 
-@app.route("/inscription", methods = ["GET", "POST"])
+
+@app.route("/inscription", methods=["GET", "POST"])
 def register():
     f = RegisterForm()
     if f.validate_on_submit():
@@ -165,4 +206,4 @@ def register():
         except Exception :
             return render_template("inscription.html", form = f)
             db.session.rollback()"""
-    return render_template("inscription.html", form = f)
+    return render_template("inscription.html", form=f)

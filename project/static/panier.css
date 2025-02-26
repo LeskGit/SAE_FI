@@ -1,10 +1,12 @@
 .background_panier{
     background-color: #E9E9E9;
-    border-radius: 4em;
+    border-radius: 1em;
 }
 
-.inner-shadow {
-    box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.5);
+.background_recap {
+    background-color: #E9E9E9;
+    border-radius: 3em;
+    margin: 0 auto;
 }
 
 .separator {
@@ -20,6 +22,40 @@
 
 .btn-orange:hover {
     background-color: #e0691f;
+}
+
+.main-container {
+    display: flex;
+}
+
+.bin {
+    min-width: 20px;
+}
+
+
+@media (max-width: 1100px) {
+
+    .separator {
+        display: none;
+    }
+
+
+}
+
+@media (max-width: 900px) {
+
+    .main-container {
+        flex-direction: column;
+    }
+
+    .panier-container, .recap-container {
+        margin: 2em auto;
+        width: 80%;
+    }
+
+    .recap-container div {
+        border-radius: 3%;
+    }
 }
 
 #accordion-button{

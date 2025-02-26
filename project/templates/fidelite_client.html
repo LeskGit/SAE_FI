@@ -2,7 +2,27 @@
 
 {% block styles %}
     {{ super() }}
-    <link rel="stylesheet" href="{{ url_for('static', filename='profil.css') }}">
+    <!-- Exemple : on peut ajouter des styles personnalisés ici -->
+    <style>
+      /* Exemple de style pour la liste des paliers */
+      .list-group-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .threshold-badge {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 0.8rem;
+        background-color: #E84D0E; /* Orange */
+        color: white;
+      }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -11,9 +31,52 @@
     {% from "macro_client_aside.html" import sidebar_client with context %}
     {{ sidebar_client() }}
 
+    {% from "macro_client_aside.html" import mobile_navbar with context %}
+    {{ mobile_navbar() }}
+
     <div class="p-5 rounded shadow w-100 main_profil">
-        <!-- Main content area -->
-        
+        <!-- Titre de la page -->
+        <h2 class="mb-4"><strong>Mes Points de Fidélité</strong></h2>
+
+        <!-- Message de bienvenue -->
+        <p>Bonjour <strong>{{ current_user.prenom }}</strong>, vous avez actuellement 
+           <strong>{{ current_user.points_fidelite }}</strong> point(s) de fidélité.</p>
+
+        <!-- Séparateur -->
+        <hr>
+
+        <!-- Liste des paliers fictifs -->
+        {% set paliers = [
+            {'label': '-20% sur les sushis',       'threshold': 30},
+            {'label': '-10% sur les plats',        'threshold': 50},
+            {'label': '-30% sur les entrées',      'threshold': 80},
+            {'label': '-10% sur les boissons',     'threshold': 120},
+            {'label': 'Un plat de votre choix offert', 'threshold': 170}
+        ] %}
+
+        <h3 class="mt-4">Réductions disponibles</h3>
+
+        <!-- Liste en Bootstrap -->
+        <ul class="list-group">
+            {% for palier in paliers %}
+            <li class="list-group-item mb-2">
+                <!-- Zone de gauche : badge orange + texte -->
+                <div>
+                  <span class="threshold-badge">{{ palier.threshold }}</span>
+                  {{ palier.label }}
+                </div>
+
+                <!-- Bouton "Échanger mes points" : envoie un formulaire POST -->
+                <form action="{{ url_for('echanger_points') }}" method="POST" class="m-0 p-0">
+                    <!-- Envoie le threshold dans un champ caché -->
+                    <input type="hidden" name="palier_threshold" value="{{ palier.threshold }}">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Échanger mes points
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 {% endblock %}

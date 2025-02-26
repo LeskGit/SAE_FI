@@ -9,9 +9,10 @@ from wtforms.validators import DataRequired
 from wtforms import BooleanField, SubmitField, StringField
 from wtforms import HiddenField, IntegerField
 from wtforms.validators import DataRequired
-from flask_login import login_user , current_user, logout_user, login_required
+from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
 from project.models import ConstituerFormule, Plats, Allergenes, Constituer, Commandes, Formule, User, UserType
+
 
 def get_current_user():
     if current_user.is_authenticated:
@@ -21,6 +22,7 @@ def get_current_user():
         return User.get_user(user_id)
     return None
 
+
 def callback_type_user(callback_user, callback_guest, callback_unknown):
     if current_user.is_authenticated:
         return callback_user()
@@ -28,47 +30,58 @@ def callback_type_user(callback_user, callback_guest, callback_unknown):
         return callback_guest()
     return callback_unknown()
 
+
 def get_type_user():
-    return callback_type_user(lambda: UserType.USER, lambda: UserType.GUEST, lambda: UserType.UNKNOW)
+    return callback_type_user(lambda: UserType.USER, lambda: UserType.GUEST,
+                              lambda: UserType.UNKNOW)
+
 
 class CommanderForm(FlaskForm):
     id_plat = HiddenField()
     num_com = HiddenField()
     quantite = IntegerField(validators=[DataRequired()])
 
+
+def get_plats_type(type, selected_allergenes, query_plats, search_allergenes):
+    match type:
+        case "pc":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
+        case "pf":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
+        case "s":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
+        case "f":
+            return Formule.get_formules_filtered_by_allergenes(selected_allergenes)
+        case "d":
+            return Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
+    
+    if search_allergenes:
+        return Plats.get_plats_filtered_by_allergenes(selected_allergenes)
+    return Plats.query.filter(Plats.nom_plat.like(f"%{query_plats}%")).all() if query_plats is not None else Plats.get_plats()
+        
+
 @app.route("/commander", methods=["GET", "POST"])
 def commander():
     user = get_current_user()
     if user is None:
         return redirect(url_for('login_unsafe'))
-    
+
     commande = user.get_or_create_panier()
     num_commande = commande.num_commande
     form = CommanderForm()
-    selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
-    type = request.args.get('type', 'p')
+
     allergenes = Allergenes.get_allergenes()
-    query_plats = request.args.get('query')
-    plats = Plats.query.filter(Plats.nom_plat.like(f"%{query_plats}%")).all() if query_plats is not None else Plats.get_plats()
-    plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
-    plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
-    sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-    formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
-    desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
+    type = request.args.get('type', 'p')
+    selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
+    query_plats = request.args.get('query', "")
+    
+    les_plats = get_plats_type(type, selected_allergenes, query_plats, False)
 
     return render_template("commander.html", 
-                        plats=plats, 
-                        plats_chauds=plats_chauds,
-                        plats_froids=plats_froids,
-                        sushis=sushis,
-                        formules=formules, 
-                        desserts=desserts, 
-                        type=type, 
-                        nb_plats=len(plats), 
-                        nb_formules=len(formules), 
-                        nb_desserts=len(desserts), 
-                        allergenes=allergenes, 
+                        list_plats=les_plats,
+                        list_allergenes=allergenes,
                         selected_allergenes=selected_allergenes,
+                        type=type,
                         form=form,
                         num_com = num_commande)
 
@@ -78,11 +91,12 @@ def filter_allergenes():
     user = get_current_user()
     if user is None:
         return redirect(url_for('login_unsafe'))
-        
+
     # Récupérer la liste des allergènes sélectionnés
     if request.method == "POST":
-        selected_allergenes = request.form.getlist('allergenes') # Liste des allergènes cochés
-        
+        selected_allergenes = request.form.getlist(
+            'allergenes')  # Liste des allergènes cochés
+
         for i in range(len(selected_allergenes)):
             selected_allergenes[i] = int(selected_allergenes[i])
     if request.method == "GET":
@@ -90,40 +104,28 @@ def filter_allergenes():
         if selected_allergenes:
             selected_allergenes = selected_allergenes.split(',')
             for i in range(len(selected_allergenes)):
-                if(selected_allergenes[i] != ""):
+                if (selected_allergenes[i] != ""):
                     selected_allergenes[i] = int(selected_allergenes[i])
-            print(selected_allergenes)
         else:
             selected_allergenes = []
-            
-    type = request.args.get('type', 'p')
-    
-    allergenes = Allergenes.get_allergenes()
-    plats = Plats.get_plats_filtered_by_allergenes(selected_allergenes)
-    plats_chauds = Plats.get_plats_filtered_by_type_and_allergenes("Plat chaud", selected_allergenes)
-    plats_froids = Plats.get_plats_filtered_by_type_and_allergenes("Plat froid", selected_allergenes)
-    sushis = Plats.get_plats_filtered_by_type_and_allergenes("Sushi", selected_allergenes)
-    formules = Formule.get_formules_filtered_by_allergenes(selected_allergenes)
-    desserts = Plats.get_plats_filtered_by_type_and_allergenes("Dessert", selected_allergenes)
-    
-
     commande = user.get_or_create_panier()
     num_commande = commande.num_commande
     form = CommanderForm()
 
+    allergenes = Allergenes.get_allergenes()
+
+    type = request.args.get('type', 'p')
+    query_plats = request.args.get('query', "")
+    
+    les_plats = get_plats_type(type, selected_allergenes, query_plats, True)
+
     resp = make_response(render_template("commander.html", 
-                           plats=plats, 
-                            plats_chauds=plats_chauds,
-                            plats_froids=plats_froids,
-                            sushis=sushis,
-                           type=type,
-                           allergenes=allergenes,
-                           formules=formules, 
-                           desserts=desserts, 
-                           selected_allergenes=selected_allergenes,
-                           form=form,
-                           num_com = num_commande
-                           ))
+                        list_plats=les_plats,
+                        list_allergenes=allergenes,
+                        selected_allergenes=selected_allergenes,
+                        type=type,
+                        form=form,
+                        num_com = num_commande))
     
     if request.method == "POST":
         string_allergenes = ""
@@ -134,17 +136,20 @@ def filter_allergenes():
     return resp
 
 
-@app.route("/commander_plat", methods = ("POST",))
-def ajout_plat() :
+@app.route("/commander_plat", methods=("POST",))
+def ajout_plat():
     f = CommanderForm()
-    if f.num_com.data :
+    if f.num_com.data:
         try:
             commande = Commandes.get_commande(f.num_com.data)
-            constituer = Constituer.get_constituer(f.id_plat.data, f.num_com.data)
+            constituer = Constituer.get_constituer(f.id_plat.data,
+                                                   f.num_com.data)
             if constituer:
                 constituer.quantite_plat += f.quantite.data
             else:
-                constituer = Constituer(id_plat = f.id_plat.data, num_commande = f.num_com.data, quantite_plat = f.quantite.data)
+                constituer = Constituer(id_plat=f.id_plat.data,
+                                        num_commande=f.num_com.data,
+                                        quantite_plat=f.quantite.data)
                 commande.constituer_assoc.append(constituer)
             db.session.add(constituer)
             db.session.commit()
@@ -181,13 +186,12 @@ def ajout_formule():
 
     return redirect(url_for('commander'))
 
-
 @app.route("/panier")
 def panier():
     user = get_current_user()
     if user is None:
         return redirect(url_for('login_unsafe'))
-    
+
     panier = user.get_or_create_panier()
     if panier is not None:
         panier.calculer_prix()
@@ -196,8 +200,12 @@ def panier():
     if panier.date is None:
         sur_place_disponible = False
     else:
-        sur_place_disponible = True if Commandes.get_num_table_dispo(panier.date) != -1 else False
-    return render_template("panier.html", panier=panier, sur_place_disponible=sur_place_disponible)
+        sur_place_disponible = True if Commandes.get_num_table_dispo(
+            panier.date) != -1 else False
+    return render_template("panier.html",
+                           panier=panier,
+                           sur_place_disponible=sur_place_disponible)
+
 
 @app.route('/modifier_quantite')
 def modifier_quantite():
@@ -210,10 +218,11 @@ def modifier_quantite():
             for constituer in panier.constituer_assoc:
                 if constituer.plat.nom_plat == nom_plat:
                     if action == 'increment':
-                        if constituer.quantite_plat +1 <= int(constituer.plat.stock_utilisable * 0.8):
+                        if constituer.quantite_plat + 1 <= int(
+                                constituer.plat.stock_utilisable * 0.8):
                             constituer.quantite_plat += 1
                     elif action == 'decrement' and constituer.quantite_plat > 1:
-                            constituer.quantite_plat -= 1
+                        constituer.quantite_plat -= 1
                     break
 
         db.session.commit()
@@ -260,10 +269,11 @@ def modifier_date_heure():
 
     return redirect(url_for('panier'))
 
+
 @app.route('/modifier_type')
 def modifier_type():
     sur_place = request.args.get('delivery')
-    
+
     user = get_current_user()
     if user is not None:
         panier = user.get_panier()
@@ -271,23 +281,25 @@ def modifier_type():
             if sur_place == "1":
                 numero_table = Commandes.get_num_table_dispo(panier.date)
                 if numero_table != -1:
-                    if panier.date is not None and panier.date.time() > datetime.strptime("14:00", "%H:%M").time():
-                        panier.date = datetime.combine(panier.date, datetime.strptime("13:50", "%H:%M").time())
+                    if panier.date is not None and panier.date.time(
+                    ) > datetime.strptime("14:00", "%H:%M").time():
+                        panier.date = datetime.combine(
+                            panier.date,
+                            datetime.strptime("13:50", "%H:%M").time())
                     panier.sur_place = True
                     panier.num_table = numero_table
                 else:
-                    panier.sur_place = False 
+                    panier.sur_place = False
                     panier.num_table = None
             else:
                 panier.sur_place = False
                 panier.num_table = None
-                
+
             try:
                 db.session.commit()
             except Exception as e:
                 flash("Erreur : " + str(e.orig.args[1]), "danger")
                 return redirect(url_for('panier'))
-
 
     return redirect(url_for('panier'))
 
@@ -303,6 +315,7 @@ def supprimer_plat():
 
         db.session.commit()
     return redirect(url_for('panier'))
+
 
 @app.route('/supprimer_formule')
 def supprimer_formule():
@@ -320,17 +333,19 @@ def supprimer_formule():
 def choix_paiement():
     return render_template("choix_paiement.html")
 
+
 @app.route("/paiement")
 def paiement_cb():
     f = ...
     return render_template("paiement_cb.html", form=f)
 
-@app.route("/paiement/validation", methods = ["POST"])
+
+@app.route("/paiement/validation", methods=["POST"])
 def validation_paiement():
     user = get_current_user()
     if user is None:
         return redirect(url_for('login'))
-                                
+
     panier = user.get_panier()
     if panier is None:
         return redirect(url_for('panier'))

@@ -2,35 +2,53 @@ from project import app, db
 from flask import render_template, url_for, redirect, request, flash
 from project.models import Commandes, User
 from flask_wtf import FlaskForm
-from flask_login import login_user , current_user, logout_user, login_required
+from flask_login import login_user, current_user, logout_user, login_required
 from hashlib import sha256
 from project.views.authentification import RegisterForm
 from wtforms import StringField, PasswordField, EmailField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp
 from datetime import datetime, timedelta
 
+
 class PersoForm(FlaskForm):
-    phone_number = StringField("Téléphone", validators=[DataRequired(), 
-                                                               Length(min=10, max=10, message = 'Longueur incorrecte.'),
-                                                               Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")])
-    name = StringField("Nom", validators=[DataRequired(), 
-                                          Length(max=32)])
-    
-    first_name = StringField("Prénom", validators=[DataRequired(), 
-                                                   Length(max=32)])
-    
-    address = StringField("Adresse", validators=[DataRequired(), Length(max=64)])
-    email = EmailField("Email", validators=[DataRequired(), Email(message='addresse mail invalide'), 
-                                            Length(max=64)])
+    phone_number = StringField(
+        "Téléphone",
+        validators=[
+            DataRequired(),
+            Length(min=10, max=10, message='Longueur incorrecte.'),
+            Regexp(r'^\d{10}$', message="Le numéro de téléphone est invalide.")
+        ])
+    name = StringField("Nom", validators=[DataRequired(), Length(max=32)])
+
+    first_name = StringField("Prénom",
+                             validators=[DataRequired(),
+                                         Length(max=32)])
+
+    address = StringField("Adresse",
+                          validators=[DataRequired(),
+                                      Length(max=64)])
+    email = EmailField("Email",
+                       validators=[
+                           DataRequired(),
+                           Email(message='addresse mail invalide'),
+                           Length(max=64)
+                       ])
+
 
 class ChangePasswordForm(FlaskForm):
-    old_password = PasswordField("Ancien mot de passe", validators=[DataRequired()])
-    new_password = PasswordField("Nouveau mot de passe", validators=[DataRequired()])
-    confirm_password = PasswordField("Confirmer le nouveau mot de passe", validators=[
-        DataRequired(),
-        EqualTo('new_password', message="Les mots de passe ne correspondent pas")
-    ])
+    old_password = PasswordField("Ancien mot de passe",
+                                 validators=[DataRequired()])
+    new_password = PasswordField("Nouveau mot de passe",
+                                 validators=[DataRequired()])
+    confirm_password = PasswordField(
+        "Confirmer le nouveau mot de passe",
+        validators=[
+            DataRequired(),
+            EqualTo('new_password',
+                    message="Les mots de passe ne correspondent pas")
+        ])
     change_password = SubmitField("Enregistrer")
+
 
 @app.route("/client/profil", methods=["GET", "POST"])
 @login_required
@@ -67,19 +85,24 @@ def client_profil():
             if old_hash != current_user.mdp:
                 flash("Ancien mot de passe incorrect", "danger")
             else:
-                new_hash = sha256(pw_form.new_password.data.encode()).hexdigest()
+                new_hash = sha256(
+                    pw_form.new_password.data.encode()).hexdigest()
                 current_user.mdp = new_hash
                 db.session.commit()
                 flash("Mot de passe mis à jour avec succès", "success")
                 return redirect(url_for("client_profil"))
 
-    return render_template("profil_client_connecte.html", form=f, edit=edit, pw_form=pw_form)
+    return render_template("profil_client_connecte.html",
+                           form=f,
+                           edit=edit,
+                           pw_form=pw_form)
+
 
 @app.route("/client/historique")
 @login_required
 def client_historique():
     commandes = (Commandes.get_historique(id_client=current_user.id_client))
-    
+
     historique = []
     now = datetime.now()
     for com in commandes:
@@ -122,12 +145,26 @@ def client_historique():
 
     return render_template("historique_commandes.html", historique=historique)
 
+
 @app.route("/client/fidelite")
 @login_required
 def client_fidelite():
     return render_template("fidelite_client.html")
 
+
 @app.route("/client/modif")
 @login_required
 def client_modif():
     return render_template("modif_commande.html")
+
+@app.route('/echanger_points', methods=['POST'])
+@login_required
+def echanger_points():
+    threshold = int(request.form['palier_threshold'])
+    if current_user.points_fidelite >= threshold:
+        current_user.points_fidelite -= threshold
+        db.session.commit()
+        flash(f"Vous avez échangé {threshold} points pour l'offre correspondante !", "success")
+    else:
+        flash("Vous n'avez pas assez de points pour cette offre...", "danger")
+    return redirect(url_for('client_fidelite'))
