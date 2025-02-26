@@ -1,0 +1,42 @@
+<!-- Modal pour la formule -->
+<div class="modal fade" id="formuleModal{{ formule.id_formule }}" tabindex="-1" aria-labelledby="formuleModalLabel{{ formule.id_formule }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('ajout_formule') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="formuleModalLabel{{ formule.id_formule }}">{{ formule.libelle_formule }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group mb-3">
+                        {% for p in formule.les_plats %}
+                        <li class="list-group-item">
+                            {{ p.nom_plat }}
+                            {% if p.les_allergenes %}
+                            <ul class="list-group">
+                                {% for a in p.les_allergenes %}
+                                <li class="list-group-item">{{ a.nom_allergene }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="mb-3">
+                        <p>Prix unitaire : <strong>{{ formule.prix }}€</strong></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity{{ formule.id_formule }}">Quantité</label>
+                        <input type="number" class="form-control" id="quantity{{ formule.id_formule }}" name="quantite" min="1" max="{{ formule.get_stock_utilisable() * 0.8 }}" value="1">
+                        <input type="hidden" name="id_plat" value="{{ formule.id_formule }}">
+                        <input type="hidden" name="num_com" value="{{ num_com }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-orange shadow">Ajouter au panier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

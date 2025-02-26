@@ -150,8 +150,9 @@ def ajout_plat(modif):
 
     return redirect(url_for('client_modif', id_commande=f.num_com.data)) if modif else redirect(url_for('commander'))
 
-@app.route("/commander_formule", methods=["POST"])
-def ajout_formule():
+@app.route("/commander_formule", methods = ("POST",), defaults={'modif': None})
+@app.route('/commander_formule/<modif>', methods = ("POST",))
+def ajout_formule(modif):
     if current_user.is_authenticated:
         form = CommanderForm()
         if form.num_com.data:
@@ -172,10 +173,9 @@ def ajout_formule():
                 db.session.add(constituer_formule)
                 db.session.commit()
             except Exception as e:
-                flash("Erreur : " + str(e), "danger")
-                return redirect(url_for('commander'))
+                flash("Erreur : " + str(e.orig.args[1]), "danger")
 
-    return redirect(url_for('commander'))
+    return redirect(url_for('client_modif', id_commande=form.num_com.data)) if modif else redirect(url_for('commander'))
 
 @app.route("/panier")
 def panier():
@@ -233,13 +233,24 @@ def modifier_quantite(id_commande):
 
     return redirect(url_for('panier'))
 
-@app.route('/modifier_quantite_formule')
-def modifier_quantite_formule():
+@app.route("/modifier_quantite_formule", defaults={'id_commande': None})
+@app.route('/modifier_quantite_formule/<id_commande>')
+def modifier_quantite_formule(id_commande):
     action = request.args.get('action')
     libelle_formule = request.args.get('libelle_formule')
     user = get_current_user()
+
+
+    can_edit_command = None
+    if id_commande:
+
+        can_edit_command = can_modify_commande(id_commande, user.id_client)
+        if not can_edit_command: # Si l'utilisateur n'a pas le droit de modifier la commande, on le redirige directement
+            flash("Pas le droit de modifier", "danger")
+            return redirect(url_for('client_modif', id_commande=id_commande))
+
     if user is not None:
-        panier = user.get_panier()
+        panier = user.get_panier() if id_commande is None else Commandes.get_commande(id_commande)
         if panier is not None:
             for constituer in panier.constituer_formule_assoc:
                 if constituer.formule.libelle_formule == libelle_formule:
@@ -255,7 +266,12 @@ def modifier_quantite_formule():
             db.session.rollback()
             flash("Erreur : " + str(e.orig.args[1]), "danger")
 
+    if id_commande:
+        if can_edit_command:
+            return redirect(url_for('client_modif', id_commande=id_commande))
+
     return redirect(url_for('panier'))
+
 @app.route('/modifier_date_heure')
 def modifier_date_heure():
     hours = request.args.get('datetime')
@@ -315,13 +331,12 @@ def supprimer_plat(id_commande):
     user = get_current_user()
     if user is not None:
         panier = user.get_panier() if id_commande is None else Commandes.get_commande(id_commande)
-
         for constituer in panier.constituer_assoc:
             if constituer.plat.nom_plat == nom_plat:
                 db.session.delete(constituer)
         db.session.commit()
         
-        if id_commande and len(panier.constituer_assoc) == 0:
+        if id_commande and (len(panier.constituer_assoc) == 0 and len(panier.constituer_formule_assoc) == 0):
             flash("Votre commande a été supprimée", "success")
             db.session.delete(panier)
             db.session.commit()
@@ -329,17 +344,25 @@ def supprimer_plat(id_commande):
 
     return redirect(url_for('panier')) if id_commande is None else redirect(url_for('client_modif', id_commande=id_commande))
 
-@app.route('/supprimer_formule')
-def supprimer_formule():
+@app.route("/supprimer_formule", defaults={'id_commande': None})
+@app.route('/supprimer_formule/<id_commande>')
+def supprimer_formule(id_commande):
     libelle_formule = request.args.get('libelle_formule')
     user = get_current_user()
     if user is not None:
-        for constituer in user.get_panier().constituer_formule_assoc:
+        panier = user.get_panier() if id_commande is None else Commandes.get_commande(id_commande)
+        for constituer in panier.constituer_formule_assoc:
             if constituer.formule.libelle_formule == libelle_formule:
                 db.session.delete(constituer)
-
         db.session.commit()
-    return redirect(url_for('panier'))
+                
+        if id_commande and (len(panier.constituer_assoc) == 0 and len(panier.constituer_formule_assoc) == 0):
+            flash("Votre commande a été supprimée", "success")
+            db.session.delete(panier)
+            db.session.commit()
+            return redirect(url_for('client_modif', id_commande=id_commande))
+
+    return redirect(url_for('panier')) if id_commande is None else redirect(url_for('client_modif', id_commande=id_commande))
 
 @app.route("/choix_paiement")
 def choix_paiement():
