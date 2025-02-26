@@ -241,7 +241,7 @@ class Allergenes(db.Model):
     def get_allergenes(cls):
         """getter de tous les allergènes
         """
-        return cls.query.all()
+        return cls.query.all.order_by(cls.id_allergene)()
 
 
 contenir_allergene = db.Table(
@@ -907,7 +907,6 @@ class TriggerManager:
 
 
 def execute_tests():
-
     password = "password"
     m = sha256()
     m.update(password.encode())
