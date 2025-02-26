@@ -21,3 +21,18 @@
 .btn-orange:hover {
     background-color: #e0691f;
 }
+
+#accordion-button{
+    width: 100px;
+    background-color: rgba(248,249,250,1);
+}
+
+#img80{
+    width: 80px;
+    height: 80px;
+}
+
+#img60{
+    width: 60px;
+    height: 60px;
+}
