@@ -13,18 +13,16 @@ from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from flask_login import login_user , current_user, logout_user, login_required
 from hashlib import sha256
-from project.model.class_model import Commandes, User, Plats, Allergenes, Reduction
+from project.model.class_model import Commandes, User, Plats, Allergenes, Reduction, Formule
 from functools import wraps
 from wtforms import SelectMultipleField, StringField, PasswordField, EmailField, HiddenField, FileField, FloatField, SelectField
 from flask_wtf.file import FileAllowed
 from werkzeug.utils import secure_filename
-from wtforms import SelectMultipleField, StringField, HiddenField, FileField, FloatField, SelectField
 from wtforms.validators import DataRequired, Length, NumberRange
 from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 
 from project import app, db
-from project.model.class_model import Commandes, User, Plats, Allergenes, Formule
 from project.app import mkpath
 
 
