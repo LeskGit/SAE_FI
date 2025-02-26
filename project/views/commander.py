@@ -202,8 +202,10 @@ def modifier_quantite(id_commande):
     nom_plat = request.args.get('nom_plat')
     user = get_current_user()
 
-    can_edit_command = can_modify_commande(id_commande, user.id_client)
+    can_edit_command = None
     if id_commande:
+
+        can_edit_command = can_modify_commande(id_commande, user.id_client)
         if not can_edit_command: # Si l'utilisateur n'a pas le droit de modifier la commande, on le redirige directement
             flash("Pas le droit de modifier", "danger")
             return redirect(url_for('client_modif', id_commande=id_commande))
@@ -297,8 +299,9 @@ def modifier_type():
                 
             try:
                 db.session.commit()
-            except Exception as e:
-                flash("Erreur : " + str(e), "danger")
+            except sqlalchemy.exc.OperationalError as e:
+                db.session.rollback()
+                flash("Erreur : " + str(e.orig.args[1]), "danger")
                 return redirect(url_for('panier'))
 
 
@@ -370,8 +373,9 @@ def validation_paiement():
 
         db.session.commit()
 
-    except Exception as e:
-        flash("Erreur : " + str(e), "danger")
+    except sqlalchemy.exc.OperationalError as e:
+        db.session.rollback()
+        flash("Erreur : " + str(e.orig.args[1]), "danger")
         return redirect(url_for('panier'))
 
     return render_template("validation_commande.html", panier=panier)
