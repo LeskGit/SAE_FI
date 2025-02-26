@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="mt-4 w-auto retour_admin">
+    <a class="btn btn-dark" href="{{ url_for('admin') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" 
+             fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" 
+                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146
+                  a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5
+                  0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+    </a>
+</div>
+
+<div class="top-info">
+    <h1 class="text-center my-3">Édition des Réductions</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container mt-4">
+    <a href="{{ url_for('creation_reduction') }}" class="btn btn-success mb-3">Créer une nouvelle réduction</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Plat</th>
+                <th>Pourcentage</th>
+                <th>Coût (points)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for reduc in reductions %}
+            <tr>
+                <td>{{ reduc.id_reduction }}</td>
+                <td>
+                    {% set p = plats_map[reduc.id_plat] %}
+                    {{ p.nom_plat }} ({{ p.type_plat }}) - {{ p.prix }} €
+                </td>
+                <td>{{ reduc.reduction }} %</td>
+                <td>{{ reduc.points_fidelite }} pts</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" 
+                            data-bs-target="#editModal_{{ reduc.id_reduction }}">
+                        Modifier
+                    </button>
+
+                    <form action="{{ url_for('delete_reduction', id_reduction=reduc.id_reduction) }}" 
+                          method="POST" class="d-inline">
+                        <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+
+            <div class="modal fade" id="editModal_{{ reduc.id_reduction }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog">
+                <form method="POST" action="{{ url_for('update_reduction', id_reduction=reduc.id_reduction) }}">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Modifier la réduction #{{ reduc.id_reduction }}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                          <label for="id_plat_{{ reduc.id_reduction }}">Plat</label>
+                          <select class="form-control" id="id_plat_{{ reduc.id_reduction }}" name="id_plat" required>
+                              {% for plat in all_plats %}
+                              <option value="{{ plat.id_plat }}"
+                                {% if plat.id_plat == reduc.id_plat %}selected{% endif %}>
+                                  {{ plat.nom_plat }} ({{ plat.type_plat }}) - {{ plat.prix }} €
+                              </option>
+                              {% endfor %}
+                          </select>
+                      </div>
+
+                      <div class="form-group mt-3">
+                          <label for="reduction_{{ reduc.id_reduction }}">Pourcentage</label>
+                          <input type="number" class="form-control" 
+                                 id="reduction_{{ reduc.id_reduction }}"
+                                 name="reduction" value="{{ reduc.reduction }}"
+                                 min="1" max="100" required>
+                      </div>
+
+                      <div class="form-group mt-3">
+                          <label for="points_fidelite_{{ reduc.id_reduction }}">Coût en points</label>
+                          <input type="number" class="form-control"
+                                 id="points_fidelite_{{ reduc.id_reduction }}"
+                                 name="points_fidelite" value="{{ reduc.points_fidelite }}"
+                                 min="1" required>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                      <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
