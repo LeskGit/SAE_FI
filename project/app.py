@@ -23,8 +23,6 @@ def mkpath(p):
     """
     return os.path.normpath(os.path.join(os.path.dirname(__file__), p))
 
-
-
 app = Flask(__name__)
 app.config['BOOSTRAP_SERVE_LOCAL'] = True
 app.config['UPLOAD_FOLDER'] = os.path.join(

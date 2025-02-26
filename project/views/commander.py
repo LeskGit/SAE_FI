@@ -71,7 +71,6 @@ def commander():
     form = CommanderForm()
 
     allergenes = Allergenes.get_allergenes()
-    
     type = request.args.get('type', 'p')
     selected_allergenes = request.form.getlist('allergenes')  # Liste des allergènes cochés
     query_plats = request.args.get('query', "")
