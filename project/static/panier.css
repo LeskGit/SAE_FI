@@ -71,6 +71,21 @@
     }
 }
 
+#accordion-button{
+    width: 100px;
+    background-color: rgba(248,249,250,1);
+}
+
+#img80{
+    width: 80px;
+    height: 80px;
+}
+
+#img60{
+    width: 60px;
+    height: 60px;
+}
+
 @media (max-width: 550px) {
     .img_plat_panier {
         display: none;
