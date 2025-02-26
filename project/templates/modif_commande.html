@@ -40,24 +40,50 @@
             </div>
         </form>
 
+
         <!-- Grille des plats -->
+        {% if type != 'f' %}
+            <div class="row g-3 rounded me-0 plat-container">
+                <h2>{{ list_plats|length }} plats disponibles</h2>
+                {% for plat in list_plats %}
+                <div class="col-md-4">
+                    <div class="card" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.id_plat }}">
+                        <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
+                        <div class="card-body text-center">
+                            <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
+                        </div>
+                    </div>
+
+                    {% include "modal/modif_cmd_modal_plat.html" %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+        <!-- Grille des formules -->
         <div class="row g-3 rounded me-0 plat-container">
-            <h2>{{ list_plats|length }} plats disponibles</h2>
-            {% for plat in list_plats %}
-            <div class="col-md-4">
-                <div class="card" data-bs-toggle="modal" data-bs-target="#editModal{{ plat.id_plat }}">
-                    <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="card-img-top" alt="{{ plat.nom_plat }}">
-                    <div class="card-body text-center">
-                        <p>{{ plat.nom_plat }} <br> {{ plat.prix }}€</p>
+            <h2 class="text-center mb-4">{{ list_plats|length }} formules disponibles</h2>
+            {% for formule in list_plats %}
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100 border-0" data-bs-toggle="modal" data-bs-target="#formuleModal{{ formule.id_formule }}">
+                        <div class="card-header text-center bg-primary text-white rounded-top">
+                            <h5 class="mb-0">{{ formule.libelle_formule }}</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <p class="small text-muted">Cliquez pour voir les détails</p>
+                        </div>
                     </div>
                 </div>
-
-                {% include "modif_cmd_modal_plat.html" %}
-            </div>
+                
+                {% include "modal/modif_cmd_modal_formule.html" %}
             {% endfor %}
         </div>
+        {% endif %}  
+
     </div>
 
+
+
+    <!-- Récapitulatif -->
     <div class="text-center col-md-4 recap-container">
             <div class="background_recap shadow p-3 py-4">
             <h3 class="text-center my-3 fw-bold">Mes Articles</h3>
@@ -97,6 +123,58 @@
                             </div>
                         </div>
                     {% endfor %}
+                    <div class="accordion" id="panierAccordion">
+                        {% for constituer_formule in commande.constituer_formule_assoc %}
+                            <div class="container d-flex bg-light rounded my-3">
+                                    <div class="container col-2">
+                                        <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="img-fluid img_article m-2" id="img80" alt="produit1">
+                                    </div>
+                                    <div class="container my-auto">
+                                        <h4 class="mb-0"> {{ constituer_formule.formule.libelle_formule }}</h4>
+                                    </div>
+                                    <div class="container d-flex">
+                                        <div class="col-4 my-auto d-flex justify-content-center align-items-center">
+                                            <!-- Lien pour diminuer la quantité -->
+                                            <a href="{{ url_for('modifier_quantite_formule', id_commande=num_com, action='decrement', libelle_formule=constituer_formule.formule.libelle_formule) }}" 
+                                            class="btn btn-outline-danger btn-sm">-</a>
+                                            
+                                            <span class="mx-2">{{ constituer_formule.quantite_formule }}</span>
+                                            
+                                            <!-- Lien pour augmenter la quantité -->
+                                            <a href="{{ url_for('modifier_quantite_formule', id_commande=num_com, action='increment', libelle_formule=constituer_formule.formule.libelle_formule) }}" 
+                                            class="btn btn-outline-danger btn-sm">+</a>
+                                        </div>
+                                        
+                                        <!-- Récupère la quantité de la formule commandée -->
+                                        <p class="col-4 text-center my-auto"> {{ constituer_formule.formule.prix * constituer_formule.quantite_formule }}€</p>
+    
+                                        <a href="{{ url_for('supprimer_formule', id_commande=num_com, libelle_formule=constituer_formule.formule.libelle_formule) }}" class="text-danger text-center my-auto mx-auto" title="Supprimer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-trash3 col-4 text-center my-auto" viewBox="0 0 16 16">
+                                                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                    <button class="accordion-button collapsed" id="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ constituer_formule.formule.id_formule }}" aria-expanded="false" aria-controls="collapse{{ constituer_formule.formule.id_formule }}"></button>
+                            </div>
+                            <div class="collapse mt-2" id="collapse{{ constituer_formule.formule.id_formule }}">
+                                <div class="accordion-body p-3 border rounded bg-white">
+                                    <h5 class="fw-bold mb-3">Plats inclus dans cette formule :</h5>
+                                    <ul class="list-group">
+                                        {% for plat in constituer_formule.formule.les_plats %}
+                                        <li class="list-group-item d-flex align-items-center border-0">
+                                            <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="img_plat rounded me-3" id="img60" alt="{{ plat.nom_plat }}">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0">{{ plat.nom_plat }}</h6>
+                                                <small class="text-muted">{{ plat.type_plat }}</small>
+                                            </div>
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2">x1</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
                 {% endif %}
             </div>
             <hr class="w-100 mx-auto bg-dark bar"/>
