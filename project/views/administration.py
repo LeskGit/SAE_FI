@@ -388,18 +388,20 @@ def edition_offre():
 @app.route("/admin/creation_reduc", methods=["GET", "POST"])
 @admin_required
 def creation_reduction():
-    """
-    Crée une nouvelle réduction (sélection d'un plat + pourcentage).
-    """
     if request.method == "POST":
         id_plat = request.form.get("id_plat")
         pourcentage = request.form.get("reduction")
-        if not id_plat or not pourcentage:
+        cost_points = request.form.get("points_fidelite")
+        if not id_plat or not pourcentage or not cost_points:
             flash("Formulaire incomplet.", "danger")
             return redirect(url_for("creation_reduction"))
 
         try:
-            new_reduc = Reduction(id_plat=int(id_plat), reduction=int(pourcentage))
+            new_reduc = Reduction(
+                id_plat=int(id_plat),
+                reduction=int(pourcentage),
+                points_fidelite=int(cost_points)
+            )
             db.session.add(new_reduc)
             db.session.commit()
             flash("Réduction créée avec succès.", "success")
@@ -409,7 +411,6 @@ def creation_reduction():
             flash(f"Erreur lors de la création: {e}", "danger")
             return redirect(url_for("creation_reduction"))
 
-    # GET : on affiche le formulaire et la liste des plats
     plats = Plats.query.all()
     return render_template("creation_reduc.html", plats=plats)
 
@@ -420,10 +421,8 @@ def edition_reduction():
     """
     Liste et gère (modifier/supprimer) les réductions existantes.
     """
-    # Récupération des réductions
     reductions = Reduction.query.all()
     all_plats = Plats.query.all()
-    # On fait un dict pour accéder facilement au plat associé
     plats_map = {p.id_plat: p for p in all_plats}
 
     return render_template("edition_reduc.html",
@@ -436,14 +435,18 @@ def edition_reduction():
 @admin_required
 def update_reduction(id_reduction):
     """
-    Met à jour une réduction existante (changement de plat ou pourcentage).
+    Met à jour une réduction existante (changement de plat, pourcentage, coût en points).
     """
     reduc = Reduction.query.get_or_404(id_reduction)
     try:
         new_plat_id = int(request.form.get("id_plat"))
         new_pourcentage = int(request.form.get("reduction"))
+        new_points = int(request.form.get("points_fidelite"))
+
         reduc.id_plat = new_plat_id
         reduc.reduction = new_pourcentage
+        reduc.points_fidelite = new_points
+
         db.session.commit()
         flash("Réduction mise à jour avec succès.", "success")
     except Exception as e:

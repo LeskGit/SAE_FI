@@ -388,6 +388,7 @@ class Reduction(db.Model):
     id_reduction = db.Column(db.Integer, primary_key = True)
     id_plat = db.Column(db.Integer, db.ForeignKey(CONTENIR_ID_PLAT))
     reduction = db.Column(db.Integer) # en pourcentage
+    points_fidelite = db.Column(db.Integer)
     clients = db.relationship("User", secondary=client_reductions, back_populates="reductions")
 
     def __repr__(self):
@@ -1174,8 +1175,8 @@ def execute_tests():
         db.session.rollback()
         print("Erreur:", e)
 
-    reduction1 = Reduction(id_plat=plat1.id_plat, reduction=20)
-    reduction2 = Reduction(id_plat=plat2.id_plat, reduction=15)
+    reduction1 = Reduction(id_plat=plat1.id_plat, reduction=20, points_fidelite=100)
+    reduction2 = Reduction(id_plat=plat2.id_plat, reduction=15, points_fidelite=50)
     db.session.add_all([reduction1, reduction2])
     db.session.commit()
 

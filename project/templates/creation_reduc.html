@@ -7,14 +7,12 @@
 {% block content %}
 <div class="mt-4 w-auto retour_admin">
     <a class="btn btn-dark" href="{{ url_for('edition_reduction') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" 
-             class="bi bi-arrow-left" viewBox="0 0 16 16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" 
+             fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
             <path fill-rule="evenodd" 
-                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 
-                  0 1 0-.708-.708l-4 4a.5.5 
-                  0 0 0 0 .708l4 4a.5.5 
-                  0 0 0 .708-.708L2.707 8.5H14.5A.5.5 
-                  0 0 0 15 8"/>
+                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146
+                  a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 
+                  0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
         </svg>
     </a>
 </div>
@@ -42,6 +40,12 @@
             <label for="reduction">Pourcentage de réduction</label>
             <input type="number" class="form-control" id="reduction" name="reduction" 
                    placeholder="Ex: 20 pour 20%" min="1" max="100" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="points_fidelite">Coût en points de fidélité</label>
+            <input type="number" class="form-control" id="points_fidelite" 
+                   name="points_fidelite" placeholder="Ex: 50" min="1" required>
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Créer la réduction</button>
