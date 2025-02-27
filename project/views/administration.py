@@ -435,7 +435,7 @@ def creation_reduction():
             return redirect(url_for("edition_reduction"))
         except Exception as e:
             db.session.rollback()
-            flash(f"Erreur lors de la création: {e}", "danger")
+            flash(f"Erreur lors de la création: "+ str(e.orig.args[1]), "danger")
             return redirect(url_for("creation_reduction"))
 
     plats = Plats.query.all()
@@ -478,7 +478,7 @@ def update_reduction(id_reduction):
         flash("Réduction mise à jour avec succès.", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Erreur lors de la modification: {e}", "danger")
+        flash(f"Erreur lors de la modification: "+ str(e.orig.args[1]), "danger")
 
     return redirect(url_for("edition_reduction"))
 
@@ -496,7 +496,7 @@ def delete_reduction(id_reduction):
         flash("Réduction supprimée avec succès.", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Erreur lors de la suppression: {e}", "danger")
+        flash(f"Erreur lors de la suppression: " + str(e.orig.args[1]), "danger")
 
     return redirect(url_for("edition_reduction"))
 
@@ -519,20 +519,19 @@ def add_offre():
             "Erreur : Veuillez remplir tous les champs et sélectionner au moins un plat.",
             "danger")
         return redirect(url_for("creation_offre"))
-
+    
     # Validation du nombre de plats
     if len(plats_selectionnes) > 4:
         flash("Erreur : Une formule ne peut contenir que 4 plats maximum.",
               "danger")
         return redirect(url_for("creation_offre"))
-
-    # Vérifier si la formule existe déjà
-    formule_existante = Formule.query.filter_by(
-        libelle_formule=libelle_formule).first()
-    if formule_existante:
-        flash(f"Erreur : La formule '{libelle_formule}' existe déjà.", "danger")
+    
+    #Vérification que le prix est un nombre
+    if prix.isnumeric() == False:
+        flash("Erreur : Le prix doit être un nombre.", "danger")
         return redirect(url_for("creation_offre"))
 
+    
     # Créer une nouvelle formule
     nouvelle_formule = Formule(libelle_formule=libelle_formule, prix=prix)
 
@@ -541,12 +540,15 @@ def add_offre():
         plat = Plats.query.filter_by(nom_plat=nom_plat).first()
         if plat:
             nouvelle_formule.les_plats.append(plat)
-
-    db.session.add(nouvelle_formule)
-    db.session.commit()
-
-    flash(f"La formule '{libelle_formule}' a été ajoutée avec succès.",
-          "success")
+    try:
+        db.session.add(nouvelle_formule)
+        db.session.commit()
+        flash(f"La formule '{libelle_formule}' a été ajoutée avec succès.",
+              "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de l'ajout de la formule : " + str(e.orig.args[1]), "danger")
+    
     return redirect(url_for("creation_offre"))
 
 
@@ -578,10 +580,13 @@ def update_offre(id):
         Plats.query.filter_by(nom_plat=nom).first()
         for nom in plats_selectionnes
     ]
-
-    db.session.commit()
-    flash(f"La formule '{libelle_formule}' a été modifiée avec succès.",
+    try:
+        db.session.commit()
+        flash(f"La formule '{libelle_formule}' a été modifiée avec succès.",
           "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la modification de la formule : " + str(e.orig.args[1]), "danger")
     return redirect(url_for("edition_offre"))
 
 
