@@ -17,9 +17,10 @@ Imports:
 """
 from hashlib import sha256
 import click
-from project.models import User
+from .model.class_model import User
 from .app import app, db
-from .models import TriggerManager, execute_tests
+from .model.test_model import execute_tests
+from .model.trigger_model import TriggerManager
 
 
 @app.cli.command()
