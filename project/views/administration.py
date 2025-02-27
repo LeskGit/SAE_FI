@@ -424,14 +424,35 @@ def edition_offre():
                            plats=plats,
                            type=type)
 
-@app.route("/admin/creation_promo", methods=["GET", "POST"])
+@app.route("/admin/creation_promo", methods=["GET", "POST"], defaults={"id_plat": None})
+@app.route("/admin/creation_promo/<int:id_plat>", methods=["GET", "POST"])
 @admin_required
-def creation_promo():
+def creation_promo(id_plat):
     if request.method == "POST":
-        #TODO: Ajouter la réduction dans la base de données
-        pass
+        id_plat = request.form.get("id_plat")
+        quantite_promo = request.form.get("reduction")
+        prix_reduc = request.form.get("prix_calcule")
+        if not id_plat or not quantite_promo or not prix_reduc:
+            flash("Formulaire incomplet." + str(id_plat) + " " + str(quantite_promo) + " " + str(prix_reduc), "danger")
+            return redirect(url_for("creation_promo"))
+        
+        try:
+            plat = Plats.query.get(id_plat)
+            plat.quantite_promo = quantite_promo
+            plat.prix_reduc = prix_reduc
+            db.session.commit()
+            flash("Promotion créée avec succès.", "success")
+            return redirect(url_for("edition_promo"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de la création: {e}", "danger")
+            return redirect(url_for("creation_promo", id_plat=id_plat))
+        
     plats = Plats.query.all()
-    return render_template("creation_promo.html", plats=plats)
+    plat = None
+    if id_plat:
+        plat = Plats.query.get(id_plat)
+    return render_template("creation_promo.html", plats=plats, selected_plat = plat)
 
 @app.route("/admin/edition_promo", methods=["GET"])
 @admin_required
@@ -439,12 +460,24 @@ def edition_promo():
     """
     Liste et gère (modifier/supprimer) les réductions existantes.
     """
-    promo = Reduction.query.all()
-    all_plats = Plats.query.all()
-
+    promo = Plats.query.filter(Plats.quantite_promo > 0).all()
     return render_template("edition_promo.html",
-                           promo=promo,
-                           all_plats=all_plats)
+                           promo=promo)
+
+@app.route("/admin/delete_promo/<int:id_plat>", methods=["POST"])
+@admin_required
+def delete_promo(id_plat):
+    plat = Plats.query.get_or_404(id_plat)
+    try:
+        plat.quantite_promo = 0
+        plat.prix_reduc = 0
+        db.session.commit()
+        flash("Promotion supprimée avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la suppression: {e}", "danger")
+
+    return redirect(url_for("edition_promo"))
 
 @app.route("/admin/creation_reduc", methods=["GET", "POST"])
 @admin_required

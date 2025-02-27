@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="mt-4 w-auto retour_admin">
-    <a class="btn btn-dark" href="{{ url_for('edition_reduction') }}">
+    <a class="btn btn-dark" href="{{ url_for('admin') }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" 
              fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
             <path fill-rule="evenodd" 
@@ -27,18 +27,19 @@
         <div class="form-group">
             <label for="id_plat">Sélectionner le plat</label>
             <select class="form-control" id="id_plat" name="id_plat" required>
-                <option value="" disabled selected>-- Sélectionnez un plat --</option>
+                <option value="" disabled {% if not selected_plat.id_plat %}selected{% endif %}>-- Sélectionnez un plat --</option>
                 {% for plat in plats %}
-                <option value="{{ plat.id_plat }}" data-prix="{{ plat.prix }}">
+                <option value="{{ plat.id_plat }}" data-prix="{{ plat.prix }}" {% if plat.id_plat == selected_plat.id_plat %}selected{% endif %}>
                     {{ plat.nom_plat }} ({{ plat.type_plat }}) - {{ plat.prix }} €
                 </option>
+            
                 {% endfor %}
             </select>
         </div>
 
         <div class="form-group mt-3">
             <label for="reduction">Quantité nécessaire</label>
-            <input type="number" class="form-control" id="reduction" name="reduction" placeholder="Ex: 2" min="1" max="100" required>
+            <input type="number" class="form-control" id="reduction" name="reduction" placeholder="Ex: 2" min="1" max="100" value="{{ selected_plat.quantite_promo }}" required>
         </div>
 
         <div class="form-group mt-3">
@@ -49,7 +50,7 @@
         <div class="form-group mt-3">
             <label for="prix_calcule">Prix remboursé</label>
             <input type="number" class="form-control" id="prix_calcule" 
-                   name="prix_calcule" placeholder="Ex: 15€ - Pour un prix de 20€, le prix après réduction est de 5€" min="1" required>
+                   name="prix_calcule" placeholder="Ex: 15€ - Pour un prix de 20€, le prix après réduction est de 5€" min="1" value="{{ selected_plat.prix_reduc }}" required>
         </div>
 
         <div class="form-group mt-3">
@@ -65,6 +66,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        //if the id_plat in get request is not empty, then we need to update the price
+        if ('{{ selected_plat.id_plat }}' !== '') {
+            updatePrice();
+            updateFinalPrice();
+        }
+
         function updatePrice() {
             var prixCalcule = document.getElementById('prix_calcule_avant');
             var reduction = document.getElementById('reduction').value;
@@ -79,6 +86,10 @@
             var result = prixCalcule - reduction;
             document.getElementById('prix_final').value = result + ' €';
         }
+
+        document.getElementById('id_plat').addEventListener('change', function() {
+            document.getElementById('reduction').value = 0;
+        });
 
         document.getElementById('id_plat').addEventListener('change', updatePrice);
         document.getElementById('reduction').addEventListener('input', updatePrice);
