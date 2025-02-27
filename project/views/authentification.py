@@ -6,7 +6,7 @@ from hashlib import sha256
 from wtforms import StringField, PasswordField, EmailField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Email, Length, Regexp, ValidationError
-from project.models import User
+from project.model.class_model import User
 
 
 class LoginForm(FlaskForm):
