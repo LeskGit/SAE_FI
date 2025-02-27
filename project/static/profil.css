@@ -5,6 +5,15 @@
     background-color: lightgray;
 }
 
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
 aside nav ul li.active {
     background-color: #f0f0f0; /* Couleur de fond pour surligner */
     position: relative;        /* Nécessaire pour le trait vertical */
