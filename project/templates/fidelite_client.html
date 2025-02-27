@@ -49,6 +49,29 @@
             </li>
             {% endfor %}
         </ul>
+
+        <hr>
+
+        <h3 class="mt-4">Mes Réductions Actives</h3>
+        <ul class="list-group">
+            {% if current_user.reductions|length > 0 %}
+                {% for r in current_user.reductions %}
+                <li class="list-group-item mb-2">
+                    <div>
+                      <span class="threshold-badge">{{ r.points_fidelite }}</span>
+                      {% set p = plats_map[r.id_plat] %}
+                      <strong>{{ p.nom_plat }}</strong> : {{ r.reduction }}% de réduction
+                    </div>
+                    <form action="{{ url_for('retourner_reduction') }}" method="POST" class="m-0 p-0">
+                        <input type="hidden" name="id_reduction" value="{{ r.id_reduction }}">
+                        <button type="submit" class="btn btn-warning btn-sm">Annuler</button>
+                    </form>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">Vous n'avez pas de réduction active.</li>
+            {% endif %}
+        </ul>
     </div>
 </div>
 {% endblock %}
