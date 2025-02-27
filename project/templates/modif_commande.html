@@ -14,7 +14,7 @@
 <hr class="w-25 mx-auto bg-dark bar">
 <h1 class="text-center my-3">Numéro #{{ num_com }}</h1>
 
-<div class="row me-0 mt-3">
+<div class="d-flex row me-0 mt-3 container-principal">
 
     <!-- Liste des plats -->
     <div class="col-md-8 main-container">
@@ -88,32 +88,32 @@
             <div class="background_recap shadow p-3 py-4">
             <h3 class="text-center my-3 fw-bold">Mes Articles</h3>
             <hr class="w-25 mx-auto bg-dark bar"/>
-            <div class="container-fluid col-11">
+            <div class="container-fluid col-11 container-articles">
 
                 {% if panier is not none %}
                     {% for constituer in commande.constituer_assoc %}
-                        <div class="container d-flex bg-light rounded my-3">
-                            <div class="container col-2">
-                                <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="img-fluid img_article m-2" style="width: 80px; height: 80px" alt="produit1">
+                        <div class="container d-flex bg-light rounded my-3 container-article">
+                            <div class=" m-0 img-container">
+                                <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="img-fluid img_article m-2" alt="produit1">
                             </div>
                             <div class="container my-auto">
                                 <h4 class="mb-0"> {{ constituer.plat.nom_plat }}</h4>
                             </div>
-                            <div class="container d-flex">
+                            <div class="container d-flex utils">
                                 <div class="my-auto d-flex justify-content-center align-items-center">
                                     <!-- Lien pour diminuer la quantité -->
                                     <a href="{{ url_for('modifier_quantite', id_commande=num_com, action='decrement', nom_plat=constituer.plat.nom_plat) }}" 
-                                       class="btn btn-outline-danger btn-sm mx-auto">-</a>
+                                       class="btn btn-outline-danger btn-sm mx-auto link-article">-</a>
                                     
                                     <span class="mx-2">{{ constituer.quantite_plat }}</span>
                                     
                                     <!-- Lien pour augmenter la quantité -->
                                     <a href="{{ url_for('modifier_quantite', id_commande=num_com, action='increment', nom_plat=constituer.plat.nom_plat) }}" 
-                                       class="btn btn-outline-danger btn-sm mx-auto">+</a>
+                                       class="btn btn-outline-danger btn-sm mx-auto link-article">+</a>
                                 </div>
                                 
                                 <!-- Récupère la quantité du plat commandé -->
-                                <p class="my-auto mx-2"> {{ constituer.plat.prix * constituer.quantite_plat }}€</p>
+                                <p class="my-auto mx-2 link-article"> {{ constituer.plat.prix * constituer.quantite_plat }}€</p>
 
                                 <a href="{{ url_for('supprimer_plat', id_commande=num_com, nom_plat=constituer.plat.nom_plat) }}" class="text-danger text-center my-auto mx-auto" title="Supprimer">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-trash3 col-4 text-center my-auto bin" viewBox="0 0 16 16">
