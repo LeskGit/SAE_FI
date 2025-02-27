@@ -26,7 +26,7 @@
         <h3 class="mt-4">Réductions disponibles</h3>
         <ul class="list-group">
             {% for r in reductions %}
-            <li class="list-group-item mb-2">
+            <li class="reduc-container mb-2">
                 <div>
                   <span class="threshold-badge">{{ r.points_fidelite }}</span>
                   {% set p = plats_map[r.id_plat] %}
