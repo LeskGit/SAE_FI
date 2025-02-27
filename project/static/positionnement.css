@@ -123,25 +123,39 @@ footer {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
 }
 
+.panier-container {
+    position: relative; 
+}
+
+
 
 @media (max-width: 767px) {
     .navbar .d-md-block {
         display: none !important;
     }
-.img_nav {
-    position: static;
-}
+    .img_nav {
+        position: static;
+    }
+
+    .notif {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
 }
 
-.notif{
-    border-radius: 20px;
-    background-color: #E84D0E;
-    width: 20px;
-    height: 20px;
-    justify-content: center;
+
+.notif {
     position: absolute;
-    right: 60px;
-    top: 23px;
+    top: -3px;  
+    right: -10px;  
+    border-radius: 50%;
+    background-color: #E84D0E;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
     color: white;
-    
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

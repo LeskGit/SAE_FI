@@ -44,13 +44,15 @@
                     <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('nouveaute') }}">Nouveauté</a>
                     <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('commander') }}">Commander</a>
     
-                    <div class="nav-item nav-link text-center">
+                    <div class="nav-item nav-link text-center d-flex mx-auto">
+                        <div class="panier-container">
                         <a href="{{ url_for('panier') }}"><img src="{{ url_for('static', filename='img/logo_panier.png') }}" class="img_nav" alt="Logo panier"/></a>
                         {% if current_user.is_authenticated %}
                     {% if current_user.get_nb_items_panier() != 0 %}
                         <div class="notif">{{ current_user.get_nb_items_panier() }}</div>
                     {% endif %}
                 {% endif %}
+                        </div>
                 <a data-bs-toggle="dropdown" href="#" aria-expanded="false">
                             <img src="{% if current_user.is_authenticated %} {{ url_for('static', filename='img/logo_profil.png') }} {% else %} {{ url_for('static', filename='img/logo_login.png') }} {% endif %}" class="img_nav rounded-circle" alt="Logo profil">
                         </a>
