@@ -2,6 +2,8 @@
 
 {% block styles %}
 {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+
 {% endblock %}
 
 {% block content %}
@@ -23,7 +25,7 @@
 </div>
 
 <div class="container mt-4">
-    <a href="{{ url_for('creation_promo') }}" class="btn btn-success mb-3">Créer une nouvelle promotion</a>
+    <a href="{{ url_for('creation_promo') }}" class="btn btn-orange mb-3">Créer une nouvelle promotion</a>
 
     <table class="table table-striped">
         <thead>
@@ -46,7 +48,7 @@
                 <td>{{ plat.quantite_promo }}</td>
                 <td>{{ plat.prix_reduc }} €</td>
                 <td>
-                    <a class="btn btn-primary btn-sm" href="{{ url_for('creation_promo', id_plat=plat.id_plat) }}">
+                    <a class="btn btn-orange btn-sm" href="{{ url_for('creation_promo', id_plat=plat.id_plat) }}">
                         Modifier
                     </a>
 
