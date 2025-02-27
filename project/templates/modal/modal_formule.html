@@ -11,7 +11,10 @@
                     <ul class="list-group mb-3">
                         {% for p in formule.les_plats %}
                         <li class="list-group-item">
-                            {{ p.nom_plat }}
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5>{{ p.nom_plat }}</h5>
+                                <img src="{{ url_for('static', filename='img/product/' ~ p.img) }}" class="img_plat rounded me-3" id="img120" alt="{{ p.nom_plat }}">
+                            </div>
                             {% if p.les_allergenes %}
                             <ul class="list-group">
                                 {% for a in p.les_allergenes %}
