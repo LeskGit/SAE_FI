@@ -223,5 +223,30 @@ def echanger_points():
 
     return redirect(url_for("client_fidelite"))
 
+@app.route("/retourner_reduction", methods=["POST"])
+@login_required
+def retourner_reduction():
+    rid = request.form.get("id_reduction")
+    reduction = Reduction.query.get(rid)
+    if not reduction:
+        flash("Réduction introuvable.", "danger")
+        return redirect(url_for("client_fidelite"))
+    
+    if reduction not in current_user.reductions:
+        flash("Vous ne possédez pas cette réduction.", "danger")
+        return redirect(url_for("client_fidelite"))
+    
+    try:
+        current_user.points_fidelite += reduction.points_fidelite
+        current_user.reductions.remove(reduction)
+        db.session.commit()
+        flash(f"La réduction sur le plat {reduction.id_plat} a été annulée, vos points ont été restaurés !", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Une erreur s'est produite lors de l'échange : {e}", "danger")
+    
+    return redirect(url_for("client_fidelite"))
+
+
 
 
