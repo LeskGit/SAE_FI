@@ -158,6 +158,7 @@ class Commandes(db.Model):
     constituer_assoc = db.relationship("Constituer", back_populates="commande", overlaps="les_plats,plat")
     les_formules = db.relationship("Formule", secondary="constituer_formule", back_populates="les_commandes", overlaps="constituer_formule_assoc,commande,formule")
     constituer_formule_assoc = db.relationship("ConstituerFormule", back_populates="commande", overlaps="les_formules,commande")
+    reductions_ids = set()
 
     prix_total = 0
     prix_avec_reduc = 0
@@ -169,15 +170,28 @@ class Commandes(db.Model):
         self.prix_total = sum([constituer.plat.prix * constituer.quantite_plat for constituer in self.constituer_assoc]) + sum([constituerF.formule.prix * constituerF.quantite_formule for constituerF in self.constituer_formule_assoc])
         return self.prix_total
 
-    def compute_reduction(self):
-        """Calcule la réduction de la commande :
-            Applique le prix - prix_reduc pour chaque plat 
-            en promotion (constituer.quantite_plat > quantite_promo)
+    def compute_reduction(self, user):
         """
-        self.prix_avec_reduc = 0
+        Calcule le total des remises à appliquer en fonction des réductions
+        que possède l'utilisateur sur les plats contenus dans la commande.
+        La réduction est appliquée une seule fois pour chaque plat concerné.
+        
+        Args:
+            user (User): l'utilisateur connecté.
+        
+        Returns:
+            float: le montant total de la réduction (valeur négative).
+        """
+        total_reduc = 0
+        reductions_dispo = {reduction.id_plat: reduction for reduction in user.reductions}
+        
         for constituer in self.constituer_assoc:
-            if constituer.quantite_plat >= constituer.plat.quantite_promo:
-                self.prix_avec_reduc -= constituer.plat.prix_reduc
+            plat = constituer.plat
+            if plat.id_plat in reductions_dispo:
+                reduction_obj = reductions_dispo[plat.id_plat]
+                reduc = - plat.prix * (reduction_obj.reduction / 100)
+                total_reduc += reduc
+        self.prix_avec_reduc = total_reduc
         return self.prix_avec_reduc
 
     @classmethod
