@@ -11,8 +11,122 @@
 
     <!-- Section principale du dashboard -->
     <div class="row g-4">
+
+        <!-- Création de plat -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Création de plats</h5>
+                    <a href="{{ url_for('creation_plat') }}" class="btn btn-dark btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Création d'offre -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Création d'offres</h5>
+                    <a href="{{ url_for('creation_offre') }}" class="btn btn-dark btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Création Réduction -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Création de réductions</h5>
+                    <a href="{{ url_for('creation_reduction') }}" class="btn btn-dark btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Création Fidélité -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Création de promos</h5>
+                    <a href="{{ url_for('creation_promo') }}" class="btn btn-dark btn-lg"> 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">  
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Édition de plat -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Édition de plats</h5>
+                    <a href="{{ url_for('edition_plat') }}" class="btn btn-dark btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                        </svg>
+                        
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Édition d'offre -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Édition d'offres</h5>
+                    <a href="{{ url_for('edition_offre') }}" class="btn btn-dark btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Édition de réduction -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Édition de réductions</h5>
+                    <a href="{{ url_for('edition_reduction') }}" class="btn btn-dark btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Édition de fidélité -->
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Édition de promos</h5>
+                    <a href="{{ url_for('edition_promo') }}" class="btn btn-dark btn-lg">   <!-- A modif -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Stock nourriture -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card shadow-sm h-100 text-center">
                 <div class="card-body">
                     <h5 class="card-title">Stock nourriture</h5>
@@ -26,7 +140,7 @@
         </div>
 
         <!-- Commandes en cours -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card shadow-sm h-100 text-center">
                 <div class="card-body">
                     <h5 class="card-title">Commandes en cours</h5>
@@ -41,63 +155,6 @@
             </div>
         </div>
 
-        <!-- Édition de plat -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Édition de plat</h5>
-                    <a href="{{ url_for('edition_plat') }}" class="btn btn-dark btn-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                        </svg>
-                        
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Création de plat -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Création de plat</h5>
-                    <a href="{{ url_for('creation_plat') }}" class="btn btn-dark btn-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
-                        </svg>
-                        
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Édition d'offre -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Édition d'offre</h5>
-                    <a href="{{ url_for('edition_offre') }}" class="btn btn-dark btn-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Création d'offre -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Création d'offre</h5>
-                    <a href="{{ url_for('creation_offre') }}" class="btn btn-dark btn-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Statut des tables et liste noire -->
