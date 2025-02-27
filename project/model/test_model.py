@@ -199,15 +199,37 @@ def create_commandes():
                       num_table=12,
                       etat="Non Payée")
 
-    com13 = Commandes(id_client=1,
+    com14 = Commandes(id_client=1,
                       date=datetime(2024, 12, 18, 13),
                       date_creation=datetime(2024, 12, 18, 10, 5),
                       sur_place=False,
                       etat="Panier")
 
+    com15 = Commandes(id_client=1,
+                      date=datetime(2024, 11, 6, 12),
+                      date_creation=datetime(2024, 11, 4, 10),
+                      sur_place=True,
+                      num_table=12,
+                      etat="Payée")
+
+    com16 = Commandes(id_client=1,
+                      date=datetime(2024, 11, 7, 12),
+                      date_creation=datetime(2024, 11, 4, 10),
+                      sur_place=True,
+                      num_table=12,
+                      etat="Payée")
+
+
+    com17 = Commandes(id_client=1,
+                      date=datetime(2024, 11, 8, 12),
+                      date_creation=datetime(2024, 11, 4, 10),
+                      sur_place=True,
+                      num_table=12,
+                      etat="Payée")
+
     db.session.add_all([
         com1, com2, com3, com4, com5, com6, com7, com8, com9, com10, com11,
-        com12, com13
+        com12, com13, com14, com15, com16, com17
     ])
 
     db.session.commit()

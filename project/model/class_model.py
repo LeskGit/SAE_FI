@@ -158,6 +158,7 @@ class Commandes(db.Model):
     constituer_assoc = db.relationship("Constituer", back_populates="commande", overlaps="les_plats,plat")
     les_formules = db.relationship("Formule", secondary="constituer_formule", back_populates="les_commandes", overlaps="constituer_formule_assoc,commande,formule")
     constituer_formule_assoc = db.relationship("ConstituerFormule", back_populates="commande", overlaps="les_formules,commande")
+    reductions_ids = set()
 
     prix_total = 0
     prix_avec_reduc = 0
@@ -169,16 +170,41 @@ class Commandes(db.Model):
         self.prix_total = sum([constituer.plat.prix * constituer.quantite_plat for constituer in self.constituer_assoc]) + sum([constituerF.formule.prix * constituerF.quantite_formule for constituerF in self.constituer_formule_assoc])
         return self.prix_total
 
-    def compute_reduction(self):
-        """Calcule la réduction de la commande :
-            Applique le prix - prix_reduc pour chaque plat 
-            en promotion (constituer.quantite_plat > quantite_promo)
+    def compute_reduction(self, user):
         """
-        self.prix_avec_reduc = 0
+        Calcule le total des remises à appliquer en fonction de deux critères :
+        
+        1. Si pour un plat commandé, la quantité est supérieure ou égale à la quantité promotionnelle, 
+        une réduction fixe (plat.prix_reduc) est appliquée une seule fois.
+        
+        2. Si l'utilisateur a acheté une réduction pour un plat (via la table Reduction), 
+        celle-ci est appliquée en pourcentage sur le prix du plat (une seule fois).
+        
+        Le montant total de la réduction est renvoyé sous forme négative.
+        
+        Args:
+            user (User): l'utilisateur connecté.
+            
+        Returns:
+            float: le montant total de la réduction (valeur négative).
+        """
+        total_reduc = 0
         for constituer in self.constituer_assoc:
-            if constituer.quantite_plat >= constituer.plat.quantite_promo:
-                self.prix_avec_reduc -= constituer.plat.prix_reduc
+            plat = constituer.plat
+            if constituer.quantite_plat >= plat.quantite_promo:
+                total_reduc -= plat.prix_reduc
+
+        reductions_dispo = {reduction.id_plat: reduction for reduction in user.reductions}
+        for constituer in self.constituer_assoc:
+            plat = constituer.plat
+            if plat.id_plat in reductions_dispo:
+                reduction_obj = reductions_dispo[plat.id_plat]
+                discount = - plat.prix * (reduction_obj.reduction / 100)
+                total_reduc += discount
+
+        self.prix_avec_reduc = total_reduc
         return self.prix_avec_reduc
+
 
     @classmethod
     def get_num_table_dispo(cls, commande_date: datetime):

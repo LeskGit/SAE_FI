@@ -125,7 +125,7 @@ def client_historique():
         plats_names = ", ".join(articles_commandes) if articles_commandes else "-"
 
         # Calcul du prix total
-        total_price = str(com.calculer_prix() + com.compute_reduction()) + " €" if articles_commandes else "-"
+        total_price = str(com.calculer_prix() + com.compute_reduction(current_user)) + " €" if articles_commandes else "-"
         
         can_modify = False
         if com.etat != "Payée":
@@ -159,7 +159,7 @@ def client_modif(id_commande):
         return redirect(url_for('client_historique'))
 
     commande.calculer_prix()
-    commande.compute_reduction()
+    commande.compute_reduction(user)
     
     if not Commandes.can_modify_commande(id_commande, user.id_client):
         return redirect(url_for('client_historique'))
