@@ -4,8 +4,8 @@ hr {
 
 .edition {
     margin: 3em;
-    background-color: rgb(150, 162, 174);
     border-radius: 20px;
+    border: 1px solid #d6cebd;
 }
 
 .img_plat {
