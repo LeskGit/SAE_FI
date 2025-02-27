@@ -526,6 +526,13 @@ def add_offre():
               "danger")
         return redirect(url_for("creation_offre"))
     
+    # Vérifier si la formule existe déjà
+    formule_existante = Formule.query.filter_by(
+        libelle_formule=libelle_formule).first()
+    if formule_existante:
+        flash(f"Erreur : La formule '{libelle_formule}' existe déjà.", "danger")
+        return redirect(url_for("creation_offre"))
+    
     #Vérification que le prix est un nombre
     if prix.isnumeric() == False:
         flash("Erreur : Le prix doit être un nombre.", "danger")
