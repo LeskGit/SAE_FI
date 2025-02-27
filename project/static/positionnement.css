@@ -22,7 +22,14 @@ footer {
     bottom: 0;
 }
 
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
 
+.btn-orange:hover {
+    background-color: #e0691f;
+}
 
 
   html, body {

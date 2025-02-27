@@ -6,6 +6,15 @@ span.disponible {
     color: green;
 }
 
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
 body{
     background-image: url("img/background_dashboard.jpg");
     background-size: cover; 
