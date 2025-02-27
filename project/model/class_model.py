@@ -172,27 +172,39 @@ class Commandes(db.Model):
 
     def compute_reduction(self, user):
         """
-        Calcule le total des remises à appliquer en fonction des réductions
-        que possède l'utilisateur sur les plats contenus dans la commande.
-        La réduction est appliquée une seule fois pour chaque plat concerné.
+        Calcule le total des remises à appliquer en fonction de deux critères :
+        
+        1. Si pour un plat commandé, la quantité est supérieure ou égale à la quantité promotionnelle, 
+        une réduction fixe (plat.prix_reduc) est appliquée une seule fois.
+        
+        2. Si l'utilisateur a acheté une réduction pour un plat (via la table Reduction), 
+        celle-ci est appliquée en pourcentage sur le prix du plat (une seule fois).
+        
+        Le montant total de la réduction est renvoyé sous forme négative.
         
         Args:
             user (User): l'utilisateur connecté.
-        
+            
         Returns:
             float: le montant total de la réduction (valeur négative).
         """
         total_reduc = 0
+        for constituer in self.constituer_assoc:
+            plat = constituer.plat
+            if constituer.quantite_plat >= plat.quantite_promo:
+                total_reduc -= plat.prix_reduc
+
         reductions_dispo = {reduction.id_plat: reduction for reduction in user.reductions}
-        
         for constituer in self.constituer_assoc:
             plat = constituer.plat
             if plat.id_plat in reductions_dispo:
                 reduction_obj = reductions_dispo[plat.id_plat]
-                reduc = - plat.prix * (reduction_obj.reduction / 100)
-                total_reduc += reduc
+                discount = - plat.prix * (reduction_obj.reduction / 100)
+                total_reduc += discount
+
         self.prix_avec_reduc = total_reduc
         return self.prix_avec_reduc
+
 
     @classmethod
     def get_num_table_dispo(cls, commande_date: datetime):
