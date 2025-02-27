@@ -2,6 +2,8 @@
 
 {% block styles %}
 {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+
 {% endblock %}
 
 {% block content %}
@@ -58,7 +60,7 @@
             <input type="text" class="form-control" id="prix_final" name="prix_final" disabled value="-">
         </div>
 
-        <button type="submit" class="btn btn-primary mt-3">Créer la promotion</button>
+        <button type="submit" class="btn btn-orange mt-3">Créer la promotion</button>
         <a href="{{ url_for('edition_promo') }}" class="btn btn-secondary mt-3">Revenir à la liste</a>
     </form>
 </div>

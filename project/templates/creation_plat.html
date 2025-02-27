@@ -3,7 +3,7 @@
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='retour_admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -19,7 +19,7 @@
     <hr class="w-25 mx-auto bg-dark bar"/>
 </div>
 
-<div class="container-fluid w-75 bg-light justify-content-center align-items-center">
+<div class="container-fluid w-75 bg-light justify-content-center align-items-center my-5">
     <form method="POST" novalidate class="form-horizontal" enctype="multipart/form-data" role="form" action="{{ url_for('add_plat') }}">
         {{ form.hidden_tag() }} <!-- CSRF Token -->
         
@@ -70,7 +70,7 @@
         </div>
         
 
-        <button type="submit" class="btn btn-primary mt-3">Ajouter le plat</button>
+        <button type="submit" class="btn btn-orange mt-3 mb-5">Ajouter le plat</button>
     </form>
 </div>
 {% endblock %}

@@ -31,6 +31,7 @@ h3{
 .card {
     border: none;
     background-color: #e0e0e0;
+    max-width: 25em;
 }
 
 .card-img-top {

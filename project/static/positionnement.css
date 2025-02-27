@@ -21,6 +21,17 @@ main {
 footer {
     bottom: 0;
 }
+
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
+
   html, body {
     overflow-x: hidden;
     width: 100%;
@@ -53,9 +64,9 @@ footer {
     background-position: center;
     color: black;
     padding: 20px 0;
-    /*position: relative;
+    position: relative;
     bottom: 0;
-    width: 100%; */
+    width: 100%;   
 }
 
 .bar {

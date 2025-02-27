@@ -3,7 +3,7 @@
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='retour_admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -33,7 +33,7 @@
         </div>
     </nav>
 
-    <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition" style="height: auto; overflow-y: auto;">
+    <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition mx-auto" style="height: auto; overflow-y: auto;">
         <div class="row justify-content-center mt-2">
             {% for formule in formules %}
             <div class="col-md-4 d-flex align-items-stretch">
