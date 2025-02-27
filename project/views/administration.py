@@ -83,6 +83,12 @@ class PlatForm(FlaskForm):
                 "Seules les images au format JPG, JPEG, PNG ou GIF sont autorisées."
             )
         ])
+    
+    quantite_defaut = FloatField("Stock initial / seuil de réapprovisionnement",
+                                 validators=[
+                                     DataRequired(),
+                                     NumberRange(min=0)
+                                 ])
 
 
 class FormuleForm(FlaskForm):
@@ -260,10 +266,10 @@ def add_plat():
         type_plat = form.type.data
         img = form.img.data
         allergenes = form.allergenes.data
-        print(allergenes)
+        quantite_defaut = form.quantite_defaut.data
 
         # Validation des données
-        if not nom_plat or not prix or not type_plat:
+        if not nom_plat or not prix or not type_plat or not quantite_defaut:
             flash("Erreur : Les champs nom, prix et type sont requis.",
                   "danger")
             return render_template('creation_plat.html', form=form)
@@ -291,6 +297,11 @@ def add_plat():
         plat = Plats(nom_plat=nom_plat,
                      prix=prix,
                      type_plat=type_plat,
+                     quantite_defaut=quantite_defaut,
+                     stock_utilisable=quantite_defaut,
+                     stock_reserve=int(quantite_defaut * 0.2),
+                     quantite_promo = 0,
+                     prix_reduc = 0,
                      img=filename)
         plat.add_allergene(allergenes)
         db.session.add(plat)
@@ -335,6 +346,7 @@ def update_plat(id):
     plat.nom_plat = request.form['nom_plat']
     plat.type_plat = request.form['type_plat']
     plat.prix = float(request.form['prix'])
+    plat.quantite_defaut = float(request.form['quantite_defaut'])
 
     # Récupérer les allergènes cochés
     allergenes_selectionnes = request.form.getlist('allergenes[]')
@@ -411,6 +423,61 @@ def edition_offre():
                            formules=formules,
                            plats=plats,
                            type=type)
+
+@app.route("/admin/creation_promo", methods=["GET", "POST"], defaults={"id_plat": None})
+@app.route("/admin/creation_promo/<int:id_plat>", methods=["GET", "POST"])
+@admin_required
+def creation_promo(id_plat):
+    if request.method == "POST":
+        id_plat = request.form.get("id_plat")
+        quantite_promo = request.form.get("reduction")
+        prix_reduc = request.form.get("prix_calcule")
+        if not id_plat or not quantite_promo or not prix_reduc:
+            flash("Formulaire incomplet." + str(id_plat) + " " + str(quantite_promo) + " " + str(prix_reduc), "danger")
+            return redirect(url_for("creation_promo"))
+        
+        try:
+            plat = Plats.query.get(id_plat)
+            plat.quantite_promo = quantite_promo
+            plat.prix_reduc = prix_reduc
+            db.session.commit()
+            flash("Promotion créée avec succès.", "success")
+            return redirect(url_for("edition_promo"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erreur lors de la création: {e}", "danger")
+            return redirect(url_for("creation_promo", id_plat=id_plat))
+        
+    plats = Plats.query.all()
+    plat = None
+    if id_plat:
+        plat = Plats.query.get(id_plat)
+    return render_template("creation_promo.html", plats=plats, selected_plat = plat)
+
+@app.route("/admin/edition_promo", methods=["GET"])
+@admin_required
+def edition_promo():
+    """
+    Liste et gère (modifier/supprimer) les réductions existantes.
+    """
+    promo = Plats.query.filter(Plats.quantite_promo > 0).all()
+    return render_template("edition_promo.html",
+                           promo=promo)
+
+@app.route("/admin/delete_promo/<int:id_plat>", methods=["POST"])
+@admin_required
+def delete_promo(id_plat):
+    plat = Plats.query.get_or_404(id_plat)
+    try:
+        plat.quantite_promo = 0
+        plat.prix_reduc = 0
+        db.session.commit()
+        flash("Promotion supprimée avec succès.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la suppression: {e}", "danger")
+
+    return redirect(url_for("edition_promo"))
 
 @app.route("/admin/creation_reduc", methods=["GET", "POST"])
 @admin_required

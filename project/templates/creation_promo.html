@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="mt-4 w-auto retour_admin">
+    <a class="btn btn-dark" href="{{ url_for('admin') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" 
+             fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" 
+                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146
+                  a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 
+                  0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+    </a>
+</div>
+
+<div class="top-info">
+    <h1 class="text-center my-3">Créer une Promotion</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container mt-4">
+    <form method="POST" action="{{ url_for('creation_promo') }}">
+        <div class="form-group">
+            <label for="id_plat">Sélectionner le plat</label>
+            <select class="form-control" id="id_plat" name="id_plat" required>
+                <option value="" disabled {% if not selected_plat.id_plat %}selected{% endif %}>-- Sélectionnez un plat --</option>
+                {% for plat in plats %}
+                <option value="{{ plat.id_plat }}" data-prix="{{ plat.prix }}" {% if plat.id_plat == selected_plat.id_plat %}selected{% endif %}>
+                    {{ plat.nom_plat }} ({{ plat.type_plat }}) - {{ plat.prix }} €
+                </option>
+            
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="reduction">Quantité nécessaire</label>
+            <input type="number" class="form-control" id="reduction" name="reduction" placeholder="Ex: 2" min="1" max="100" value="{{ selected_plat.quantite_promo }}" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="prix_calcule_avant">Prix avant réduction (€)</label>
+            <input type="number" class="form-control" id="prix_calcule_avant" name="prix_calcule_avant" disabled value="-">
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="prix_calcule">Prix remboursé</label>
+            <input type="number" class="form-control" id="prix_calcule" 
+                   name="prix_calcule" placeholder="Ex: 15€ - Pour un prix de 20€, le prix après réduction est de 5€" min="1" value="{{ selected_plat.prix_reduc }}" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="prix_final">Prix après réduction</label>
+            <input type="text" class="form-control" id="prix_final" name="prix_final" disabled value="-">
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Créer la promotion</button>
+        <a href="{{ url_for('edition_promo') }}" class="btn btn-secondary mt-3">Revenir à la liste</a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        //if the id_plat in get request is not empty, then we need to update the price
+        if ('{{ selected_plat.id_plat }}' !== '') {
+            updatePrice();
+            updateFinalPrice();
+        }
+
+        function updatePrice() {
+            var prixCalcule = document.getElementById('prix_calcule_avant');
+            var reduction = document.getElementById('reduction').value;
+            var prixPlat = document.getElementById('id_plat').selectedOptions[0].getAttribute('data-prix');
+            var result = prixPlat * reduction;
+            prixCalcule.value = result;
+        }
+
+        function updateFinalPrice() {
+            var prixCalcule = document.getElementById('prix_calcule_avant').value;
+            var reduction = document.getElementById('prix_calcule').value;
+            var result = prixCalcule - reduction;
+            document.getElementById('prix_final').value = result + ' €';
+        }
+
+        document.getElementById('id_plat').addEventListener('change', function() {
+            document.getElementById('reduction').value = 0;
+        });
+
+        document.getElementById('id_plat').addEventListener('change', updatePrice);
+        document.getElementById('reduction').addEventListener('input', updatePrice);
+
+        document.getElementById('id_plat').addEventListener('change', updateFinalPrice);
+        document.getElementById('reduction').addEventListener('input', updateFinalPrice);
+        document.getElementById('prix_calcule').addEventListener('input', updateFinalPrice);
+        
+        
+    });
+</script>
+{% endblock %}
