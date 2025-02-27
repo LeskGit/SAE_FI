@@ -85,6 +85,12 @@ class PlatForm(FlaskForm):
                 "Seules les images au format JPG, JPEG, PNG ou GIF sont autorisées."
             )
         ])
+    
+    quantite_defaut = FloatField("Stock initial / seuil de réapprovisionnement",
+                                 validators=[
+                                     DataRequired(),
+                                     NumberRange(min=0)
+                                 ])
 
 
 class FormuleForm(FlaskForm):
@@ -262,10 +268,10 @@ def add_plat():
         type_plat = form.type.data
         img = form.img.data
         allergenes = form.allergenes.data
-        print(allergenes)
+        quantite_defaut = form.quantite_defaut.data
 
         # Validation des données
-        if not nom_plat or not prix or not type_plat:
+        if not nom_plat or not prix or not type_plat or not quantite_defaut:
             flash("Erreur : Les champs nom, prix et type sont requis.",
                   "danger")
             return render_template('creation_plat.html', form=form)
@@ -293,6 +299,11 @@ def add_plat():
         plat = Plats(nom_plat=nom_plat,
                      prix=prix,
                      type_plat=type_plat,
+                     quantite_defaut=quantite_defaut,
+                     stock_utilisable=quantite_defaut,
+                     stock_reserve=int(quantite_defaut * 0.2),
+                     quantite_promo = 0,
+                     prix_reduc = 0,
                      img=filename)
         plat.add_allergene(allergenes)
         db.session.add(plat)
@@ -337,6 +348,7 @@ def update_plat(id):
     plat.nom_plat = request.form['nom_plat']
     plat.type_plat = request.form['type_plat']
     plat.prix = float(request.form['prix'])
+    plat.quantite_defaut = float(request.form['quantite_defaut'])
 
     # Récupérer les allergènes cochés
     allergenes_selectionnes = request.form.getlist('allergenes[]')
