@@ -2,7 +2,6 @@
 
 {% block styles %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='suivi_commandes.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
@@ -50,13 +49,13 @@
                         <ul class="list-group">
                             {% for association in commande.constituer_assoc %}
                             <li class="list-group-item d-flex align-items-center">
-                                <img src="{{ url_for('static', filename='img/product/' ~ association.plat.img) }}" class="img_plat rounded me-3" alt="{{ association.plat.nom_plat }}">
+                                <img src="{{ url_for('static', filename='img/product/' ~ association.plat.img) }}" class="img_plat img-fluid rounded me-3 ms-5 mt-2 mb-2" alt="{{ association.plat.nom_plat }}">
                                 <div class="flex-grow-1">
                                     <h3 class="mb-0">{{ association.plat.nom_plat }}</h3>
-                                    
-
                                 </div>
                                 <h4 class="mb-0 ms-auto me-5">X {{ association.quantite_plat }}</h4>
+                                
+                                
                             </li>
                             {% endfor %}
                             {% for constituer_formule in commande.constituer_formule_assoc %}
@@ -74,7 +73,7 @@
                                     <ul class="list-group">
                                         {% for plat in constituer_formule.formule.les_plats %}
                                         <li class="list-group-item d-flex align-items-center border-0">
-                                            <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="img_article" alt="{{ plat.nom_plat }}">
+                                            <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="img_plat img-fluid rounded me-3 ms-5 mt-2 mb-2" alt="{{ plat.nom_plat }}">
                                             <div class="flex-grow-1">
                                                 <h6 class="mb-0">{{ plat.nom_plat }}</h6>
                                             </div>
