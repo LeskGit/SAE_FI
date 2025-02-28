@@ -15,3 +15,8 @@
     width: 80px;
     height: 80px;
 }
+
+.img_plat {
+    max-width: 10em;
+    max-height: 10em;
+}
