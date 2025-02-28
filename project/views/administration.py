@@ -152,6 +152,21 @@ def suivi_commande():
     commandes = Commandes.get_commandes_today()
     return render_template("suivi_commandes.html", les_commandes=commandes)
 
+@app.route("/suivi/commande/valider/<int:id_commande>")
+@admin_required
+def valider_commande(id_commande):
+    commande = Commandes.query.get(id_commande)
+    commande.etat = "Payée"
+    db.session.commit()
+    return redirect(url_for("suivi_commande"))
+
+@app.route("/suivi/commande/annuler/<int:id_commande>")
+@admin_required
+def annuler_commande(id_commande):
+    commande = Commandes.query.get(id_commande)
+    commande.etat = "Annulée"
+    db.session.commit()
+    return redirect(url_for("suivi_commande"))
 
 @app.route("/suivi/stock")
 @admin_required

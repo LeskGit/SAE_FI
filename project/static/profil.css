@@ -116,6 +116,15 @@ aside nav ul li.active::before {
     font-weight: bold;
 }
 
+.status-annule {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    background-color: #eb5353; /* Orange pâle */
+    color: #000;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
 .status-termine {
     display: inline-block;
     padding: 0.25em 0.5em;

@@ -33,6 +33,8 @@
                 </h2>
                 <div id="collapse{{ commande.num_commande }}" class="accordion-collapse collapse" aria-labelledby="heading{{ commande.num_commande }}">
                     <div class="accordion-body">
+                        <button class="btn btn-primary" {% if commande.etat != "Non payée" %}disabled{% endif %}><a href="{{ url_for('valider_commande', id_commande=commande.num_commande) }}" class="btn btn-primary">Valider</a></button>
+                        <button class="btn btn-danger" {% if commande.etat != "Non payée" %}disabled{% endif %}><a href="{{ url_for('annuler_commande', id_commande=commande.num_commande) }}" class="btn btn-danger">Annuler</a></button>
                         <ul class="list-group">
                             {% for association in commande.constituer_assoc %}
                             <li class="list-group-item d-flex align-items-center">

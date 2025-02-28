@@ -108,11 +108,14 @@ def client_historique():
     now = datetime.now()
     for com in commandes:
         if com.etat == "Payée":
-            statut_label = "TERMINE"
+            statut_label = "TERMINÉE"
             statut_class = "status-termine"
-        else:
+        elif com.etat == "Non payée":
             statut_label = "EN COURS"
             statut_class = "status-encours"
+        elif com.etat == "Annulée":
+            statut_label = "ANNULÉE"
+            statut_class = "status-annule"
         
         # Récupération des plats commandés avec quantité
         plats_list = [f"{assoc.plat.nom_plat} (x{assoc.quantite_plat})" for assoc in com.constituer_assoc] if com.constituer_assoc else []
@@ -141,7 +144,8 @@ def client_historique():
             "statut_class": statut_class,
             "date_str": com.date.strftime('%Y/%m/%d') if com.date else '-',
             "heure_str": com.date.strftime('%H:%M') if com.date else '-',
-            "can_modify": can_modify
+            "can_modify": can_modify,
+            "etat": com.etat
         })
 
     return render_template("historique_commandes.html", historique=historique)
