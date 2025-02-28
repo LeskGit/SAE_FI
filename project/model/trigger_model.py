@@ -104,8 +104,10 @@ class TriggerManager:
             DECLARE current DATETIME DEFAULT NOW();
 
             IF TIMESTAMPDIFF(MINUTE, OLD.date_creation, current) > 15 and OLD.etat != 'Panier' THEN
-                SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Impossible de modifier une commande après 15 minutes';
+                IF (NEW.etat != 'Payée' AND NEW.etat != 'Annulée') THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Impossible de modifier une commande après 15 minutes';
+                END IF;
             END IF;
         END;
         """
