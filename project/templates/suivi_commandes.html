@@ -27,7 +27,7 @@
                         data-bs-target="#collapse{{ commande.num_commande }}" aria-expanded="false" 
                         aria-controls="collapse{{ commande.num_commande }}">
                         <span>
-                            {{ commande.les_clients.nom }} {{ commande.les_clients.prenom }} <br> {{ commande.les_clients.num_tel }}
+                            {{ commande.les_clients.nom }} {{ commande.les_clients.prenom }} <br> {{ commande.les_clients.num_tel }} <br>  {{commande.date}}
                         </span>
                         <span class="ms-auto">
                             {% if commande.sur_place %}
@@ -53,7 +53,7 @@
                                 <img src="{{ url_for('static', filename='img/product/' ~ association.plat.img) }}" class="img_plat rounded me-3" alt="{{ association.plat.nom_plat }}">
                                 <div class="flex-grow-1">
                                     <h3 class="mb-0">{{ association.plat.nom_plat }}</h3>
-                                    <h6> {{commande.date}}</h6>
+                                    
 
                                 </div>
                                 <h4 class="mb-0 ms-auto me-5">X {{ association.quantite_plat }}</h4>
@@ -63,7 +63,7 @@
                             <div class="container-fluid d-flex bg-light rounded my-3 container-article">
                                 <h4 class="mb-0"> {{ constituer_formule.formule.libelle_formule }}</h4>
                                 <h4 class="mb-0 ms-auto me-5">X {{ constituer_formule.quantite_formule }}</h4>
-                                <h6> {{commande.date}}</h6>
+                                
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
                                     data-bs-target="#collapse{{ constituer_formule.formule.id_formule }}" 
                                     aria-expanded="false" aria-controls="collapse{{ constituer_formule.formule.id_formule }}"></button>
