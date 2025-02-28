@@ -44,7 +44,7 @@
                             <td>{{ item.date_str }}</td>
                             <td>{{ item.heure_str }}</td>
                             <td>
-                                {% if item.can_modify %}
+                                {% if item.can_modify and item.etat != "Annulée" %}
                                     <a href="{{ url_for('client_modif', id_commande=item.num_commande) }}" class="btn btn_color">Modifier</a>
                                 {% else %}
                                     -
