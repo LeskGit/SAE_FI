@@ -41,7 +41,6 @@ def syncdb():
 @app.cli.command()
 def dropdb():
     '''Drops the tables.'''
-
     db.drop_all()
 
 
@@ -71,24 +70,13 @@ def create_admin():
 
 
 @app.cli.command()
-@click.argument("username")
-@click.argument("password")
-def newuser(username, password):
-    """Adds a new user. """
-    m = sha256()
-    m.update(password.encode())
-    u = User(username=username, password=m.hexdigest())
+@click.argument("num_tel")
+def setadmin(num_tel):
+    """Set an admin with the given phone number"""
+    u = User.query.filter_by(num_tel=num_tel).first()
+    if u is None:
+        print("User not found")
+        return
+    u.is_admin = True
     db.session.add(u)
-    db.session.commit()
-
-
-@app.cli.command()
-@click.argument("username")
-@click.argument("password")
-def newpassword(username, password):
-    """ Change the actual user password. """
-    m = sha256()
-    m.update(password.encode())
-    u = User.query.get(username)
-    u.password = m.hexdigest()
     db.session.commit()
