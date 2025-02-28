@@ -3,7 +3,7 @@
 {% block styles %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='edit.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='retour_admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -64,7 +64,7 @@
             </ul>
     </nav>
 
-    <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition" style="height: 500px; overflow-y: auto;">
+    <div class="container-fluid col-md-9 w-75 justify-content-center align-items-center edition mx-auto" style="height: 500px; overflow-y: auto;">
         <div class="container-fluid d-flex">
             <div class="container-fluid plat_cards">
                 {% if type=="a" %}
@@ -329,7 +329,13 @@
                                                 </div>
                                             {% endfor %}
                                         </div>
-                                    </div>                                                                
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="platQteDefaut_{{ p.quantite_defaut }}">Stock initial</label>
+                                        <input type="number" step="1" class="form-control" id="platQteDefaut_{{ p.quantite_defaut }}" name="quantite_defaut" value="{{ p.quantite_defaut }}" placeholder="Stock initial / seuil de réapprovisionnement">
+                                    </div>
+
                                     <div class="form-group">
                                         <label for="platPrix_{{ p.nom_plat }}">Prix</label>
                                         <input type="number" step="1" class="form-control" id="platPrix_{{ p.nom_plat }}" name="prix" value="{{ p.prix }}" required>

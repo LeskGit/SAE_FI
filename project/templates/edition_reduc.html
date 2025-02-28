@@ -2,6 +2,8 @@
 
 {% block styles %}
 {{ super() }}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -46,7 +48,7 @@
                 <td>{{ reduc.reduction }} %</td>
                 <td>{{ reduc.points_fidelite }} pts</td>
                 <td>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" 
+                    <button class="btn btn-orange btn-sm" data-bs-toggle="modal" 
                             data-bs-target="#editModal_{{ reduc.id_reduction }}">
                         Modifier
                     </button>
@@ -97,7 +99,7 @@
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                      <button type="submit" class="btn btn-primary">Enregistrer</button>
+                      <button type="submit" class="btn btn-orange">Enregistrer</button>
                     </div>
                   </div>
                 </form>

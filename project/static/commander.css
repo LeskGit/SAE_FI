@@ -31,6 +31,7 @@ h3{
 .card {
     border: none;
     background-color: #e0e0e0;
+    max-width: 25em;
 }
 
 .card-img-top {
@@ -123,4 +124,9 @@ body{
         justify-self: center;
         width: 18rem;
     }
+}
+
+#img120{
+    width: 120px;
+    height: 120px;
 }

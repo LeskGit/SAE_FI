@@ -5,6 +5,15 @@
     background-color: lightgray;
 }
 
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
 aside nav ul li.active {
     background-color: #f0f0f0; /* Couleur de fond pour surligner */
     position: relative;        /* Nécessaire pour le trait vertical */
@@ -133,6 +142,46 @@ aside nav ul li.active::before {
     display: none;
 }
 
+.list-group-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .threshold-badge {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 0.8rem;
+        background-color: #E84D0E; /* Orange */
+        color: white;
+      }
+
+.reduc-container {
+
+    display: flex;
+    padding: 10px 15px;
+    justify-content: space-between;
+    margin-bottom: -1px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+}
+
+.reduc-container:hover {
+    background-color: #f5f5f5;
+  }
+
+  .reduc-container.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+
 @media (max-width: 820px) {
 
     .form-container {
@@ -150,5 +199,7 @@ aside nav ul li.active::before {
     .bouton-tel {
         display: block;
     }
+
+
 
 }

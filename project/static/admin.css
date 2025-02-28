@@ -6,6 +6,15 @@ span.disponible {
     color: green;
 }
 
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
 body{
     background-image: url("img/background_dashboard.jpg");
     background-size: cover; 
@@ -23,3 +32,23 @@ body{
     overflow-y: auto;  /* Active la scrollbar verticale */
     padding: 5px;      /* Espacement interne */
 }
+
+.retour_admin {
+    margin-left: 8%;
+}
+
+@media (max-width: 767px) {
+     .init-container, .range-container {
+        flex-direction: column;
+     }
+
+     .init-container button {
+        min-width: 300px;
+        margin: 10px auto;
+     }
+
+     .range-container {
+        margin: 0 auto;
+        max-width: 80%;
+     }
+}   

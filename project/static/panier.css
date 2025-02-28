@@ -29,8 +29,26 @@
 }
 
 .bin {
-    min-width: 20px;
+    min-width:25px;
+    max-width: 80px;
 }
+
+.img_plat_panier {
+    width: 80px;
+    height: 80px;
+    border-radius: 5%;
+    margin: 0.8em auto;  
+}
+
+.articles-container {
+    overflow-y: auto;
+    max-height: 30em;
+}
+
+.nom-plat {
+    margin: 0 0.5em;
+}
+
 
 
 @media (max-width: 1100px) {
@@ -71,4 +89,62 @@
 #img60{
     width: 60px;
     height: 60px;
+}
+
+@media (max-width: 550px) {
+    .img_plat_panier {
+        display: none;
+    }
+
+    .plat-container {
+        margin: 1em auto;
+    }
+
+    .link-container a {
+        padding: 0.5em;
+        font-size: 0.5em;
+    }
+
+    .bin {
+        max-height: 2em;
+        padding: 0 0;
+    }
+
+    .plat-container {
+        min-width: 0.5em;
+    }
+
+ 
+
+    .nom-plat {
+        font-size: 0.8em;
+        margin: 0 2em;
+    }
+
+    .content-container a, .content-container span, .content-container p, .content-container button {
+        margin: 0px 5px !important;
+    }
+}
+
+
+@media (max-width: 360px) {
+
+    .prix-plat, span {
+        margin: 2px 2px !important;
+    }
+
+    .content-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .link-container {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .content-container a, .content-container span, .content-container p, .content-container button {
+        margin: 0px 1px !important;
+    }
 }

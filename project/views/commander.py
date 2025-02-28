@@ -187,7 +187,7 @@ def panier():
     panier = user.get_or_create_panier()
     if panier is not None:
         panier.calculer_prix()
-        panier.compute_reduction()
+        panier.compute_reduction(user)
 
     if panier.date is None:
         sur_place_disponible = False
@@ -374,32 +374,34 @@ def paiement_cb():
     f = ...
     return render_template("paiement_cb.html", form=f)
 
-@app.route("/paiement/validation", methods = ["POST"])
+@app.route("/paiement/validation", methods=["POST"])
 def validation_paiement():
     user = get_current_user()
     if user is None:
-        return redirect(url_for('login'))
-                                
+        return redirect(url_for('login'))                   
     panier = user.get_panier()
     if panier is None:
         return redirect(url_for('panier'))
-
     try:
         panier.etat = "Non payée"
         panier.date_creation = datetime.now()
-
         for constituer_plat in panier.constituer_assoc:
             constituer_plat.plat.stock_utilisable -= constituer_plat.quantite_plat
         
         for constituer_formule in panier.constituer_formule_assoc:
             for plat in constituer_formule.formule.les_plats:
                 plat.stock_utilisable -= constituer_formule.quantite_formule
-
+        panier.calculer_prix()
+        panier.compute_reduction(user)
+        for constituer in panier.constituer_assoc:
+            plat = constituer.plat
+            for reduction in list(user.reductions):
+                if reduction.id_plat == plat.id_plat:
+                    reduction.clients.remove(user)
+                    break 
         db.session.commit()
-
     except sqlalchemy.exc.OperationalError as e:
         db.session.rollback()
         flash("Erreur : " + str(e.orig.args[1]), "danger")
         return redirect(url_for('panier'))
-
     return render_template("validation_commande.html", panier=panier)
