@@ -215,8 +215,8 @@ class Commandes(db.Model):
         """
         #today = datetime.today().date()
         #today = datetime(2024, 11, 6, 12)
-        #return Commandes.query.filter(db.func.date(Commandes.date) == today).all()
-        return cls.query.all()
+        #return Commandes.query.filter(db.func.date(Commandes.date) == today).order_by(cls.date.desc()).all()
+        return cls.query.order_by(cls.date.desc()).all()
 
     @classmethod
     def get_historique(cls, id_client):
