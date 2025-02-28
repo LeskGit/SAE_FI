@@ -20,7 +20,6 @@ https://github.com/LeskGit/SAE_FI
 1. **Cloner le dépôt** :
 ```bash
 git clone https://github.com/LeskGit/SAE_FI.git
-cd project-oumami
 ```
 
 2. **Créer et activer un environnement virtuel** (recommandé)
@@ -43,7 +42,7 @@ pip install -r requirements.txt
 ## Lancement de l'application
 1. Initier la base de données (avant le premier lancement)
 ```bash
-flask loaddb tuto/static/data.yml
+flask syncdb
 ```
 
 2. Lancer l'application
@@ -53,23 +52,14 @@ flask run
 ##### L'application sera accessible localement à l'adresse `http://127.0.0.1:5000`
 
 ## Commandes Flask disponibles
-- Synchroniser la base de données (*créer les tables manquantes*)
+- Synchroniser la bd
     ```bash
     flask syncdb
     ```
-- Ajouter un utilisateur
-    ```bash
-    flask newuser username password
+- Créer un administrateur
+  ### Prérequis
+  - Créer un utilisteur sur le site
+  
+  ```bash
+    flask setadmin [num_tel]
     ```
-- Changer le mot de passe
-    ```bash
-    flask newuser username password
-    ```
-    
-## Ressources :
-| Description | Lien |
-|-------------|------|
-| Flask-WTF Forms Documentation | [flask-wtf.readthedocs.io](https://flask-wtf.readthedocs.io/en/1.2.x/form/) |
-| Flask Tutorial by Grey Li | [gist.github.com](https://gist.github.com/greyli/81d7e5ae6c9baf7f6cdfbf64e8a7c037) |
-| Flask-Resize API Documentation | [flask-resize.readthedocs.io](https://flask-resize.readthedocs.io/api.html#module-flask_resize.resizing) |
-| Flask-Uploads Documentation | [flask-uploads.readthedocs.io](https://flask-uploads.readthedocs.io/en/latest/) |
