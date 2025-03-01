@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='panier.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style_calendar.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="top-info">
+    <h1 class="text-center my-3">Panier</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container-fluid d-flex p-0 mb-4 align-items-center justify-content-center main-container">
+    <div class="col-md-6 text-start mx-auto panier-container">
+        <div class="shadow background_panier p-3">
+            <h3 class="text-center my-3 fw-bold">Mes Articles</h3>
+            <hr class="w-25 mx-auto bg-dark bar"/>
+            <div class="container-fluid col-11 articles-container">
+
+                {% if panier is not none %}
+                {% if panier.constituer_assoc|length != 0 or panier.constituer_formule_assoc|length != 0 %}
+                    {% for constituer in panier.constituer_assoc %}
+                        <div class="container-fluid d-flex bg-light rounded my-3 content-container">
+                            <div class="d-flex justify-content-center align-items-center plat-container">
+                                <img 
+                                    src="{{ url_for('static', filename='img/product/' ~ constituer.plat.img) if constituer.plat.img else url_for('static', filename='img/logo_oumami.jpg') }}"
+                                    class="img_plat_panier" 
+                                    alt="{{ constituer.plat.nom_plat }}">
+                            <h4 class="mb-0 mx-3 nom-plat"> {{ constituer.plat.nom_plat }}</h4>
+                            </div>
+
+                            <div class="container d-flex justify-content-end link-container">
+                                <div class="my-auto d-flex justify-content-center align-items-center">
+                                    <!-- Lien pour diminuer la quantité -->
+                                    <a href="{{ url_for('modifier_quantite', action='decrement', nom_plat=constituer.plat.nom_plat) }}" 
+                                       class="btn btn-outline-danger btn-sm mx-auto">-</a>
+                                    
+                                    <span class="mx-2 prix-plat">{{ constituer.quantite_plat }}</span>
+                                    
+                                    <!-- Lien pour augmenter la quantité -->
+                                    <a href="{{ url_for('modifier_quantite', action='increment', nom_plat=constituer.plat.nom_plat) }}" 
+                                       class="btn btn-outline-danger btn-sm mx-auto">+</a>
+                                    <!-- Récupère la quantité du plat commandé -->
+                                    <p class="my-auto mx-3 prix-plat"> {{ constituer.plat.prix * constituer.quantite_plat }}€</p>
+                                    <a href="{{ url_for('supprimer_plat', nom_plat=constituer.plat.nom_plat) }}" class="text-danger text-center my-auto" title="Supprimer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-trash3 text-center my-auto bin" viewBox="0 0 16 16">
+                                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                        </svg>
+                                    </a>
+                                </div>  
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="accordion" id="panierAccordion">
+                    {% for constituer_formule in panier.constituer_formule_assoc %}
+                        <div class="container-fluid d-flex bg-light rounded my-3 content-container">
+                                <div class="d-flex justify-content-center align-items-center plat-container">
+                                    <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="img_plat_panier" alt="produit1">
+                                    <h4 class="mb-0 nom-plat"> {{ constituer_formule.formule.libelle_formule }}</h4>
+                                </div>
+                                <div class="container d-flex justify-content-end link-container">
+                                    <div class="my-auto d-flex justify-content-center align-items-center">
+                                        <!-- Lien pour diminuer la quantité -->
+                                        <a href="{{ url_for('modifier_quantite_formule', action='decrement', libelle_formule=constituer_formule.formule.libelle_formule) }}" 
+                                        class="btn btn-outline-danger btn-sm mx-auto">-</a>
+                                        
+                                        <span class="mx-2 prix-plat">{{ constituer_formule.quantite_formule }}</span>
+                                        
+                                        <!-- Lien pour augmenter la quantité -->
+                                        <a href="{{ url_for('modifier_quantite_formule', action='increment', libelle_formule=constituer_formule.formule.libelle_formule) }}" 
+                                        class="btn btn-outline-danger btn-sm mx-auto">+</a>
+                                   
+                                    
+                                    <!-- Récupère la quantité de la formule commandée -->
+                                    <p class="my-auto mx-3 prix-plat"> {{ constituer_formule.formule.prix * constituer_formule.quantite_formule }}€</p>
+
+                                    <a href="{{ url_for('supprimer_formule', libelle_formule=constituer_formule.formule.libelle_formule) }}" class="text-danger text-center my-auto mx-auto" title="Supprimer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-trash3 text-center my-auto bin" viewBox="0 0 16 16">
+                                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                        </svg>
+                                    </a>
+                                    </div>  
+                                    
+                               
+                                </div>
+                                <button class="accordion-button collapsed" id="accordion-button"
+                                        type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse{{ constituer_formule.formule.id_formule }}"
+                                        aria-expanded="false" aria-controls="collapse{{ constituer_formule.formule.id_formule }}">
+                                </button>
+                                
+                        </div>
+                        <div class="collapse mt-2" id="collapse{{ constituer_formule.formule.id_formule }}">
+                            <div class="accordion-body p-3 border rounded bg-white">
+                                <h5 class="fw-bold mb-3">Plats inclus dans cette formule :</h5>
+                                <ul class="list-group">
+                                    {% for plat in constituer_formule.formule.les_plats %}
+                                    <li class="list-group-item d-flex align-items-center border-0">
+                                        <img src="{{ url_for('static', filename='img/product/' ~ plat.img) }}" class="img_plat rounded me-3" id="img60" alt="{{ plat.nom_plat }}">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ plat.nom_plat }}</h6>
+                                            <small class="text-muted">{{ plat.type_plat }}</small>
+                                        </div>
+                                        <span class="badge bg-secondary rounded-pill px-3 py-2">x1</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="my-3 mx-auto">
+                        <div class="text-center my-auto">
+                            <h5>Votre panier est vide</h5>
+                        </div>
+                    </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="separator"></div>
+
+        <!-- Conteneur principal -->
+        <div class="text-center mx-auto recap-container">
+            <div class="background_recap shadow p-3 py-4">
+
+                <!-- Titre -->
+                <h3 class="text-center my-3  fw-bold px-2">Récapitulatif</h3>
+                <hr class="w-100 mx-auto bg-dark bar"/>
+
+                <!-- Récapitulatif des prix -->
+                <div class="container-fluid text-start mb-4">
+                    <p class="d-flex justify-content-between">
+                        <span>{{ panier.constituer_assoc|length + panier.constituer_formule_assoc|length}} articles</span>
+                        <span>{{ panier.prix_total }}€</span>
+                    </p>
+                    {% if panier.prix_avec_reduc != 0 %}
+                        <p class="d-flex justify-content-between">
+                            <span>Réduction</span>
+                            <span>{{ panier.prix_avec_reduc }}€</span>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Total -->
+                <hr class="w-100 mx-auto bg-dark bar"/>
+                <div class="d-flex justify-content-between fw-bold fs-5 my-3">
+                    <span>Total</span>
+                    <span>{{ panier.prix_total + panier.prix_avec_reduc }}€</span>
+                </div>
+
+                <!-- Formulaires -->
+                <div class="text-start">
+                
+                    <label for="delivery" class="form-label">Type</label>
+                    <select name="delivery" id="delivery" {% if panier.date is none %}disabled{% endif %} class="form-select mb-3" onchange="window.location.href='/modifier_type?delivery=' + this.value">
+                        {% if sur_place_disponible %}
+                            <option value="0" {% if panier.sur_place == 0 %}selected{% endif %}>À emporter</option>
+                            <option value="1" {% if panier.sur_place == 1 %}selected{% endif %}>Sur place</option>
+                        {% else %}
+                            <option value="0" selected>À emporter</option>
+                            <option disabled>Aucune table disponible</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="text-start">
+
+                    <label for="datetime">Choisissez une heure :</label>
+                    <input type="text" id="datetime" name="datetime" placeholder="Heure" required>
+            
+                    <input type="hidden" name="panier_date" id="panier_date" value='{{panier.date}}'>
+
+
+                    <!-- Flatpickr Script -->
+                    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+                    <script>
+                        
+                        let panier_date = document.getElementById("panier_date").value.split(' ')[1];
+                        var maxTime;
+                        if (document.getElementById("delivery").value == "0") {
+                            maxTime = "20:00";
+                        } else {
+                            maxTime = "14:00";
+                        }
+                        var minTime = "11:30";
+                        var defaultTime = panier_date;
+
+                        // Initialiser Flatpickr avec les options personnalisées
+                        flatpickr("#datetime", {
+                            enableTime: true, // Activer la sélection de l'heure
+                            noCalendar: true, // Désactiver la sélection de la date
+                            dateFormat: "H:i", // Format de l'heure
+                            time_24hr: true, // Format 24 heures
+                            locale: "fr", // Langue française
+                            minTime: minTime, // Heure minimale
+                            maxTime: maxTime, // Heure maximale
+                            defaultDate: defaultTime, // Heure par défaut
+                            onChange: function(selectedDates, dateStr, instance) {
+                                // Redirection vers la route avec l'heure sélectionnée
+                                window.location.href = '/modifier_date_heure?datetime=' + encodeURIComponent(dateStr);
+                            }
+                        });
+                    </script>
+
+                </div>
+
+                <!-- Bouton -->
+                 
+                    <form action="{{ url_for('validation_paiement') }}" method="post">
+                        <button type="submit" class="btn btn-orange px-4 mt-4 fw-bold" {% if (panier.constituer_assoc|length == 0 and panier.constituer_formule_assoc|length == 0) or panier.date is none %}disabled{% endif %}>COMMANDER</button>
+                    </form>
+             
+            </div>
+        </div>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    {% block head %}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+            <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo_oumami.ico') }}">
+        <title>Oumami</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='positionnement.css') }}">
+        {% block styles %}
+            {{ bootstrap.load_css() }}
+        {% endblock %}
+    {% endblock %}
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <div class="container-fluid">
+            <!-- Logo mobile -->
+            <a class="navbar-brand d-md-none" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_nav" alt="Logo Oumami">
+            </a>
+    
+            <button class="navbar-toggler m-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse nav-tel" id="navbarNavDropdown">
+    
+                <!-- Left buttons -->
+                <div class="navbar-nav w-100 d-flex">
+                    <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('home') }}">Accueil</a>
+                    <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('a_propos') }}">A propos</a>
+                    <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('contact') }}">Contact</a>
+                </div>
+    
+                <!-- Logo centré en version desktop -->
+                <a class="navbar-brand d-none d-md-block mx-auto" href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_nav" alt="Logo Oumami">
+                </a>
+    
+                <!-- Right buttons -->
+                <div class="navbar-nav w-100 d-flex">
+                    <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('nouveaute') }}">Nouveauté</a>
+                    <a class="nav-item nav-link flex-grow-1 text-center text_nav" href="{{ url_for('commander') }}">Commander</a>
+    
+                    <div class="nav-item nav-link text-center d-flex mx-auto">
+                        <div class="panier-container">
+                        <a href="{{ url_for('panier') }}"><img src="{{ url_for('static', filename='img/logo_panier.png') }}" class="img_nav" alt="Logo panier"/></a>
+                        {% if current_user.is_authenticated %}
+                    {% if current_user.get_nb_items_panier() != 0 %}
+                        <div class="notif">{{ current_user.get_nb_items_panier() }}</div>
+                    {% endif %}
+                {% endif %}
+                        </div>
+                <a data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                            <img src="{% if current_user.is_authenticated %} {{ url_for('static', filename='img/logo_profil.png') }} {% else %} {{ url_for('static', filename='img/logo_login.png') }} {% endif %}" class="img_nav rounded-circle" alt="Logo profil">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2 rounded">
+                            {% if session.get('user') %}
+                        <li><a class="dropdown-item py-2">{{ session.get('user') }}</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('register') }}">S'inscrire</a></li>
+                        <li><a class="dropdown-item py-2 text-logout" href="{{ url_for('logout') }}">Se déconnecter</a></li>
+                    {% else %}
+
+                        {% if current_user.is_authenticated %}
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('client_profil') }}">Mon profil</a></li>
+                                    {% if current_user.is_admin %}
+                                        <li><a class="dropdown-item py-2" href="{{ url_for('admin') }}">Page Admin</a></li>
+                                    {% endif %}
+                                    <li><a class="dropdown-item py-2 text-logout" href="{{ url_for('logout') }}">Se déconnecter</a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('login') }}">Se connecter</a></li>
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('register') }}">S'inscrire</a></li>
+                                {% endif %}
+                            {% endif %}
+
+
+                </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+<main class="flex-shrink-0">
+    <div class="container-fluid p-0">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container-fluid mt-4">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show alert-fixed w-50" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}
+
+        {% endblock %}
+    </div>
+ </main>
+{% block scripts %}
+{{ bootstrap.load_js() }}
+{% endblock %}
+
+
+
+<footer class="footer-bg py-4">
+    <div class="container">
+        <!-- Logo et sections -->
+        <div class="row align-items-center">
+            <!-- Logo -->
+            <div class="col-12 col-md-3 text-center text-md-start">
+                <img src="{{ url_for('static', filename='img/logo_oumami.png') }}" class="logo_footer" alt="Logo Oumami">
+            </div>
+
+            <!-- Sections du footer -->
+            <div class="col-12 col-md-9">
+                <div class="row">
+                    <div class="col-12 col-md-4 text_footer contact-footer">
+                        <h5>Contact</h5>
+                        <p>Adresse : 4, place de la Halle,  41250 BRACIEUX</p>
+                        <p>Téléphone : 02.54.79.05.48</p>
+                    </div>
+                    <div class="col-12 col-md-4 text_footer partenaire-footer">
+                        <h5>Nos Partenaires</h5>
+                        <a href="http://www.creation-nao.com/">SANGA : miso, koji et produits BIO</a>
+                    </div>
+                    <div class="col-12 col-md-4 text_footer reseau-footer">
+                        <h5>Suivez-nous</h5>
+                        <a href="https://www.facebook.com/pages/Oumami/676898092430564?ref=hl" target="_blank" rel="noopener noreferrer">
+                            <img src="{{ url_for('static', filename='img/facebook.png') }}" alt="Facebook" style="width: 32px; height: 32px;">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horaires et droits -->
+        <div class="row mt-3 text-center">
+            <div class="col-12 col-md-6 text_footer horaire-footer">
+                <p>Ouverture du magasin : Du mardi au samedi 11h30 - 14h / 17h - 20h</p>
+            </div>
+            <div class="col-12 col-md-6 text_footer droit-footer">
+                <p>© 2014-2024 Oumami - Tous droits réservés.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

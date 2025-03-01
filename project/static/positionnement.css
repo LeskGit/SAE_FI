@@ -1,0 +1,161 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+html, body {
+    height: 100%;
+    margin: 0; 
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    bottom: 0;
+}
+
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
+
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+.img_nav {
+    height: 2em;
+    width: 2em;
+    margin-left: 1em;
+}
+
+.logo_nav {
+    height: 3em;
+    width: 3em;
+}
+
+.logo_footer {
+    height: 9em;
+    width: 9em;
+}
+
+
+.text_nav {
+    font-weight: bold;
+}
+
+.footer-bg {
+    background-image: url("../static/img/background_footer.webp");
+    background-size: cover;
+    background-position: center;
+    color: black;
+    padding: 20px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;   
+}
+
+.bar {
+    padding-bottom: 0.1em;
+}
+
+.a_propos_texte {
+    font-family: Open;
+}
+
+/* Ajustement de l'image dans le bouton */
+.img_nav {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+    background-color: #f8f9fa; /* Couleur de fond */
+    border: none;
+    border-radius: 8px; /* Arrondir les coins */
+}
+
+/* Item du dropdown avec effet survol */
+.dropdown-item {
+    color: #343a40;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Divider */
+.dropdown-divider {
+    border-color: #e9ecef;
+}
+
+/* Style de l'option déconnexion */
+.dropdown-item.text-logout {
+    color: #dc3545;
+}
+
+.dropdown-item.text-logout:hover {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+.alert-fixed {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: auto; 
+    max-width: 90%; 
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+.panier-container {
+    position: relative; 
+}
+
+
+
+@media (max-width: 767px) {
+    .navbar .d-md-block {
+        display: none !important;
+    }
+    .img_nav {
+        position: static;
+    }
+
+    .notif {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
+}
+
+
+.notif {
+    position: absolute;
+    top: -3px;  
+    right: -10px;  
+    border-radius: 50%;
+    background-color: #E84D0E;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

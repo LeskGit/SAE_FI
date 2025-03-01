@@ -1,0 +1,22 @@
+.bg-gris-clair {
+    background-color: #d9d9d9;
+    border-color: #d9d9d9;
+}
+
+/* pour la scrollbar */
+#commandesAccordion{
+    max-height: 780px;
+    overflow-y: auto; 
+    padding: 10px; 
+    border-radius: 10px; 
+}
+
+#img80 {
+    width: 80px;
+    height: 80px;
+}
+
+.img_plat {
+    max-width: 10em;
+    max-height: 10em;
+}

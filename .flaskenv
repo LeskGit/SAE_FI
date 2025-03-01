@@ -1,0 +1,3 @@
+FLASK_APP=project
+FLASK_DEBUG=True
+FLASK_ENV=development

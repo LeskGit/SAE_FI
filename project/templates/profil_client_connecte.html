@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='profil.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex mb-5">
+    <!-- Sidebar -->
+    {% from "macro_client_aside.html" import sidebar_client with context %}
+    {{ sidebar_client() }}
+    
+    <div class="p-5 rounded shadow w-100 main_profil">
+        <!-- Main content area -->
+        <div class="form-container">
+            <div class="d-flex justify-content-start align-items-center mb-4">
+            {% from "macro_client_aside.html" import mobile_navbar with context %}
+                {{ mobile_navbar() }}
+                <h2 class="mt-2 mx-3">Profil</h2>
+            </div>
+            <form method="POST" action="{{ url_for('client_profil') }}">
+                {{ form.hidden_tag() }}
+
+                <!--Numéro de téléphone (non modifiable)-->
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">
+                        {{ form.phone_number.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.phone_number(size=50,
+                        class_="form-control w-100",
+                        disabled=(True if not edit else False),
+                        placeholder="Entrez votre numéro de téléphone") }}   
+                </div>
+                {% if form.phone_number.errors %}
+                    <ul class="list-group">
+                        {% for e in form.phone_number.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Nom-->
+                <div class="mb-3">
+                    <label for="name" class="form-label">
+                        {{ form.name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.name(size=50, class_="form-control w-100",
+                                 disabled=(True if not edit else False),
+                                 placeholder="Entrez votre nom") }}
+                </div>
+                {% if form.name.errors %}
+                    <ul class="list-group">
+                        {% for e in form.name.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Prénom-->
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">
+                        {{ form.first_name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.first_name(size=50, class_="form-control w-100",
+                                       disabled=(True if not edit else False),
+                                       placeholder="Entrez votre prénom") }}
+                </div>
+                {% if form.first_name.errors %}
+                    <ul class="list-group">
+                        {% for e in form.first_name.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Email-->
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        {{ form.email.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.email(size=50, class_="form-control w-100",
+                                  disabled=(True if not edit else False),
+                                  placeholder="Entrez votre email") }}
+                </div>
+                {% if form.email.errors %}
+                    <ul class="list-group">
+                        {% for e in form.email.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!--Adresse-->
+                <div class="mb-3">
+                    <label for="address" class="form-label">
+                        {{ form.address.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.address(size=50, class_="form-control w-100",
+                                    disabled=(True if not edit else False),
+                                    placeholder="Entrez votre adresse postale") }}
+                </div>
+                {% if form.address.errors %}
+                    <ul class="list-group">
+                        {% for e in form.address.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="d-flex">
+                    <div class="mb-3 ms-auto">
+                        {% if edit %}
+                            <a href="{{ url_for('client_profil') }}" class="btn btn_color">Annuler</a>
+                            <input class="btn btn_color" type="submit" name="save_profile" value="Enregistrer">
+                        {% else %}
+                            <a href="{{ url_for('client_profil', edit=True) }}" class="btn btn_color">Modifier</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+
+            <!-- Formulaire de changement de mot de passe -->
+            <h2 class="mb-4">Changer mon mot de passe</h2>
+            <form method="POST" action="{{ url_for('client_profil') }}">
+                {{ pw_form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label for="old_password" class="form-label">
+                        {{ pw_form.old_password.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pw_form.old_password(class_="form-control w-100", placeholder="Entrez votre ancien mot de passe") }}
+                </div>
+                {% if pw_form.old_password.errors %}
+                    <ul class="list-group">
+                        {% for e in pw_form.old_password.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="new_password" class="form-label">
+                        {{ pw_form.new_password.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pw_form.new_password(class_="form-control w-100", placeholder="Entrez votre nouveau mot de passe") }}
+                </div>
+                {% if pw_form.new_password.errors %}
+                    <ul class="list-group">
+                        {% for e in pw_form.new_password.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">
+                        {{ pw_form.confirm_password.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ pw_form.confirm_password(class_="form-control w-100", placeholder="Confirmez votre nouveau mot de passe") }}
+                </div>
+                {% if pw_form.confirm_password.errors %}
+                    <ul class="list-group">
+                        {% for e in pw_form.confirm_password.errors %}
+                            <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="d-flex">
+                    <div class="mb-3 ms-auto">
+                        {{ pw_form.change_password(class_="btn btn_color") }}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

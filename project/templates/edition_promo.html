@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+
+{% endblock %}
+
+{% block content %}
+<div class="mt-4 w-auto retour_admin">
+    <a class="btn btn-dark" href="{{ url_for('admin') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" 
+             fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" 
+                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146
+                  a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5
+                  0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+    </a>
+</div>
+
+<div class="top-info">
+    <h1 class="text-center my-3">Édition des Promotions</h1>
+    <hr class="w-25 mx-auto bg-dark bar"/>
+</div>
+
+<div class="container mt-4">
+    <a href="{{ url_for('creation_promo') }}" class="btn btn-orange mb-3">Créer une nouvelle promotion</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Plat</th>
+                <th>Quantité</th>
+                <th>Réduction du prix</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for plat in promo %}
+            <tr>
+                <td>{{ plat.id_plat }}</td>
+                <td>
+                  
+                    {{ plat.nom_plat }} ({{ plat.type_plat }}) - {{ plat.prix }} €
+                </td>
+                <td>{{ plat.quantite_promo }}</td>
+                <td>{{ plat.prix_reduc }} €</td>
+                <td>
+                    <a class="btn btn-orange btn-sm" href="{{ url_for('creation_promo', id_plat=plat.id_plat) }}">
+                        Modifier
+                    </a>
+
+                    <form action="{{ url_for('delete_promo', id_plat=plat.id_plat) }}" 
+                          method="POST" class="d-inline">
+                        <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

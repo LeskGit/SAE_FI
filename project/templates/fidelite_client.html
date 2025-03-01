@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    {{ super() }}
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='profil.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex mb-5">
+    {% from "macro_client_aside.html" import sidebar_client with context %}
+    {{ sidebar_client() }}
+
+    <div class="p-5 rounded shadow w-100 main_profil">
+        <div class="d-flex justify-content-start align-items-center">
+        {% from "macro_client_aside.html" import mobile_navbar with context %}
+          {{ mobile_navbar() }}
+        <h2 class=" mx-3"><strong>Mes Points de Fidélité</strong></h2>
+          </div>
+        <p>Bonjour <strong>{{ current_user.prenom }}</strong>, 
+           vous avez actuellement 
+           <strong>{{ current_user.points_fidelite }}</strong> point(s) de fidélité.</p>
+
+        <hr>
+
+        <h3 class="mt-4">Réductions disponibles</h3>
+        <ul class="list-group">
+            {% for r in reductions %}
+            <li class="reduc-container mb-2">
+                <div>
+                  <span class="threshold-badge">{{ r.points_fidelite }}</span>
+                  {% set p = plats_map[r.id_plat] %}
+                  <strong>{{ p.nom_plat }}</strong> : {{ r.reduction }}% de réduction
+                </div>
+
+                <form action="{{ url_for('echanger_points') }}" method="POST" class="m-0 p-0">
+                    <input type="hidden" name="id_reduction" value="{{ r.id_reduction }}">
+                    
+                    {% if current_user.points_fidelite < r.points_fidelite %}
+                      <button type="submit" class="btn btn-orange btn-sm" disabled>
+                        Échanger
+                      </button>
+                    {% else %}
+                      <button type="submit" class="btn btn-orange btn-sm">
+                        Échanger
+                      </button>
+                    {% endif %}
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <hr>
+
+        <h3 class="mt-4">Mes Réductions Actives</h3>
+        <ul class="list-group">
+            {% if current_user.reductions|length > 0 %}
+                {% for r in current_user.reductions %}
+                <li class="reduc-container">
+                    <div>
+                      <span class="threshold-badge">{{ r.points_fidelite }}</span>
+                      {% set p = plats_map[r.id_plat] %}
+                      <strong>{{ p.nom_plat }}</strong> : {{ r.reduction }}% de réduction
+                    </div>
+                    <form action="{{ url_for('retourner_reduction') }}" method="POST" class="m-0 p-0">
+                        <input type="hidden" name="id_reduction" value="{{ r.id_reduction }}">
+                        <button type="submit" class="btn btn-warning btn-sm">Annuler</button>
+                    </form>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="reduc-container">Vous n'avez pas de réduction active.</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

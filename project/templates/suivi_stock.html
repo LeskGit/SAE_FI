@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+{% endblock %}
+{% block content %}
+    <div class="mt-4 w-auto retour_admin">
+        <a class="btn btn-dark" href="{{ url_for('admin') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+          </svg>
+        </a>
+    </div>
+    <div class="container-fluid my-5 text-center main-container">
+        <h1 class="mb-4">Stock disponible <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="black" class="bi bi-box-seam-fill" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.01-.003.268-.108a.75.75 0 0 1 .558 0l.269.108.01.003zM10.404 2 4.25 4.461 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339L8 5.961 5.596 5l6.154-2.461z"/>
+        </svg>
+        </h1>
+        
+        <div class="d-flex justify-content-around mb-4 init-container">
+            <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
+                <input type="hidden" name="category" value="Plat chaud">
+                <button type="submit" class="btn btn-dark">Réinitialiser Plats chauds</button>
+            </form>
+            <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
+                <input type="hidden" name="category" value="Plat froid">
+                <button type="submit" class="btn btn-dark">Réinitialiser Plats froids</button>
+            </form>
+            <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
+                <input type="hidden" name="category" value="Sushi">
+                <button type="submit" class="btn btn-dark">Réinitialiser Sushis</button>
+            </form>
+            <form action="{{ url_for('reinitialiser_stock') }}" method="POST" class="d-inline">
+                <input type="hidden" name="category" value="Dessert">
+                <button type="submit" class="btn btn-dark">Réinitialiser Desserts</button>
+            </form>
+        </div>
+        
+    <form action="{{ url_for('modifier_stock') }}" method="POST">        
+        <div class="d-flex justify-content-around bg-secondary range-container">
+            <div>
+                <h5>Plats chauds </h5>
+                <ul class="list-unstyled">
+                    {% for plat in plats_chauds %}
+                        <li>{{ plat.nom_plat }} : <input type="number" min="0" name="{{ plat.nom_plat }}" value="{{ plat.stock_utilisable }}"></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div>
+                <h5>Plats froids </h5>
+                <ul class="list-unstyled">
+                    {% for plat in plats_froids %}
+                        <li>{{ plat.nom_plat }} : <input type="number" min="0" name="{{ plat.nom_plat }}" value="{{ plat.stock_utilisable }}"></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div>
+                <h5>Sushis </h5>
+                <ul class="list-unstyled">
+                    {% for sushi in sushis %}
+                        <li>{{ sushi.nom_plat }} : <input type="number" min="0" name="{{ sushi.nom_plat }}" value="{{ sushi.stock_utilisable }}"></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div>
+                <h5>Desserts </h5>
+                <ul class="list-unstyled">
+                    {% for dessert in desserts %}
+                        <li>{{ dessert.nom_plat }} : <input type="number" min="0" name="{{ dessert.nom_plat }}" value="{{ dessert.stock_utilisable }}"></li></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="text-center my-4">
+        <button type="submit" class="btn btn-orange">Valider</button>
+    </div>
+</form>
+{% endblock %}

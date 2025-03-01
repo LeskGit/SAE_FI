@@ -1,0 +1,214 @@
+
+
+
+.main_profil {
+    background-color: lightgray;
+}
+
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
+aside nav ul li.active {
+    background-color: #f0f0f0; /* Couleur de fond pour surligner */
+    position: relative;        /* Nécessaire pour le trait vertical */
+    padding-left: 10px;        /* Espace pour le trait */
+    border-radius: 4px;        /* Coins arrondis pour l'esthétique */
+}
+
+/* Ajout d'un trait vertical à gauche de l'élément actif */
+aside nav ul li.active::before {
+    content: "";
+    position: absolute;
+    left: 0;                  /* Positionné à gauche */
+    top: 0;
+    bottom: 0;
+    width: 4px;               /* Largeur du trait */
+    background-color: #dc3545; /* Couleur du trait */
+    border-radius: 2px;       /* Coins arrondis pour le trait */
+}
+
+/* Style de base pour le bouton */
+.btn_color {
+    background-color: #E84D0E;   /* Couleur de fond rouge */
+    color: #ffffff;              /* Texte blanc */      /* Espace interne */
+    border: none;                /* Suppression de la bordure par défaut */
+    border-radius: 5px;          /* Coins arrondis */       /* Curseur en forme de main */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Transition pour effet de survol */
+}
+
+/* Effet de survol pour le bouton */
+.btn_color:hover {
+    background-color: #dc3545;   /* Couleur plus foncée au survol */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Ombre légèrement plus prononcée */
+}
+
+/* Effet de clic */
+.btn_color:active {
+    background-color: #dc3545;   /* Couleur encore plus foncée au clic */
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2); /* Réduit l'ombre pour effet de pression */
+    transform: translateY(1px);  /* Légère translation pour effet de clic */
+}
+
+/* Style pour le survol */
+.section_effect:hover {
+    background-color: #b0b0b0;  /* Couleur grise légèrement foncée pour le survol */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Ombre prononcée au survol */
+}
+
+/* Style pour l'effet de clic */
+.section_effect:active {
+    background-color: #a0a0a0; /* Teinte plus foncée pour l’effet de clic */
+    box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2); /* Ombre en relief pour effet de pression */
+    transform: translateY(1px); /* Légère translation pour effet de clic */
+}
+
+.pseudo {
+    width: 150px;            /* Ajuste la largeur en fonction de la zone souhaitée */
+    white-space: nowrap;      /* Empêche le texte de se mettre sur plusieurs lignes */
+    overflow: hidden;         /* Masque le texte qui dépasse la largeur */
+    text-overflow: ellipsis;  /* Ajoute les "..." pour indiquer le texte tronqué */
+}
+.historique-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+.separator {
+    width: 100%;
+    border-bottom: 2px solid #000;
+    margin-bottom: 1em;
+}
+
+.historique-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+.historique-table thead th {
+    text-align: left;
+    background-color: #f9f9f9;
+    padding: 0.75em;
+    border-bottom: 1px solid #ccc;
+    font-weight: normal;
+}
+
+.historique-table tbody td {
+    padding: 0.75em;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+/* Styles pour les statuts */
+.status-encours {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    background-color: #FFDAB9; /* Orange pâle */
+    color: #000;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-annule {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    background-color: #eb5353; /* Orange pâle */
+    color: #000;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-termine {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    background-color: #90EE90; /* Vert clair */
+    color: #000;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.text-center {
+    text-align: center;
+}
+
+
+.form-container {
+    max-width: 40em;
+}
+
+.version-tel {
+    display: none;
+}
+
+.bouton-tel {
+    display: none;
+}
+
+.list-group-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .threshold-badge {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 0.8rem;
+        background-color: #E84D0E; /* Orange */
+        color: white;
+      }
+
+.reduc-container {
+
+    display: flex;
+    padding: 10px 15px;
+    justify-content: space-between;
+    margin-bottom: -1px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+}
+
+.reduc-container:hover {
+    background-color: #f5f5f5;
+  }
+
+  .reduc-container.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+
+@media (max-width: 820px) {
+
+    .form-container {
+        max-width: 100%;
+    }
+
+    .version-desktop {
+        display: none;
+    }
+
+    .version-tel {
+        display: block;
+    }
+
+    .bouton-tel {
+        display: block;
+    }
+
+
+
+}

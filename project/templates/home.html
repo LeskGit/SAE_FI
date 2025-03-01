@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+<section class="carousel" >
+    <p id="oumami" class="carousel-text">OUMAMI</p>
+    <hr class="carousel-line">
+    <p id="info"class="carousel-text">Traiteur asiatique</p>
+
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <!-- Indicateurs dynamiques -->
+        <ol class="carousel-indicators">
+            {% for image in images %}
+            <li data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" class="{% if loop.index == 1 %}active{% endif %}"></li>
+            {% endfor %}
+        </ol>
+
+    <div class="carousel-inner">
+        {% for image in images %}
+        <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+            <img src="{{ url_for('static', filename=image) }}" alt="Slide {{ loop.index }}">
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Contrôles du carousel -->
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only"></span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only"></span>
+    </a>
+
+    <section class="scroll-down-indicator">
+        <a href="#offres" class="scroll-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" class="bi bi-chevron-down bounce" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+            </svg>
+        </a>
+    </section>
+</section>
+
+
+
+<section class="contact-section py-4" id="offres">
+    <div class="container">
+        <div class="row align-items-center text-white">
+            <div class="col-md-4 text-center">
+                <div class="contact-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" class="bi bi-geo-alt-fill mb-2" viewBox="0 0 16 16">
+                        <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
+                        <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                      </svg>
+                    <p class="mb-0 fw-bold">4, place de la Halle</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="contact-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" class="bi bi-geo-alt-fill mb-2" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+                    </svg>
+                    <p class="mb-0 fw-bold">| 41250 BRACIEUX |</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="contact-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="orange" class="bi bi-geo-alt-fill mb-2" viewBox="0 0 16 16">
+                        <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
+                    </svg>
+                    <p class="mb-0 fw-bold">02.54.79.05.48</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="offres-section" >
+    <h2 class="offres-title">Découvrez nos offres</h2>
+    <hr class="offres-divider">
+    <div class="d-flex justify-content-center"> 
+        <div class="offres-container mx-auto">
+            <!-- Colonne Réception -->
+            <div class="sous-section-offre">
+                <h3 class="offres-subtitle text-orange">Réception</h3>
+                <p class="offres-subdetail">(à partir de 30 personnes)</p>
+                <p>Oumami se déplace chez vous pour vos cocktails, mariages, baptêmes, repas d'affaires, etc.</p>
+                <p><em>Uniquement sur réservation</em></p>
+            </div>
+            <!-- Ligne de séparation -->
+            <div class="col-md-1 d-none d-md-block">
+                <div class="separator"></div>
+            </div>
+            <!-- Colonne Bento -->
+            <div class="sous-section-offre">
+                <h3 class="offres-subtitle text-orange">Bentô</h3>
+                <p class="offres-subdetail">(plateau repas)</p>
+                <p>Oumami livre chez vous pour vos réunions, pique-niques, manifestations sportives et culturelles, etc.</p>
+                <p><em>Uniquement sur réservation</em></p>
+            </div>
+            <!-- Ligne de séparation -->
+            <div class="col-md-1 d-none d-md-block">
+                <div class="separator"></div>
+            </div>
+            <!-- Colonne Plats à emporter -->
+            <div class="sous-section-offre">
+                <h3 class="offres-subtitle text-orange">Plats à emporter</h3>
+                <p>Oumami vous propose des plats divers suggérés par notre chef.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="plats-section">
+    <h2 class="plats-title">Découvrez nos plats</h2>
+    <hr class="plats-divider">
+    
+    <div class="d-flex justify-content-center">
+
+        <div class="row justify-content-center plat-container">
+            <div class="col-md-3">
+                <h3 class="text-orange">PLATS CHAUDS</h3>
+                <ul>
+                    <li>Nem nature (à la viande hachée et aux légumes) - 2,50 €</li>
+                    <li>Nem au curry (au poulet) - 2,50 €</li>
+                    <li>Samoussa - 1,50 €</li>
+                    <li>Fritette japonaise au calamar - 4,50 €</li>
+                    <li>Poulet frit, 5 pièces - 5,00 €</li>
+                    <li>Poulet frit, 10 pièces - 9,00 €</li>
+                    <li>Poulet frit, 15 pièces - 13,00 €</li>
+                    <li>Poulet sauté à la sauce sésame (caramélisée) - 42,00 € / kg</li>
+                    <li>Poulet sauté à la sauce coréenne (épicée) - 42,00 € / kg</li>
+                    <li>Porc à la sauce aigre-douce - 40,00 € / kg</li>
+                    <li>Bœuf caramélisé - 45,00 € / kg</li>
+                    <li>Poisson du jour - 50,00 € / kg</li>
+                    <li>Riz sauté - 20,00 € / kg</li>
+                    <li>Nouilles sautées - 22,00 € / kg</li>
+                    <li>Ramen - 15,00 € / bol</li>
+                    <li>Udon - 15,00 € / bol</li>
+                    <li>Soupe miso, petit bol - 3,80 €</li>
+                    <li>Soupe miso, grand bol - 4,50 €</li>
+                    <li>Soupe au lait de coco, petit bol - 5,50 €</li>
+                    <li>Soupe au lait de coco, grand bol - 6,50 €</li>
+                </ul>
+                
+            </div>
+            <div class="col-md-3">
+                <h3 class="text-orange">SUSHIS</h3>
+                <p class="sushis-disclaimer">La disponibilité de Sushi peut varier selon arrivée des poissons.<br>Merci de commander à l'avance.</p>
+                <ul>
+                    <li>Plateau SUSHI 12 pièces (3 Sushi, 6 Maki, 3 Maki géant) - 13,00 € / plateau</li>
+                    <li>Plateau SUSHI 24 pièces (6 Sushi, 12 Maki, 6 Maki géant) - 24,00 € / plateau</li>
+                    <li>Plateau SUSHI 35 pièces (8 Sushi, 18 Maki, 9 Maki géant) - 33,00 € / plateau</li>
+                    <li>Plateau 8 SUSHI, 8 saumon - 12,00 € / plateau</li>
+                    <li>Plateau 8 SUSHI, 4 saumon et 4 thon - 13,00 € / plateau</li>
+                    <li>Plateau MAKI 12 pièces - 6,50 € / plateau</li>
+                    <li>Plateau MAKI 18 pièces - 9,00 € / plateau</li>
+                    <li>Plateau California 8 pièces - 10,00 € / plateau</li>
+                    <li>Plateau Maki géant au thon cuit 8 pièces - 10,00 € / plateau</li>
+                    <li>Chirashi saumon (saumon mariné et salade sur le riz à Sushi) - 13,00 € / bol</li>
+                    <li>Chirashi saumon thon (saumon et thon marinés et salade sur le riz à Sushi) - 13,50 € / bol</li>
+                    <li>Mini Chirashi saumon avocat - 9,00 € / bol</li>
+                </ul>
+                
+            </div>
+            <div class="col-md-3">
+                <h3 class="text-orange">PLATS FROIDS</h3>
+                <ul>
+                    <li>Rouleau de printemps aux crevettes - 3,00 € / pièce</li>
+                    <li>Rouleau de printemps au poulet - 3,00 € / pièce</li>
+                    <li>Salade de saison - 4,00 € / paquet</li>
+                    <li>Salade de crevettes - 8,00 € / paquet</li>
+                    <li>Carpaccio de bœuf - 10,00 € / paquet</li>
+                </ul>
+
+                <h3 class="text-orange">DESSERTS</h3>
+                <ul>
+                    <li>Panna cotta à la chinoise - 4,50 € / pièce</li>
+                    <li>Tarte maison (au chocolat blanc et au thé vert Matcha) - 5,00 € / pièce</li>
+                    <li>Biscuits maison - 3,00 € / sachet</li>
+                </ul>
+
+                <h3 class="text-orange">PLATS À EMPORTER</h3>
+                <ul>
+                    <li>Rouleau de printemps aux crevettes - 3,00 € / pièce</li>
+                    <li>Rouleau de printemps au poulet - 3,00 € / pièce</li>
+                    <li>Salade de saison - 4,00 € / paquet</li>
+                    <li>Salade de crevettes - 8,00 € / paquet</li>
+                    <li>Carpaccio de bœuf - 10,00 € / paquet</li><br>
+                </ul>
+                <div class="row flex-nowrap dl">
+                    <a href="{{ url_for('static', filename='img/menu.pdf') }}" download class="d-flex align-items-center text-decoration-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                        </svg>
+                        <p class="mb-0 ms-2">Télécharger le menu</p>
+                    </a>                   
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="full-width-image">
+    <img src="{{ url_for('static', filename='img/la-devanture-de-notre.jpg') }}" alt="Background Image">
+    <div class="text-overlay">
+        <h1>Nos horaires <br> d’ouverture</h1>
+    </div>
+</section>
+
+<div class="d-flex justify-content-center align-items-center">
+    <section class="horaire-section">
+        <p>Le magasin est ouvert du mardi au samedi de  11h30 à 14h (la vente à emporter et la restauration sur place) <br> et de 17h à 20h (la vente à emporter uniquement).</p>
+
+    </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+{% endblock %}

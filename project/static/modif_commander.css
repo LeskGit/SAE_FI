@@ -1,0 +1,204 @@
+.main-container{
+    background-color: #ffff;
+}
+
+.background_recap {
+    background-color: #E9E9E9;
+    border-radius: 3em;
+    margin: 0 auto;
+}
+
+h3{
+    color: #000000;
+}
+.col-md-3.bg-light.p-3{
+    width: 20%;
+    margin-right: 10px;
+}
+
+.input-group .form-control {
+    background-color: #e0e0e0;
+}
+
+.input-group-text {
+    background-color: #e0e0e0;
+    border: none;
+}
+
+.list-group-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+}
+
+.badge {
+    font-size: 1rem;
+}
+
+.card {
+    border: none;
+    background-color: #e0e0e0;
+}
+
+.card-img-top {
+    width: 100%;
+    height: auto;
+}
+
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
+.shadow {
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.row.g-3{
+    background-image: url("img/close-up-white-marble-texture-background.jpg");
+    margin-top: 15px;
+    margin-left: 5px;
+}
+
+.row{
+    margin-bottom: 20px;
+}
+
+body{
+    background-image: url("img/fond-style-chinois-aquarelle_23-2149699407.jpg");
+    background-size: cover; 
+    background-position: center;
+    background-attachment: fixed; 
+    background-repeat: no-repeat;
+}
+
+.col-md-3.bg-light.p-3.rounded{
+    opacity: 0.8;
+}
+
+.nav-link:not(.active){
+    color: #495057;
+}
+
+
+.card-header, .badge, .form-check-input.ms-auto {
+    background-color: #f27a24 !important; /* force la couleur pour écraser le css de bootstrap */
+    border-color: #000000 !important; /* force la couleur pour écraser le css de bootstrap */
+}
+
+.plat-container {
+    display: flex;
+    overflow-y: auto;
+    height: 500px;
+}
+
+.affiche-all {
+    display: none;
+    text-decoration: none;
+}
+
+.bin {
+    min-width:25px;
+    max-width: 80px;
+}
+
+.img_article {
+    min-width: 50px;
+    min-height: 50px;
+    border-radius: 5%;
+    margin: 0.8em auto; 
+}
+
+.container-articles {
+    overflow-y: auto;
+    max-height: 20em;
+}
+
+#accordion-button {
+    margin: 0px 0px !important;
+    padding: 0px 0px !important;
+}
+
+
+@media (max-width: 1280px) {
+    
+    .plat-container {
+        margin: 0 auto;
+    }
+
+    .all-desktop {
+        display: none;
+    }
+
+    .main-container {
+        margin: 0 auto;
+        width: 90%;
+    }
+
+    .affiche-all {
+        display: block;
+    }
+
+    .container-principal {
+        flex-direction: column;
+    }
+
+    .recap-container {
+        margin: 5em auto;
+        width: 80%;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .card-img-top {
+    }
+
+    .card {
+        justify-self: center;
+        width: 18rem;
+    }
+}
+
+@media (max-width: 510px) {
+    .container-article {
+        flex-direction: column;
+    }
+
+    .content-container a, .content-container span, .content-container p, .content-container button {
+        margin: 0px 5px !important;
+    }
+
+    .utils {
+        flex-direction: column;
+        margin: 2em auto;
+    }
+
+    .container-article p, .container-article h3 {
+        text-align: center !important;
+    }
+
+    .img_article {
+        max-width: 3em;
+        max-height: 3em;
+        margin: 0 1em !important;
+    }
+
+    .img-container {
+        margin: 1em auto !important;
+    }
+
+    .container-article .link-article, .container-article span, .container-article p {
+        margin: 1em 0.5em !important;
+    }
+
+    
+
+   
+}
+

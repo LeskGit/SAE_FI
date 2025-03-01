@@ -1,0 +1,74 @@
+hr {
+    background-color: #dc3545;
+}
+
+.edition {
+    margin: 3em;
+    border-radius: 20px;
+    border: 1px solid #d6cebd;
+}
+
+.img_plat {
+    width: 25%;
+    height: 25%;
+}
+
+.edit_button {
+    background-image: url("../static/img/logo_edit.png");
+    background-size: 20px 20px; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    height: 3em;
+    width: 3em; 
+    margin: 0.5em;
+}
+
+.delete_button {
+    background-image: url("../static/img/logo_delete.png");
+    background-size: 20px 20px; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    height: 3em;
+    width: 3em; 
+    margin: 0.5em;
+}
+
+form .form-check {
+    margin-bottom: 10px;
+}
+
+form .col-md-6 {
+    margin-bottom: 20px;
+}
+
+form h5 {
+    text-decoration: underline;
+    margin-bottom: 10px;
+}
+
+.btn-orange {
+    background-color: #f27a24;
+    color: white;
+}
+
+.btn-orange:hover {
+    background-color: #e0691f;
+}
+
+.form-check-input{
+    background-color: #f27a24 !important; /* force la couleur pour écraser le css de bootstrap */
+    border-color: #000000 !important; /* force la couleur pour écraser le css de bootstrap */
+}
+
+
+.nav-tabs .nav-link {
+    color: #000; 
+    font-weight: bold;
+}
+
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link.active {
+    color: #f27a24;
+}
+
+
+

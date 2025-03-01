@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='authentification.css')}}">
+{% endblock %}
+{% block content %}
+<div class="background">
+    <img src="{{ url_for('static', filename='img/notre_magasin.jpg')}}" class="background_image" alt="Background">
+    <div class="form_container mx-auto">
+        <form class="form-horizontal" role="form" method ="POST"
+            action ="{{ url_for ('login_unsafe') }}">
+            {{ form.hidden_tag() }}
+
+            <!--Numéro de téléphone-->
+            <div class="form-group row justify-content-center">
+                <label for="phone number" class="col-sm-10 mx-auto">
+                    {{ form.phone_number.label }} <span>*</span>
+                </label>
+                <div class="col-sm-10 mx-auto">
+                    {{ form.phone_number(size=50, class_="form-control",
+                                placeholder="Numéro de téléphone") }}
+                </div>
+            </div>
+
+            <!--Erreur si ce n'est pas que des chiffres pour le numéro-->
+            {% if form.phone_number.errors %}
+                <ul class="list-group">
+                    {% for e in form.phone_number.errors %}
+                        <li class="list-group-item list-group-item-danger">{{ e }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <!--Erreur si mdp ne correspond pas-->
+            {% if error == "existant" %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>Erreur !</strong> Le numéro de téléphone appartient déjà à un compte.
+                </div>
+            {% endif %}
+
+            <!--Les boutons-->
+            <div class="form-group">
+                <!--Bouton Se connecter-->
+                <div class="col-sm-offset-2 col-sm-10 mx-auto">
+                    <button type="submit" class="btn btn-dark btn-lg btn-block w-100">Confirmer</button>
+                </div>
+
+                <!--Bouton S'inscrire-->
+                <div class="col-sm-offset-2 col-sm-10 mx-auto">
+                    <a href="{{ url_for('login') }}" 
+                    class="btn btn-light btn-lg btn-block w-100 inscrire">Se connecter</a>
+                </div>
+            </div>
+        </form >
+    </div>
+</div>
+{% endblock %}
